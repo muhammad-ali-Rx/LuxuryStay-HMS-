@@ -10,8 +10,4 @@ export default defineConfig({
       "@/lib": path.resolve(__dirname, "./src/lib"),
     },
   },
-  server: {
-    port: 3000,
-    open: true,
-  },
 })

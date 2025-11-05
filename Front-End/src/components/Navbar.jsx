@@ -1,16 +1,16 @@
-"use client"
-
 import { useState, useEffect } from "react"
 import { Link, useLocation } from "react-router-dom"
 import { Menu, X } from "lucide-react"
+import { useAuth } from "../context/AuthContext"
 
 export default function FrontendNavbar() {
   const [isOpen, setIsOpen] = useState(false)
   const [scrolled, setScrolled] = useState(false)
   const location = useLocation()
+  const auth = useAuth()
 
   const navLinks = [
-    { href: "/", label: "Home" },
+    { href: "/home", label: "Home" },
     { href: "/rooms", label: "Rooms" },
     { href: "/dining", label: "Dining" },
     { href: "/facilities", label: "Facilities" },
@@ -33,7 +33,7 @@ export default function FrontendNavbar() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-20">
           {/* Logo */}
-          <Link to="/" className="flex items-center gap-3 flex-shrink-0 hover:scale-105 transition-transform">
+          <Link to="/home" className="flex items-center gap-3 flex-shrink-0 hover:scale-105 transition-transform">
             <div className="w-11 h-11 bg-[#D4AF37] rounded-2xl flex items-center justify-center shadow-md hover:shadow-[#D4AF37]/40 transition-shadow">
               <span className="font-bold text-[#0A1F44] text-lg tracking-wide">LS</span>
             </div>
@@ -56,14 +56,47 @@ export default function FrontendNavbar() {
             ))}
           </div>
 
-          {/* CTA Buttons */}
           <div className="hidden md:flex items-center gap-5">
-            <Link
-              to="/admin-login"
-              className="text-[#0A1F44] hover:text-[#D4AF37] transition-colors text-sm font-semibold"
-            >
-              Admin
-            </Link>
+            {auth && auth.isAuthenticated && auth.userAuth ? (
+              <>
+                {/* Show My Bookings for all authenticated users */}
+                <Link
+                  to="/reservations"
+                  className="text-[#0A1F44] hover:text-[#D4AF37] transition-colors text-sm font-semibold"
+                >
+                  My Bookings
+                </Link>
+
+                {/* Show Admin Panel only for admin, manager, receptionist, housekeeping, staff roles */}
+                {auth.canAccessAdmin() && (
+                  <Link
+                    to="/admin"
+                    className="text-[#D4AF37] hover:text-[#0A1F44] transition-colors text-sm font-semibold"
+                  >
+                    Admin Panel
+                  </Link>
+                )}
+
+                {/* Logout button for authenticated users */}
+                <button
+                  onClick={() => auth.logoutUser()}
+                  className="text-[#0A1F44] hover:text-[#D4AF37] transition-colors text-sm font-semibold"
+                >
+                  Logout
+                </button>
+              </>
+            ) : (
+              <>
+                {/* Show Login for unauthenticated users */}
+                <Link
+                  to="/login"
+                  className="text-[#0A1F44] hover:text-[#D4AF37] transition-colors text-sm font-semibold"
+                >
+                  Login
+                </Link>
+              </>
+            )}
+            {/* Book Now - always visible */}
             <Link
               to="/booking"
               className="bg-[#D4AF37] text-[#0A1F44] text-sm font-semibold px-5 py-2.5 rounded-xl shadow-md hover:shadow-[#D4AF37]/50 hover:scale-105 transition-all duration-300"
@@ -100,13 +133,45 @@ export default function FrontendNavbar() {
                 {link.label}
               </Link>
             ))}
-            <Link
-              to="/admin-login"
-              onClick={() => setIsOpen(false)}
-              className="block px-4 py-2 text-[#0A1F44] font-medium hover:bg-gray-200/40 rounded-lg hover:text-[#D4AF37] transition-all duration-300 text-center"
-            >
-              Admin
-            </Link>
+            {auth && auth.isAuthenticated && auth.userAuth ? (
+              <>
+                <Link
+                  to="/reservations"
+                  onClick={() => setIsOpen(false)}
+                  className="block px-4 py-2 text-[#0A1F44] font-medium hover:bg-gray-200/40 rounded-lg hover:text-[#D4AF37] transition-all duration-300 text-center"
+                >
+                  My Bookings
+                </Link>
+                {auth.canAccessAdmin() && (
+                  <Link
+                    to="/admin"
+                    onClick={() => setIsOpen(false)}
+                    className="block px-4 py-2 text-[#D4AF37] font-medium hover:bg-gray-200/40 rounded-lg hover:text-[#0A1F44] transition-all duration-300 text-center"
+                  >
+                    Admin Panel
+                  </Link>
+                )}
+                <button
+                  onClick={() => {
+                    auth.logoutUser()
+                    setIsOpen(false)
+                  }}
+                  className="block px-4 py-2 text-[#0A1F44] font-medium hover:bg-gray-200/40 rounded-lg hover:text-[#D4AF37] transition-all duration-300 text-center w-full"
+                >
+                  Logout
+                </button>
+              </>
+            ) : (
+              <>
+                <Link
+                  to="/login"
+                  onClick={() => setIsOpen(false)}
+                  className="block px-4 py-2 text-[#0A1F44] font-medium hover:bg-gray-200/40 rounded-lg hover:text-[#D4AF37] transition-all duration-300 text-center"
+                >
+                  Login
+                </Link>
+              </>
+            )}
             <Link
               to="/booking"
               onClick={() => setIsOpen(false)}
