@@ -11,7 +11,17 @@ const roomSchema = new mongoose.Schema(
 
     roomType: {
       type: String,
-      enum: ["Standard", "Deluxe", "Suite", "Executive"],
+      enum: [
+        "Standard",
+        "Deluxe",
+        "Suite",
+        "Presidential",
+        "Penthouse",
+        "Family",
+        "Twin",
+        "Single",
+        "Double",
+      ],
       required: true,
     },
 
@@ -32,7 +42,7 @@ const roomSchema = new mongoose.Schema(
     // 🖼️ Images of room
     images: {
       type: [String],
-      default: [],
+      required: [true, "Images is Required"]
     },
 
     // 🧺 Amenities (for display in UI)

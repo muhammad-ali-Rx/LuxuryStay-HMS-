@@ -19,66 +19,7 @@ export const getAllUsers = async (req, res) => {
   }
 };
 
-/* ================================
-   🔹 Create New User (Admin or Manager only)
-=================================*/
-export const createUser = async (req, res) => {
-  try {
-    const {
-      name,
-      email,
-      password,
-      role,
-      phone,
-      address,
-      profileImage,
-      status,
-      preferences,
-      assignedTasks,
-    } = req.body;
 
-    // Check existing user
-    const existingUser = await User.findOne({ email });
-    if (existingUser) {
-      return res.status(400).json({ message: "User already exists with this email." });
-    }
-
-    // Hash password
-    const hashedPassword = await bcrypt.hash(password, 10);
-
-    // Create user
-    const newUser = new User({
-      name,
-      email,
-      password: hashedPassword,
-      role: role || "user",
-      bookingStatus: "none",
-      phone,
-      address,
-      profileImage,
-      status: status || "active",
-      preferences: role === "guest" ? preferences : undefined,
-      assignedTasks: role !== "guest" ? assignedTasks : [],
-      createdBy: req.user?._id || null,
-    });
-
-    await newUser.save();
-
-    res.status(201).json({
-      message: "User created successfully",
-      user: {
-        id: newUser._id,
-        name: newUser.name,
-        email: newUser.email,
-        role: newUser.role,
-        status: newUser.status,
-      },
-    });
-  } catch (error) {
-    console.error("❌ Error creating user:", error);
-    res.status(500).json({ message: "Internal Server Error", error: error.message });
-  }
-};
 
 /* ================================
    🔹 Update User

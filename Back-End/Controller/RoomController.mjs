@@ -1,21 +1,19 @@
-import Room from "../models/Room.js";
+import Room from "../Models/Room.mjs";
 
 export const createRoom = async (req, res) => {
   try {
+    console.log("Files received:", req.files); // 👈 Add this line
+
     const {
       roomNumber,
       roomType,
       pricePerNight,
-      images = [],
       amenities = [],
       description,
       createdBy,
-      } = req.body;
-      
-    const existingRoom = await Room.findOne({ roomNumber });
-    if (existingRoom) {
-      return res.status(400).json({ message: "Room number already exists." });
-    }
+    } = req.body;
+
+    const images = req.files?.map((file) => file.path) || [];
 
     const room = new Room({
       roomNumber,
@@ -28,11 +26,15 @@ export const createRoom = async (req, res) => {
     });
 
     await room.save();
+    console.log("✅ Room saved:", room);
     res.status(201).json({ message: "Room added successfully!", room });
   } catch (error) {
+    console.error("❌ Error:", error);
     res.status(500).json({ message: "Error adding room", error: error.message });
   }
 };
+
+
 
 // ✅ Get all rooms
 export const getAllRooms = async (req, res) => {

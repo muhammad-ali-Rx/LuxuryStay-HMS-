@@ -3,6 +3,8 @@ import dotenv from "dotenv";
 import cors from "cors";
 import connectDB from "./DB/db.mjs"
 import User from "./Routers/UserRoute.mjs"
+import Register from "./Routers/RegistrationRoute.mjs"
+import room from "./Routers/RoomRoute.mjs"
 dotenv.config();
 
 
@@ -17,6 +19,8 @@ app.get("/express", (req , res) => {
 });
 
 app.use("/", User)
+app.use("/register", Register)
+app.use("/room", room)
 
 
 
@@ -26,7 +30,7 @@ app.use((err, req, res, next) => {
       message: "Server Error",
       error: err.message || "Unknown error",
     });
-  });
+});
 
 
 
