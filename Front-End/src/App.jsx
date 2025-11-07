@@ -64,7 +64,7 @@ function ProtectedAdminRoute() {
 
   const adminRoles = ["admin", "manager", "receptionist", "housekeeping"]
   if (!adminUser || !adminRoles.includes(adminUser.role)) {
-    return <Navigate to="/admin-login" replace />
+    return <Navigate to="/admin" replace />
   }
 
   return <AdminPanel />

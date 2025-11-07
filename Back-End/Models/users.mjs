@@ -23,14 +23,21 @@ const userSchema = new mongoose.Schema(
 
     role: {
       type: String,
-      enum: ["admin", "manager", "receptionist", "housekeeping", "user", "guest"],
-      default: "user", // by default, normal registered user
+      enum: [
+        "admin",
+        "manager",
+        "receptionist",
+        "housekeeping",
+        "user",
+        "guest",
+      ],
+      default: "user",
     },
 
     bookingStatus: {
       type: String,
       enum: ["none", "pending", "approved"],
-      default: "none", // none = no booking yet
+      default: "none",
     },
 
     phone: {
@@ -48,12 +55,28 @@ const userSchema = new mongoose.Schema(
 
     status: {
       type: String,
-      enum: ["Active", "Inactive"],
+      enum: ["active", "inactive"],
       default: "active",
     },
 
     preferences: {
       type: String, // e.g., "Non-smoking room, Sea view"
+    },
+
+    verified: {
+      type: Boolean,
+      default: false, // false = not verified yet
+    },
+
+    shift: {
+      type: String,
+      enum: ["morning", "afternoon", "night", "flexible"],
+      default: "flexible",
+    },
+
+    salary: {
+      type: Number,
+      default: 0,
     },
 
     assignedTasks: [
@@ -78,9 +101,7 @@ userSchema.methods.updateRoleOnBooking = async function (bookingStatus) {
 
   if (bookingStatus === "approved") {
     this.role = "guest";
-  } else if (bookingStatus === "pending") {
-    this.role = "user";
-  } else if (bookingStatus === "none") {
+  } else if (bookingStatus === "pending" || bookingStatus === "none") {
     this.role = "user";
   }
 

@@ -26,7 +26,7 @@ export const sendOTP = async (req, res) => {
     const otp = generateOTP();
     await storeOTP(email, otp);
 
-    console.log('[v0] OTP for', email, ':', otp); // Debug - remove in production
+    console.log('[v0] OTP for', email, ':', otp); 
 
     res.setHeader('Content-Type', 'application/json');
     res.status(200).json({

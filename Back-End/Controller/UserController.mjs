@@ -24,9 +24,11 @@ export const getAllUsers = async (req, res) => {
 /* ================================
    🔹 Update User
 =================================*/
+
 export const updateUser = async (req, res) => {
   try {
     const { id } = req.params;
+
     const {
       name,
       email,
@@ -38,14 +40,19 @@ export const updateUser = async (req, res) => {
       status,
       preferences,
       bookingStatus,
+      verified,
+      shift,
+      salary,
+      assignedTasks,
+      createdBy,
     } = req.body;
 
     const user = await User.findById(id);
     if (!user) {
-      return res.status(404).json({ message: "User not found" });
+      return res.status(404).json({ message: "❌ User not found" });
     }
 
-    // Update fields
+    // Update basic fields (only if provided)
     if (name) user.name = name;
     if (email) user.email = email;
     if (phone) user.phone = phone;
@@ -54,8 +61,13 @@ export const updateUser = async (req, res) => {
     if (role) user.role = role;
     if (status) user.status = status;
     if (preferences) user.preferences = preferences;
+    if (verified !== undefined) user.verified = verified;
+    if (shift) user.shift = shift;
+    if (salary !== undefined) user.salary = salary;
+    if (assignedTasks) user.assignedTasks = assignedTasks;
+    if (createdBy) user.createdBy = createdBy;
 
-    // Booking-based role logic
+    // Handle booking-based role update
     if (bookingStatus) {
       await user.updateRoleOnBooking(bookingStatus);
     }
@@ -74,9 +86,12 @@ export const updateUser = async (req, res) => {
     });
   } catch (error) {
     console.error("❌ Error updating user:", error);
-    res.status(500).json({ message: "Internal Server Error", error: error.message });
+    res
+      .status(500)
+      .json({ message: "Internal Server Error", error: error.message });
   }
 };
+
 
 /* ================================
    🔹 Delete User

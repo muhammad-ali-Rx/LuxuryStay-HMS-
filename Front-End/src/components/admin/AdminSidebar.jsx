@@ -1,7 +1,17 @@
 "use client"
 
 import { motion } from "framer-motion"
-import { LayoutDashboard, DoorOpen, Calendar, Users, UserCheck, FileText, Settings, LogOut } from "lucide-react"
+import {
+  LayoutDashboard,
+  DoorOpen,
+  Calendar,
+  Users,
+  UserCheck,
+  FileText,
+  Settings,
+  LogOut,
+  Home,
+} from "lucide-react"
 import { useAuth } from "../../context/AuthContext"
 import { useNavigate } from "react-router-dom"
 
@@ -16,12 +26,15 @@ const menuItems = [
 ]
 
 export default function AdminSidebar({ activeTab, setActiveTab, isOpen }) {
-  const { logout } = useAuth()
+  const { logoutAdmin } = useAuth()
   const navigate = useNavigate()
 
   const handleLogout = () => {
-    logout()
-    navigate("/admin-login")
+    logoutAdmin() // this will handle redirect too
+  }
+
+  const goToUserPanel = () => {
+    navigate("/home")
   }
 
   return (
@@ -32,6 +45,7 @@ export default function AdminSidebar({ activeTab, setActiveTab, isOpen }) {
         isOpen ? "w-64" : "w-0"
       } bg-[#0A1F44] text-white overflow-hidden transition-all duration-300 flex flex-col shadow-lg`}
     >
+      {/* Logo Section */}
       <div className="p-6 border-b border-white/10">
         <div className="flex items-center gap-3">
           <div className="w-10 h-10 bg-[#D4AF37] rounded-lg flex items-center justify-center">
@@ -44,6 +58,7 @@ export default function AdminSidebar({ activeTab, setActiveTab, isOpen }) {
         </div>
       </div>
 
+      {/* Navigation Menu */}
       <nav className="flex-1 p-4 space-y-2 overflow-y-auto">
         {menuItems.map((item) => (
           <motion.button
@@ -51,7 +66,9 @@ export default function AdminSidebar({ activeTab, setActiveTab, isOpen }) {
             onClick={() => setActiveTab(item.id)}
             whileHover={{ x: 5 }}
             className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-all duration-200 ${
-              activeTab === item.id ? "bg-[#D4AF37] text-[#0A1F44] font-semibold" : "text-white hover:bg-white/10"
+              activeTab === item.id
+                ? "bg-[#D4AF37] text-[#0A1F44] font-semibold"
+                : "text-white hover:bg-white/10"
             }`}
           >
             <item.icon size={20} />
@@ -60,7 +77,19 @@ export default function AdminSidebar({ activeTab, setActiveTab, isOpen }) {
         ))}
       </nav>
 
-      <div className="p-4 border-t border-white/10">
+      {/* Bottom Buttons */}
+      <div className="p-4 border-t border-white/10 space-y-2">
+        {/* Go to User Panel Button */}
+        <motion.button
+          onClick={goToUserPanel}
+          whileHover={{ x: 5 }}
+          className="w-full flex items-center gap-3 px-4 py-3 rounded-lg text-white hover:bg-[#D4AF37]/20 transition-all duration-200"
+        >
+          <Home size={20} />
+          <span>Go to User Panel</span>
+        </motion.button>
+
+        {/* Logout Button */}
         <motion.button
           onClick={handleLogout}
           whileHover={{ x: 5 }}
