@@ -5,6 +5,7 @@ import connectDB from "./DB/db.mjs"
 import User from "./Routers/UserRoute.mjs"
 import Register from "./Routers/RegistrationRoute.mjs"
 import room from "./Routers/RoomRoute.mjs"
+import roomRating  from "./Routers/ratingRoutes.mjs"
 dotenv.config();
 
 
@@ -21,6 +22,7 @@ app.get("/express", (req , res) => {
 app.use("/", User)
 app.use("/register", Register)
 app.use("/room", room)
+app.use("/room", roomRating)
 
 
 

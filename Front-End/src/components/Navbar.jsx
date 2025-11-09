@@ -1,17 +1,18 @@
 import { useState, useEffect } from "react"
 import { Link, useLocation } from "react-router-dom"
-import { Menu, X } from "lucide-react"
+import { Menu, X, Phone, MapPin, ChevronDown, User, LogOut, Settings, Calendar } from "lucide-react"
 import { useAuth } from "../context/AuthContext"
 
 export default function FrontendNavbar() {
   const [isOpen, setIsOpen] = useState(false)
   const [scrolled, setScrolled] = useState(false)
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false)
   const location = useLocation()
   const auth = useAuth()
 
   const navLinks = [
     { href: "/home", label: "Home" },
-    { href: "/rooms", label: "Rooms" },
+    { href: "/rooms", label: "Suites" },
     { href: "/dining", label: "Dining" },
     { href: "/facilities", label: "Facilities" },
     { href: "/gallery", label: "Gallery" },
@@ -19,169 +20,294 @@ export default function FrontendNavbar() {
   ]
 
   useEffect(() => {
-    const handleScroll = () => setScrolled(window.scrollY > 10)
+    const handleScroll = () => setScrolled(window.scrollY > 30)
     window.addEventListener("scroll", handleScroll)
     return () => window.removeEventListener("scroll", handleScroll)
   }, [])
 
   return (
-    <nav
-      className={`fixed top-0 w-full z-50 transition-all duration-500 ${
-        scrolled ? "bg-white/90 backdrop-blur-lg shadow-lg" : "bg-white/60 backdrop-blur-md"
-      } border-b border-white/20`}
-    >
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between items-center h-20">
-          {/* Logo */}
-          <Link to="/home" className="flex items-center gap-3 flex-shrink-0 hover:scale-105 transition-transform">
-            <div className="w-11 h-11 bg-[#D4AF37] rounded-2xl flex items-center justify-center shadow-md hover:shadow-[#D4AF37]/40 transition-shadow">
-              <span className="font-bold text-[#0A1F44] text-lg tracking-wide">LS</span>
+    <>
+      {/* Main Container - Now scrolls with content */}
+      <div className={`sticky top-0 z-50 transition-all duration-300 ${
+        scrolled ? "shadow-lg" : ""
+      }`}>
+        {/* Subtle Top Bar */}
+        <div className="bg-slate-800 text-slate-200 py-2 px-4 text-sm">
+          <div className="max-w-7xl mx-auto flex flex-col sm:flex-row justify-between items-center gap-2">
+            <div className="flex items-center gap-6">
+              <div className="flex items-center gap-2">
+                <Phone size={14} className="text-slate-400" />
+                <span className="text-slate-300">+92 300 1234567</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <MapPin size={14} className="text-slate-400" />
+                <span className="text-slate-300">Lahore, Pakistan</span>
+              </div>
             </div>
-            <span className="text-2xl font-bold text-[#0A1F44] hidden sm:inline tracking-wider">LuxuryStay</span>
-          </Link>
-
-          {/* Desktop Navigation */}
-          <div className="hidden md:flex items-center gap-10">
-            {navLinks.map((link) => (
-              <Link
-                key={link.href}
-                to={link.href}
-                className={`relative text-[#0A1F44] font-medium text-sm uppercase tracking-wide transition-all duration-300 hover:text-[#D4AF37] group ${
-                  location.pathname === link.href ? "text-[#D4AF37]" : ""
-                }`}
-              >
-                {link.label}
-                <span className="absolute left-0 -bottom-1 w-0 h-[2px] bg-[#D4AF37] transition-all duration-300 group-hover:w-full rounded-full"></span>
-              </Link>
-            ))}
+            <div className="flex items-center gap-4 text-slate-300 text-xs">
+              <span>5-Star Luxury Hotel</span>
+              <div className="w-1 h-1 bg-slate-500 rounded-full"></div>
+              <span>24/7 Concierge</span>
+            </div>
           </div>
-
-          <div className="hidden md:flex items-center gap-5">
-            {auth && auth.isAuthenticated && auth.userAuth ? (
-              <>
-                {/* Show My Bookings for all authenticated users */}
-                <Link
-                  to="/reservations"
-                  className="text-[#0A1F44] hover:text-[#D4AF37] transition-colors text-sm font-semibold"
-                >
-                  My Bookings
-                </Link>
-
-                {/* Show Admin Panel only for admin, manager, receptionist, housekeeping, staff roles */}
-                {auth.canAccessAdmin() && (
-                  <Link
-                    to="/admin"
-                    className="text-[#D4AF37] hover:text-[#0A1F44] transition-colors text-sm font-semibold"
-                  >
-                    Admin Panel
-                  </Link>
-                )}
-
-                {/* Logout button for authenticated users */}
-                <button
-                  onClick={() => auth.logoutUser()}
-                  className="text-[#0A1F44] hover:text-[#D4AF37] transition-colors text-sm font-semibold"
-                >
-                  Logout
-                </button>
-              </>
-            ) : (
-              <>
-                {/* Show Login for unauthenticated users */}
-                <Link
-                  to="/login"
-                  className="text-[#0A1F44] hover:text-[#D4AF37] transition-colors text-sm font-semibold"
-                >
-                  Login
-                </Link>
-              </>
-            )}
-            {/* Book Now - always visible */}
-            <Link
-              to="/booking"
-              className="bg-[#D4AF37] text-[#0A1F44] text-sm font-semibold px-5 py-2.5 rounded-xl shadow-md hover:shadow-[#D4AF37]/50 hover:scale-105 transition-all duration-300"
-            >
-              Book Now
-            </Link>
-          </div>
-
-          {/* Mobile Menu Button */}
-          <button
-            className="md:hidden text-[#0A1F44] p-2 rounded-lg hover:bg-gray-200/40 transition-all duration-300"
-            onClick={() => setIsOpen(!isOpen)}
-          >
-            {isOpen ? <X size={26} /> : <Menu size={26} />}
-          </button>
         </div>
 
-        {/* Mobile Navigation */}
-        <div
-          className={`md:hidden transition-all duration-500 ease-in-out overflow-hidden ${
-            isOpen ? "max-h-[400px] opacity-100 pb-5" : "max-h-0 opacity-0"
+        {/* Main Navigation - No longer fixed, scrolls with content */}
+        <nav
+          className={`bg-white transition-all duration-300 ${
+            scrolled 
+              ? "border-b border-slate-100 py-2" 
+              : "py-3"
           }`}
         >
-          <div className="flex flex-col gap-3 mt-3 backdrop-blur-md bg-white/70 rounded-2xl shadow-inner p-4 border border-white/30">
-            {navLinks.map((link) => (
-              <Link
-                key={link.href}
-                to={link.href}
-                onClick={() => setIsOpen(false)}
-                className={`block px-4 py-2 text-[#0A1F44] font-medium hover:bg-gray-200/40 rounded-lg hover:text-[#D4AF37] transition-all duration-300 text-center ${
-                  location.pathname === link.href ? "text-[#D4AF37] bg-gray-200/30" : ""
-                }`}
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="flex justify-between items-center">
+              {/* Clean Logo */}
+              <Link 
+                to="/home" 
+                className="flex items-center gap-3 flex-shrink-0 group"
               >
-                {link.label}
+                <div className="w-12 h-12 bg-slate-900 rounded-xl flex items-center justify-center shadow-sm group-hover:shadow-md transition-shadow">
+                  <span className="font-bold text-white text-lg tracking-tight font-serif">LS</span>
+                </div>
+                <div className="flex flex-col">
+                  <span className="text-2xl font-bold text-slate-900 font-serif tracking-tight">
+                    LuxuryStay
+                  </span>
+                  <span className="text-xs text-slate-500 tracking-widest uppercase font-medium">
+                    Hotels & Resorts
+                  </span>
+                </div>
               </Link>
-            ))}
-            {auth && auth.isAuthenticated && auth.userAuth ? (
-              <>
-                <Link
-                  to="/reservations"
-                  onClick={() => setIsOpen(false)}
-                  className="block px-4 py-2 text-[#0A1F44] font-medium hover:bg-gray-200/40 rounded-lg hover:text-[#D4AF37] transition-all duration-300 text-center"
-                >
-                  My Bookings
-                </Link>
-                {auth.canAccessAdmin() && (
+
+              {/* Clean Desktop Navigation */}
+              <div className="hidden xl:flex items-center gap-1">
+                {navLinks.map((link) => (
                   <Link
-                    to="/admin"
-                    onClick={() => setIsOpen(false)}
-                    className="block px-4 py-2 text-[#D4AF37] font-medium hover:bg-gray-200/40 rounded-lg hover:text-[#0A1F44] transition-all duration-300 text-center"
+                    key={link.href}
+                    to={link.href}
+                    className={`relative px-6 py-3 text-slate-600 font-medium text-sm uppercase tracking-wide transition-all duration-200 group ${
+                      location.pathname === link.href ? "text-slate-900 font-semibold" : "hover:text-slate-900"
+                    }`}
                   >
-                    Admin Panel
+                    {link.label}
+                    <div className={`absolute bottom-0 left-1/2 transform -translate-x-1/2 w-0 h-0.5 bg-slate-900 transition-all duration-200 ${
+                      location.pathname === link.href ? "w-3/4" : "group-hover:w-3/4"
+                    }`}></div>
+                  </Link>
+                ))}
+              </div>
+
+              {/* Clean Desktop Auth & Actions */}
+              <div className="hidden lg:flex items-center gap-3">
+                {auth && auth.isAuthenticated && auth.userAuth ? (
+                  <div className="relative">
+                    <button
+                      onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+                      className="flex items-center gap-3 px-4 py-2 rounded-lg border border-slate-200 hover:border-slate-300 bg-white hover:bg-slate-50 transition-all duration-200 group"
+                    >
+                      <div className="w-9 h-9 bg-slate-700 rounded-full flex items-center justify-center text-white text-sm font-medium">
+                        {auth.userAuth.name?.charAt(0)?.toUpperCase() || "U"}
+                      </div>
+                      <div className="flex flex-col items-start">
+                        <span className="text-sm font-medium text-slate-800">
+                          {auth.userAuth.name?.split(' ')[0] || "User"}
+                        </span>
+                        <span className="text-xs text-slate-500">
+                          My Account
+                        </span>
+                      </div>
+                      <ChevronDown 
+                        size={16} 
+                        className={`text-slate-400 transition-transform duration-200 ${isDropdownOpen ? "rotate-180" : ""}`} 
+                      />
+                    </button>
+
+                    {/* Clean Dropdown Menu */}
+                    {isDropdownOpen && (
+                      <div className="absolute top-full right-0 mt-2 w-56 bg-white rounded-lg shadow-lg border border-slate-200 py-2 z-50">
+                        <div className="px-4 py-3 border-b border-slate-100">
+                          <p className="text-sm font-semibold text-slate-900">{auth.userAuth.name}</p>
+                          <p className="text-xs text-slate-500 truncate">{auth.userAuth.email}</p>
+                        </div>
+                        
+                        <div className="py-1">
+                          <Link
+                            to="/reservations"
+                            onClick={() => setIsDropdownOpen(false)}
+                            className="flex items-center gap-3 px-4 py-2 text-sm text-slate-700 hover:bg-slate-50 transition-colors"
+                          >
+                            <Calendar size={16} className="text-slate-500" />
+                            <span>My Bookings</span>
+                          </Link>
+
+                          {auth.canAccessAdmin() && (
+                            <Link
+                              to="/admin"
+                              onClick={() => setIsDropdownOpen(false)}
+                              className="flex items-center gap-3 px-4 py-2 text-sm text-slate-700 hover:bg-slate-50 transition-colors"
+                            >
+                              <Settings size={16} className="text-slate-500" />
+                              <span>Admin Panel</span>
+                            </Link>
+                          )}
+                        </div>
+
+                        <div className="border-t border-slate-100 pt-1">
+                          <button
+                            onClick={() => {
+                              auth.logoutUser()
+                              setIsDropdownOpen(false)
+                            }}
+                            className="flex items-center gap-3 px-4 py-2 text-sm text-red-600 hover:bg-red-50 w-full transition-colors"
+                          >
+                            <LogOut size={16} />
+                            <span>Sign Out</span>
+                          </button>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                ) : (
+                  <Link
+                    to="/login"
+                    className="px-6 py-2 text-slate-700 hover:text-slate-900 font-medium text-sm rounded-lg border border-slate-200 hover:border-slate-300 transition-colors"
+                  >
+                    Sign In
                   </Link>
                 )}
-                <button
-                  onClick={() => {
-                    auth.logoutUser()
-                    setIsOpen(false)
-                  }}
-                  className="block px-4 py-2 text-[#0A1F44] font-medium hover:bg-gray-200/40 rounded-lg hover:text-[#D4AF37] transition-all duration-300 text-center w-full"
-                >
-                  Logout
-                </button>
-              </>
-            ) : (
-              <>
+                
+                {/* Clean Book Now Button */}
                 <Link
-                  to="/login"
-                  onClick={() => setIsOpen(false)}
-                  className="block px-4 py-2 text-[#0A1F44] font-medium hover:bg-gray-200/40 rounded-lg hover:text-[#D4AF37] transition-all duration-300 text-center"
+                  to="/booking"
+                  className="bg-slate-900 hover:bg-slate-800 text-white px-6 py-3 rounded-lg font-semibold text-sm shadow-sm hover:shadow transition-all duration-200 flex items-center gap-2"
                 >
-                  Login
+                  <span>Book Now</span>
+                  <svg 
+                    className="w-4 h-4" 
+                    fill="none" 
+                    stroke="currentColor" 
+                    viewBox="0 0 24 24"
+                  >
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                  </svg>
                 </Link>
-              </>
-            )}
-            <Link
-              to="/booking"
-              onClick={() => setIsOpen(false)}
-              className="block bg-[#D4AF37] text-[#0A1F44] text-center mt-3 py-2 font-semibold rounded-xl hover:scale-105 transition-transform"
+              </div>
+
+              {/* Clean Mobile Menu Button */}
+              <button
+                className="lg:hidden p-2 rounded-lg border border-slate-200 hover:border-slate-300 bg-white hover:bg-slate-50 transition-colors"
+                onClick={() => setIsOpen(!isOpen)}
+              >
+                <div className="relative w-6 h-6">
+                  <span className={`absolute left-0 top-1 w-6 h-0.5 bg-slate-600 rounded transition-all duration-200 ${
+                    isOpen ? "rotate-45 top-3" : ""
+                  }`}></span>
+                  <span className={`absolute left-0 top-3 w-6 h-0.5 bg-slate-600 rounded transition-all duration-200 ${
+                    isOpen ? "opacity-0" : ""
+                  }`}></span>
+                  <span className={`absolute left-0 top-5 w-6 h-0.5 bg-slate-600 rounded transition-all duration-200 ${
+                    isOpen ? "-rotate-45 top-3" : ""
+                  }`}></span>
+                </div>
+              </button>
+            </div>
+
+            {/* Clean Mobile Navigation */}
+            <div
+              className={`lg:hidden transition-all duration-300 ease-out overflow-hidden ${
+                isOpen ? "max-h-[600px] opacity-100 py-4" : "max-h-0 opacity-0"
+              }`}
             >
-              Book Now
-            </Link>
+              <div className="bg-white rounded-lg shadow-lg border border-slate-200 p-4 space-y-2">
+                {/* Mobile Navigation Links */}
+                <div className="space-y-1">
+                  {navLinks.map((link) => (
+                    <Link
+                      key={link.href}
+                      to={link.href}
+                      onClick={() => setIsOpen(false)}
+                      className={`block px-4 py-3 text-slate-700 font-medium rounded-lg transition-colors ${
+                        location.pathname === link.href 
+                          ? "bg-slate-100 text-slate-900 font-semibold" 
+                          : "hover:bg-slate-50 hover:text-slate-900"
+                      }`}
+                    >
+                      {link.label}
+                    </Link>
+                  ))}
+                </div>
+
+                {/* Mobile Auth Section */}
+                <div className="border-t border-slate-200 pt-4 space-y-2">
+                  {auth && auth.isAuthenticated && auth.userAuth ? (
+                    <>
+                      <div className="flex items-center gap-3 px-4 py-3 bg-slate-50 rounded-lg">
+                        <div className="w-10 h-10 bg-slate-700 rounded-full flex items-center justify-center text-white font-medium">
+                          {auth.userAuth.name?.charAt(0)?.toUpperCase() || "U"}
+                        </div>
+                        <div className="flex-1">
+                          <p className="font-semibold text-slate-900 text-sm">{auth.userAuth.name}</p>
+                          <p className="text-xs text-slate-500 truncate">{auth.userAuth.email}</p>
+                        </div>
+                      </div>
+
+                      <Link
+                        to="/reservations"
+                        onClick={() => setIsOpen(false)}
+                        className="flex items-center gap-3 px-4 py-3 text-slate-700 hover:bg-slate-50 rounded-lg transition-colors"
+                      >
+                        <Calendar size={18} className="text-slate-500" />
+                        <span className="font-medium">My Bookings</span>
+                      </Link>
+
+                      {auth.canAccessAdmin() && (
+                        <Link
+                          to="/admin"
+                          onClick={() => setIsOpen(false)}
+                          className="flex items-center gap-3 px-4 py-3 text-slate-700 hover:bg-slate-50 rounded-lg transition-colors"
+                        >
+                          <Settings size={18} className="text-slate-500" />
+                          <span className="font-medium">Admin Panel</span>
+                        </Link>
+                      )}
+
+                      <button
+                        onClick={() => {
+                          auth.logoutUser()
+                          setIsOpen(false)
+                        }}
+                        className="flex items-center gap-3 px-4 py-3 text-red-600 hover:bg-red-50 rounded-lg w-full text-left transition-colors"
+                      >
+                        <LogOut size={18} />
+                        <span className="font-medium">Sign Out</span>
+                      </button>
+                    </>
+                  ) : (
+                    <Link
+                      to="/login"
+                      onClick={() => setIsOpen(false)}
+                      className="flex items-center gap-3 px-4 py-3 text-slate-700 hover:bg-slate-50 rounded-lg transition-colors"
+                    >
+                      <User size={18} className="text-slate-500" />
+                      <span className="font-medium">Sign In</span>
+                    </Link>
+                  )}
+
+                  {/* Mobile Book Now Button */}
+                  <Link
+                    to="/booking"
+                    onClick={() => setIsOpen(false)}
+                    className="block bg-slate-900 hover:bg-slate-800 text-white text-center py-3 font-semibold rounded-lg transition-colors mt-3"
+                  >
+                    Book Now
+                  </Link>
+                </div>
+              </div>
+            </div>
           </div>
-        </div>
+        </nav>
       </div>
-    </nav>
+    </>
   )
 }
