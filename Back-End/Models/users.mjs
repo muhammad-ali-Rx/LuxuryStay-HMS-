@@ -1,4 +1,5 @@
 import mongoose from "mongoose";
+import bcrypt from 'bcryptjs'; // ✅ ADD THIS IMPORT
 
 const userSchema = new mongoose.Schema(
   {
@@ -25,6 +26,7 @@ const userSchema = new mongoose.Schema(
       type: String,
       enum: [
         "admin",
+        "general manager",
         "manager",
         "receptionist",
         "housekeeping",
@@ -56,7 +58,7 @@ const userSchema = new mongoose.Schema(
     status: {
       type: String,
       enum: ["active", "inactive"],
-      default: "active",
+      default: "Active",
     },
 
     preferences: {
@@ -95,6 +97,35 @@ const userSchema = new mongoose.Schema(
     timestamps: true,
   }
 );
+
+// ✅ ADD THIS: Password comparison method
+userSchema.methods.comparePassword = async function(candidatePassword) {
+  try {
+    return await bcrypt.compare(candidatePassword, this.password);
+  } catch (error) {
+    throw new Error('Password comparison failed');
+  }
+};
+
+// ✅ ADD THIS: Password hashing before save
+userSchema.pre('save', async function(next) {
+  // Only hash the password if it has been modified (or is new)
+  if (!this.isModified('password')) return next();
+  
+  try {
+    // Hash password with salt rounds
+    const saltRounds = 12;
+    this.password = await bcrypt.hash(this.password, saltRounds);
+    next();
+  } catch (error) {
+    next(error);
+  }
+});
+
+// ✅ ADD THIS: Method to check if user can login
+userSchema.methods.canLogin = function() {
+  return this.status === 'Active' && this.verified;
+};
 
 userSchema.methods.updateRoleOnBooking = async function (bookingStatus) {
   this.bookingStatus = bookingStatus;

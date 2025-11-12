@@ -63,23 +63,23 @@ export default function FacilitiesSection() {
   }, [])
 
   return (
-    <section id="facilities-section" className="py-24 px-4 sm:px-6 lg:px-8 bg-gray-50">
+    <section id="facilities-section" className="py-24 px-4 sm:px-6 lg:px-8 bg-white">
       <div className="max-w-7xl mx-auto">
         {/* Header */}
         <div className="text-center mb-20">
           <div
-            className={`inline-flex items-center gap-2 mb-6 px-4 py-2 bg-white rounded-full shadow-sm transition-all duration-700 ${
+            className={`inline-flex items-center gap-2 mb-6 px-4 py-2 bg-[#1B3788]/10 rounded-full transition-all duration-700 ${
               isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"
             }`}
           >
-            <div className="w-2 h-2 bg-amber-600 rounded-full"></div>
-            <span className="text-gray-600 font-medium text-sm tracking-widest uppercase">
+            <div className="w-2 h-2 bg-[#1B3788] rounded-full"></div>
+            <span className="text-[#1D293D] font-medium text-sm tracking-widest uppercase">
               Our Amenities
             </span>
           </div>
           
           <h2
-            className={`text-4xl md:text-5xl font-serif font-bold text-gray-900 mb-6 transition-all duration-700 delay-200 ${
+            className={`text-4xl md:text-5xl font-serif font-bold text-[#1D293D] mb-6 transition-all duration-700 delay-200 ${
               isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"
             }`}
           >
@@ -87,7 +87,7 @@ export default function FacilitiesSection() {
           </h2>
           
           <p
-            className={`text-xl text-gray-600 max-w-2xl mx-auto leading-relaxed transition-all duration-700 delay-300 ${
+            className={`text-xl text-[#1D293D]/80 max-w-2xl mx-auto leading-relaxed transition-all duration-700 delay-300 ${
               isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"
             }`}
           >
@@ -114,42 +114,42 @@ export default function FacilitiesSection() {
                 <div
                   className={`relative h-full bg-white rounded-2xl p-8 border border-gray-200 transition-all duration-500 ${
                     hoveredCard === index
-                      ? "shadow-xl border-amber-200 -translate-y-2"
+                      ? "shadow-xl border-[#1B3788]/20 -translate-y-2"
                       : "shadow-sm hover:shadow-lg hover:border-gray-300"
                   }`}
                 >
                   {/* Icon Section */}
                   <div className="relative mb-6">
                     <div
-                      className={`inline-flex items-center justify-center w-20 h-20 rounded-2xl bg-gradient-to-br from-amber-50 to-amber-100 border border-amber-200 transition-all duration-500 ${
+                      className={`inline-flex items-center justify-center w-20 h-20 rounded-2xl bg-[#1B3788]/10 border border-[#1B3788]/20 transition-all duration-500 ${
                         hoveredCard === index
                           ? "scale-110 rotate-3 shadow-lg"
                           : "shadow-md group-hover:shadow-lg"
                       }`}
                     >
                       <Icon
-                        className={`w-10 h-10 text-amber-600 transition-all duration-500 ${
+                        className={`w-10 h-10 text-[#1B3788] transition-all duration-500 ${
                           hoveredCard === index ? "scale-110" : ""
                         }`}
                       />
                     </div>
                     
                     {/* Floating elements */}
-                    <div className="absolute -top-2 -right-2 w-6 h-6 bg-amber-500 rounded-full opacity-0 group-hover:opacity-100 transition-all duration-500 delay-200 transform scale-0 group-hover:scale-100"></div>
-                    <div className="absolute -bottom-2 -left-2 w-4 h-4 bg-amber-400 rounded-full opacity-0 group-hover:opacity-100 transition-all duration-500 delay-300 transform scale-0 group-hover:scale-100"></div>
+                    <div className="absolute -top-2 -right-2 w-6 h-6 bg-[#1B3788] rounded-full opacity-0 group-hover:opacity-100 transition-all duration-500 delay-200 transform scale-0 group-hover:scale-100"></div>
+                    <div className="absolute -bottom-2 -left-2 w-4 h-4 bg-[#1B3788]/70 rounded-full opacity-0 group-hover:opacity-100 transition-all duration-500 delay-300 transform scale-0 group-hover:scale-100"></div>
                   </div>
 
                   {/* Content Section */}
                   <div className="relative">
                     <h3
-                      className={`text-xl font-serif font-bold text-gray-900 mb-3 transition-colors duration-300 ${
-                        hoveredCard === index ? "text-amber-700" : ""
+                      className={`text-xl font-serif font-bold text-[#1D293D] mb-3 transition-colors duration-300 ${
+                        hoveredCard === index ? "text-[#1B3788]" : ""
                       }`}
                     >
                       {facility.name}
                     </h3>
                     
-                    <p className="text-gray-600 leading-relaxed mb-4">
+                    <p className="text-[#1D293D]/80 leading-relaxed mb-4">
                       {facility.description}
                     </p>
 
@@ -158,9 +158,9 @@ export default function FacilitiesSection() {
                       {facility.features.map((feature, idx) => (
                         <div
                           key={idx}
-                          className="flex items-center gap-2 text-sm text-gray-500 transition-all duration-300 group-hover:text-gray-700"
+                          className="flex items-center gap-2 text-sm text-[#1D293D]/70 transition-all duration-300 group-hover:text-[#1D293D]"
                         >
-                          <div className="w-1.5 h-1.5 bg-amber-400 rounded-full"></div>
+                          <div className="w-1.5 h-1.5 bg-[#1B3788] rounded-full"></div>
                           <span>{feature}</span>
                         </div>
                       ))}
@@ -168,18 +168,17 @@ export default function FacilitiesSection() {
 
                     {/* CTA Button */}
                     <button
-                      className={`flex items-center gap-2 text-sm font-medium text-amber-600 opacity-0 group-hover:opacity-100 transform translate-y-2 group-hover:translate-y-0 transition-all duration-500 ${
+                      className={`flex items-center gap-2 text-sm font-medium text-[#1B3788] opacity-0 group-hover:opacity-100 transform translate-y-2 group-hover:translate-y-0 transition-all duration-500 ${
                         hoveredCard === index ? "opacity-100 translate-y-0" : ""
                       }`}
                     >
-                      <span>Learn more</span>
-                      <ArrowRight className="w-4 h-4 transform group-hover:translate-x-1 transition-transform duration-300" />
+                      
                     </button>
                   </div>
 
                   {/* Hover Border Effect */}
                   <div
-                    className={`absolute bottom-0 left-1/2 transform -translate-x-1/2 w-0 h-1 bg-gradient-to-r from-amber-400 to-amber-600 rounded-full transition-all duration-500 ${
+                    className={`absolute bottom-0 left-1/2 transform -translate-x-1/2 w-0 h-1 bg-gradient-to-r from-[#1B3788] to-[#1B3788]/80 rounded-full transition-all duration-500 ${
                       hoveredCard === index ? "w-3/4" : "group-hover:w-1/2"
                     }`}
                   ></div>
@@ -195,10 +194,10 @@ export default function FacilitiesSection() {
             isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"
           }`}
         >
-          <p className="text-gray-600 mb-8 text-lg">
+          <p className="text-[#1D293D]/80 mb-8 text-lg">
             Discover all our premium amenities and services
           </p>
-          <button className="inline-flex items-center gap-3 px-8 py-4 bg-gray-900 text-white rounded-xl font-semibold hover:bg-gray-800 transition-all duration-300 hover:shadow-lg hover:-translate-y-1">
+          <button className="inline-flex items-center gap-3 px-8 py-4 bg-[#1D293D] text-white rounded-xl font-semibold hover:bg-[#1B3788] transition-all duration-300 hover:shadow-lg hover:-translate-y-1">
             <span>View All Facilities</span>
             <div className="w-5 h-5 bg-white/20 rounded-full flex items-center justify-center">
               <ArrowRight className="w-3 h-3" />

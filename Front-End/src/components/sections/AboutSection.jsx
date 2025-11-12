@@ -97,25 +97,25 @@ export default function AboutSection() {
       className="py-24 px-4 sm:px-6 lg:px-8 bg-white relative overflow-hidden"
     >
       {/* Subtle Background Elements */}
-      <div className="absolute top-10 right-10 w-80 h-80 bg-blue-50 rounded-full blur-3xl opacity-60 -z-10"></div>
-      <div className="absolute bottom-10 left-10 w-80 h-80 bg-amber-50 rounded-full blur-3xl opacity-60 -z-10"></div>
+      <div className="absolute top-10 right-10 w-80 h-80 bg-[#1B3788]/5 rounded-full blur-3xl opacity-60 -z-10"></div>
+      <div className="absolute bottom-10 left-10 w-80 h-80 bg-[#1B3788]/5 rounded-full blur-3xl opacity-60 -z-10"></div>
 
       <div className="max-w-7xl mx-auto">
         {/* Header Section */}
         <div className="text-center mb-16">
           <div
-            className={`inline-flex items-center gap-2 mb-6 px-4 py-2 bg-gray-100 rounded-full transition-all duration-700 delay-100 ${
+            className={`inline-flex items-center gap-2 mb-6 px-4 py-2 bg-[#1B3788]/10 rounded-full transition-all duration-700 delay-100 ${
               isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"
             }`}
           >
-            <div className="w-2 h-2 bg-amber-600 rounded-full"></div>
-            <span className="text-gray-600 font-medium text-sm tracking-widest uppercase">
+            <div className="w-2 h-2 bg-[#1B3788] rounded-full"></div>
+            <span className="text-[#1D293D] font-medium text-sm tracking-widest uppercase">
               OUR STORY
             </span>
           </div>
           
           <h2
-            className={`text-4xl md:text-5xl font-serif font-bold text-gray-900 mb-6 transition-all duration-700 delay-200 ${
+            className={`text-4xl md:text-5xl font-serif font-bold text-[#1D293D] mb-6 transition-all duration-700 delay-200 ${
               isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"
             }`}
           >
@@ -123,7 +123,7 @@ export default function AboutSection() {
           </h2>
           
           <p
-            className={`text-xl text-gray-600 max-w-2xl mx-auto leading-relaxed transition-all duration-700 delay-300 ${
+            className={`text-xl text-[#1D293D]/80 max-w-2xl mx-auto leading-relaxed transition-all duration-700 delay-300 ${
               isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"
             }`}
           >
@@ -151,12 +151,12 @@ export default function AboutSection() {
             {/* Established Badge */}
             <div className="absolute -bottom-6 -right-6 bg-white rounded-2xl p-6 shadow-lg border border-gray-100 max-w-xs">
               <div className="flex items-center gap-3">
-                <div className="w-12 h-12 bg-amber-100 rounded-lg flex items-center justify-center">
-                  <Calendar className="w-6 h-6 text-amber-600" />
+                <div className="w-12 h-12 bg-[#1B3788]/10 rounded-lg flex items-center justify-center">
+                  <Calendar className="w-6 h-6 text-[#1B3788]" />
                 </div>
                 <div>
-                  <p className="text-sm text-gray-500 mb-1">Established</p>
-                  <p className="text-2xl font-bold text-gray-900">1995</p>
+                  <p className="text-sm text-[#1D293D]/70 mb-1">Established</p>
+                  <p className="text-2xl font-bold text-[#1D293D]">1995</p>
                 </div>
               </div>
             </div>
@@ -168,17 +168,17 @@ export default function AboutSection() {
               isVisible ? "opacity-100 translate-x-0" : "opacity-0 translate-x-8"
             }`}
           >
-            <h3 className="text-3xl font-serif font-bold text-gray-900 mb-8">
+            <h3 className="text-3xl font-serif font-bold text-[#1D293D] mb-8">
               A Legacy of Excellence
             </h3>
 
             <div className="space-y-6 mb-8">
-              <p className="text-lg text-gray-600 leading-relaxed">
+              <p className="text-lg text-[#1D293D]/80 leading-relaxed">
                 For nearly three decades, LuxuryStay has been the epitome of sophistication and hospitality. Our journey
                 began with a simple vision: to create a sanctuary where every guest feels like royalty.
               </p>
 
-              <p className="text-lg text-gray-600 leading-relaxed">
+              <p className="text-lg text-[#1D293D]/80 leading-relaxed">
                 From our meticulously curated suites to our award-winning dining experiences, every element is designed to
                 exceed expectations. We don't just provide accommodation—we create memories that last a lifetime.
               </p>
@@ -191,16 +191,16 @@ export default function AboutSection() {
                 return (
                   <div
                     key={idx}
-                    className="flex items-center gap-4 p-4 rounded-xl bg-gray-50 hover:bg-white hover:shadow-md transition-all duration-300 group cursor-pointer border border-transparent hover:border-gray-200"
+                    className="flex items-center gap-4 p-4 rounded-xl bg-[#1B3788]/5 hover:bg-white hover:shadow-md transition-all duration-300 group cursor-pointer border border-transparent hover:border-[#1B3788]/20"
                   >
                     <div className="w-12 h-12 bg-white rounded-lg flex items-center justify-center shadow-sm group-hover:shadow transition-all duration-300">
-                      <Icon className="w-6 h-6 text-amber-600" />
+                      <Icon className="w-6 h-6 text-[#1B3788]" />
                     </div>
                     <div className="flex-1">
-                      <p className="font-semibold text-gray-900 group-hover:text-amber-700 transition-colors">
+                      <p className="font-semibold text-[#1D293D] group-hover:text-[#1B3788] transition-colors">
                         {feature.title}
                       </p>
-                      <p className="text-sm text-gray-600 mt-1">{feature.desc}</p>
+                      <p className="text-sm text-[#1D293D]/70 mt-1">{feature.desc}</p>
                     </div>
                   </div>
                 )
@@ -223,16 +223,16 @@ export default function AboutSection() {
                 className="group text-center"
               >
                 <div className="bg-white rounded-2xl p-8 shadow-sm hover:shadow-lg transition-all duration-500 hover:-translate-y-2 border border-gray-100">
-                  <div className="w-16 h-16 bg-amber-100 rounded-2xl flex items-center justify-center mx-auto mb-6 group-hover:bg-amber-600 transition-colors duration-300">
-                    <Icon className="w-8 h-8 text-amber-600 group-hover:text-white transition-colors duration-300" />
+                  <div className="w-16 h-16 bg-[#1B3788]/10 rounded-2xl flex items-center justify-center mx-auto mb-6 group-hover:bg-[#1B3788] transition-colors duration-300">
+                    <Icon className="w-8 h-8 text-[#1B3788] group-hover:text-white transition-colors duration-300" />
                   </div>
                   
-                  <div className="text-4xl font-bold text-gray-900 mb-3">
+                  <div className="text-4xl font-bold text-[#1D293D] mb-3">
                     {stat.value}
                     {stat.suffix}
                   </div>
                   
-                  <p className="text-gray-600 font-medium">{stat.label}</p>
+                  <p className="text-[#1D293D]/80 font-medium">{stat.label}</p>
                 </div>
               </div>
             )
@@ -245,12 +245,12 @@ export default function AboutSection() {
             isVisible ? "opacity-100 scale-100" : "opacity-0 scale-95"
           }`}
         >
-          <p className="text-gray-600 mb-8 text-lg">
+          <p className="text-[#1D293D]/80 mb-8 text-lg">
             Ready to experience luxury like never before?
           </p>
           <a
             href="/rooms"
-            className="inline-flex items-center gap-3 px-8 py-4 bg-gray-900 text-white rounded-xl font-semibold hover:bg-gray-800 transition-all duration-300 hover:shadow-lg hover:-translate-y-1"
+            className="inline-flex items-center gap-3 px-8 py-4 bg-[#1D293D] text-white rounded-xl font-semibold hover:bg-[#1B3788] transition-all duration-300 hover:shadow-lg hover:-translate-y-1"
           >
             <span>Explore Our Suites</span>
             <div className="w-5 h-5 bg-white/20 rounded-full flex items-center justify-center">
@@ -263,4 +263,4 @@ export default function AboutSection() {
       </div>
     </section>
   )
-} 
+}

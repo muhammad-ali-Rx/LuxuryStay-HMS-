@@ -139,8 +139,6 @@ export default function FeaturesSection() {
                     <div className={`flex items-center justify-center gap-1 text-xs font-medium text-gray-500 
                       opacity-0 group-hover:opacity-100 transform translate-y-2 group-hover:translate-y-0 
                       transition-all duration-500`}>
-                      <span>Learn more</span>
-                      <ArrowRight className="w-3 h-3 transform group-hover:translate-x-1 transition-transform duration-300" />
                     </div>
                   </div>
 

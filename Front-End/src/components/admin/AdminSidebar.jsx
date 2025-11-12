@@ -11,6 +11,8 @@ import {
   Settings,
   LogOut,
   Home,
+  Utensils,
+  BookOpen,
 } from "lucide-react"
 import { useAuth } from "../../context/AuthContext"
 import { useNavigate } from "react-router-dom"
@@ -18,7 +20,9 @@ import { useNavigate } from "react-router-dom"
 const menuItems = [
   { id: "dashboard", label: "Dashboard", icon: LayoutDashboard },
   { id: "rooms", label: "Rooms", icon: DoorOpen },
+  { id: "dining", label: "Dining", icon: Utensils },
   { id: "bookings", label: "Bookings", icon: Calendar },
+  { id: "reservations", label: "reservations", icon: BookOpen },
   { id: "guests", label: "Guests", icon: Users },
   { id: "staff", label: "Staff", icon: UserCheck },
   { id: "reports", label: "Reports", icon: FileText },
@@ -30,7 +34,7 @@ export default function AdminSidebar({ activeTab, setActiveTab, isOpen }) {
   const navigate = useNavigate()
 
   const handleLogout = () => {
-    logoutAdmin() // this will handle redirect too
+    logoutAdmin()
   }
 
   const goToUserPanel = () => {
@@ -79,7 +83,6 @@ export default function AdminSidebar({ activeTab, setActiveTab, isOpen }) {
 
       {/* Bottom Buttons */}
       <div className="p-4 border-t border-white/10 space-y-2">
-        {/* Go to User Panel Button */}
         <motion.button
           onClick={goToUserPanel}
           whileHover={{ x: 5 }}
@@ -89,7 +92,6 @@ export default function AdminSidebar({ activeTab, setActiveTab, isOpen }) {
           <span>Go to User Panel</span>
         </motion.button>
 
-        {/* Logout Button */}
         <motion.button
           onClick={handleLogout}
           whileHover={{ x: 5 }}

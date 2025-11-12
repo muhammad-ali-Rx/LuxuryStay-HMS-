@@ -36,7 +36,7 @@ export default function StaffManagement() {
   const fetchStaff = async () => {
     try {
       setLoading(true);
-      const response = await fetch(`${API_BASE_URL}/`); // Updated endpoint
+      const response = await fetch(`${API_BASE_URL}/users`); // Updated endpoint
       if (!response.ok) throw new Error("Failed to fetch staff");
 
       const data = await response.json();
@@ -91,7 +91,7 @@ export default function StaffManagement() {
         delete payload.password;
       }
 
-      const response = await fetch(`${API_BASE_URL}/update/${staffId}`, {
+      const response = await fetch(`${API_BASE_URL}/users/update/${staffId}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
@@ -156,7 +156,7 @@ export default function StaffManagement() {
 
   const handleAddStaff = async () => {
     try {
-      const response = await fetch(`${API_BASE_URL}/register/complete`, {
+      const response = await fetch(`${API_BASE_URL}/users/register/complete`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({

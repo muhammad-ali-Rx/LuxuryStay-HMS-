@@ -19,4 +19,3 @@ router.get('/protected', auth , (req , res)=>res.send('hello'));
 router.get('/:id', searchUsers);    
 router.post('/login',  loginUser);
 export default router;
-

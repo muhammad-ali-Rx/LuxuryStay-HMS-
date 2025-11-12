@@ -15,6 +15,7 @@
     "multer-storage-cloudinary": "^4.0.0",
     "nodemailer": "^7.0.10",
     "nodemon": "^3.1.10",
-    "redis": "^5.9.0"
+    "redis": "^5.9.0",
+     "express-validator": "^7.0.1"
   }
 }

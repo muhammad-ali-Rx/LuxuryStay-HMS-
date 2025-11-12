@@ -10,6 +10,8 @@ import GuestsManagement from "../../components/admin/GuestsManagement"
 import StaffManagement from "../../components/admin/StaffManagement"
 import ReportsPage from "../../components/admin/ReportsPage"
 import SettingsPage from "../../components/admin/SettingsPage"
+import RestaurantsManagement from "../../components/admin/RestaurantsManagement"
+import ReservationsManagement from "../../components/admin/ReservationsManagement"
 
 export default function AdminPanel() {
   const [activeTab, setActiveTab] = useState("dashboard")
@@ -33,8 +35,12 @@ export default function AdminPanel() {
         return <AdminDashboard />
       case "rooms":
         return <RoomsManagement />
+      case "dining":
+        return <RestaurantsManagement />
       case "bookings":
         return <BookingsManagement />
+      case "reservations":
+        return <ReservationsManagement />
       case "guests":
         return <GuestsManagement />
       case "staff":

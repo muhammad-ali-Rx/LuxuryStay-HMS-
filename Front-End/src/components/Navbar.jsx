@@ -41,7 +41,7 @@ export default function FrontendNavbar() {
               </div>
               <div className="flex items-center gap-2">
                 <MapPin size={14} className="text-slate-400" />
-                <span className="text-slate-300">Lahore, Pakistan</span>
+                <span className="text-slate-300">Karachi, Pakistan</span>
               </div>
             </div>
             <div className="flex items-center gap-4 text-slate-300 text-xs">

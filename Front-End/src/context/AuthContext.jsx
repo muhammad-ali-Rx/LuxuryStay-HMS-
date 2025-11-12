@@ -1,3 +1,5 @@
+"use client"
+
 import { createContext, useContext, useState, useEffect } from "react"
 
 const AuthContext = createContext()
@@ -11,73 +13,82 @@ export function AuthProvider({ children }) {
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    const savedUserAuth = localStorage.getItem("userAuth")
-    const savedAdminAuth = localStorage.getItem("adminAuth")
-    const savedToken = localStorage.getItem("authToken")
+  // Check localStorage for existing sessions
+  const savedUserAuth = localStorage.getItem("userAuth")
+  const savedAdminAuth = localStorage.getItem("adminAuth")
+  const savedToken = localStorage.getItem("authToken")
 
-    if (savedUserAuth && savedToken) {
-      const auth = JSON.parse(savedUserAuth)
-      setUserAuth(auth)
-      setIsAuthenticated(true)
+  if (savedUserAuth && savedToken) {
+    const auth = JSON.parse(savedUserAuth)
+    setUserAuth(auth)
+    setIsAuthenticated(true)
+  }
+
+  if (savedAdminAuth && savedToken) {
+    const admin = JSON.parse(savedAdminAuth)
+    setAdminUser(admin)
+  }
+
+  // 🧩 Development only — auto-login as admin if none found
+  if (!savedAdminAuth) {
+    const devAdmin = {
+      id: "1",
+      name: "Developer Admin",
+      email: "admin@luxurystay.com",
+      role: "admin",
     }
 
-    if (savedAdminAuth && savedToken) {
-      const admin = JSON.parse(savedAdminAuth)
-      setAdminUser(admin)
-    }
+    localStorage.setItem("authToken", "dev-token")
+    localStorage.setItem("adminAuth", JSON.stringify(devAdmin))
 
-    // 🧩 Development only — auto-login as admin if none found
-    if (!savedAdminAuth) {
-      const devAdmin = {
-        id: "1",
-        name: "Developer Admin",
-        email: "admin@luxurystay.com",
-        role: "admin",
-      }
+    setAdminUser(devAdmin)
+  }
 
-      localStorage.setItem("authToken", "dev-token")
-      localStorage.setItem("adminAuth", JSON.stringify(devAdmin))
-      setAdminUser(devAdmin)
-    }
+  setLoading(false)
+}, [])
 
-    setLoading(false)
-  }, [])
 
   const setUserFromAPI = (apiResponse) => {
-    const userData = apiResponse.user || apiResponse
-    const user = {
-      id: userData.id,
-      name: userData.name,
-      email: userData.email,
-      role: userData.role,
-      phone: userData.phone,
-    }
-
-    localStorage.setItem("authToken", apiResponse.token)
-    localStorage.setItem("userAuth", JSON.stringify(user))
-
-    setUserAuth(user)
-    setIsAuthenticated(true)
-
-    return user
+  const userData = apiResponse.user || apiResponse // handle both cases
+  const user = {
+    id: userData.id,
+    name: userData.name,
+    email: userData.email,
+    role: userData.role,
+    phone: userData.phone,
   }
+
+  localStorage.setItem("authToken", apiResponse.token)
+  localStorage.setItem("userAuth", JSON.stringify(user))
+
+  setUserAuth(user)
+  setIsAuthenticated(true)
+
+  return user
+}
+
 
   const registerUser = async (userData) => {
     try {
       const response = await fetch(`${API_BASE_URL}/users/add`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+        },
         body: JSON.stringify({
           name: userData.name,
           email: userData.email,
           phone: userData.phone,
           password: userData.password,
-          role: "user",
+          role: "user", // default role for new users
         }),
       })
 
       const data = await response.json()
-      if (!response.ok) throw new Error(data.message || "Registration failed")
+
+      if (!response.ok) {
+        throw new Error(data.message || "Registration failed")
+      }
 
       return { success: true, user: data.user }
     } catch (error) {
@@ -86,26 +97,36 @@ export function AuthProvider({ children }) {
     }
   }
 
-  const loginUser = async (email, password) => {
-    try {
-      const response = await fetch(`${API_BASE_URL}/users/login`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, password }),
-      })
+ const loginUser = async (email, password) => {
+  try {
+    const response = await fetch(`${API_BASE_URL}/users/login`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ email, password }),
+    })
 
-      const data = await response.json()
-      if (!response.ok) throw new Error(data.message || "Login failed")
+    const data = await response.json()
 
-      const formattedResponse = data.user ? { ...data.user, token: data.token } : data
-      const user = setUserFromAPI(formattedResponse)
-
-      return { success: true, user, token: data.token }
-    } catch (error) {
-      console.error("Login error:", error)
-      return { success: false, error: error.message }
+    if (!response.ok) {
+      throw new Error(data.message || "Login failed")
     }
+
+    // 🧠 Safe way: handle both possible response shapes
+    const formattedResponse = data.user
+      ? { ...data.user, token: data.token }
+      : data
+
+    const user = setUserFromAPI(formattedResponse)
+
+    return { success: true, user, token: data.token }
+  } catch (error) {
+    console.error("Login error:", error)
+    return { success: false, error: error.message }
   }
+}
+
 
   const logoutUser = () => {
     setUserAuth(null)
@@ -120,18 +141,28 @@ export function AuthProvider({ children }) {
     return adminRoles.includes(userAuth.role)
   }
 
-  const isGuest = () => userAuth?.role === "guest"
+  const isGuest = () => {
+    return userAuth?.role === "guest"
+  }
 
   const loginAdmin = async (email, password) => {
     try {
       const response = await fetch(`${API_BASE_URL}/users/login`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, password }),
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          email,
+          password,
+        }),
       })
 
       const data = await response.json()
-      if (!response.ok) throw new Error(data.message || "Admin login failed")
+
+      if (!response.ok) {
+        throw new Error(data.message || "Admin login failed")
+      }
 
       const adminRoles = ["admin", "manager", "receptionist", "housekeeping"]
       if (!adminRoles.includes(data.user.role)) {
@@ -147,6 +178,7 @@ export function AuthProvider({ children }) {
 
       localStorage.setItem("authToken", data.token)
       localStorage.setItem("adminAuth", JSON.stringify(admin))
+
       setAdminUser(admin)
 
       return { success: true, admin, token: data.token }
@@ -156,44 +188,46 @@ export function AuthProvider({ children }) {
     }
   }
 
-  // ✅ FIXED logoutAdmin
   const logoutAdmin = () => {
     setAdminUser(null)
-    setUserAuth(null)
-    setIsAuthenticated(false)
-
     localStorage.removeItem("adminAuth")
-    localStorage.removeItem("userAuth")
     localStorage.removeItem("authToken")
-
-    // Redirect to homepage after clearing all sessions
-    window.location.href = "/home"
   }
+const getToken = () => {
+  return localStorage.getItem("authToken");
+};
 
-  return (
-    <AuthContext.Provider
-      value={{
-        isAuthenticated,
-        userAuth,
-        setUserFromAPI,
-        registerUser,
-        loginUser,
-        logoutUser,
-        canAccessAdmin,
-        isGuest,
-        adminUser,
-        loginAdmin,
-        logoutAdmin,
-        loading,
-      }}
-    >
-      {children}
-    </AuthContext.Provider>
-  )
+// Then add it to the value object:
+return (
+  <AuthContext.Provider
+    value={{
+      // User
+      isAuthenticated,
+      userAuth,
+      setUserFromAPI,
+      registerUser,
+      loginUser,
+      logoutUser,
+      canAccessAdmin,
+      isGuest,
+      // Admin
+      adminUser,
+      loginAdmin,
+      logoutAdmin,
+      loading,
+      // Add this:
+      getToken, // ✅ Add this line
+    }}
+  >
+    {children}
+  </AuthContext.Provider>
+);
 }
 
 export const useAuth = () => {
   const context = useContext(AuthContext)
-  if (!context) throw new Error("useAuth must be used within AuthProvider")
+  if (!context) {
+    throw new Error("useAuth must be used within AuthProvider")
+  }
   return context
 }

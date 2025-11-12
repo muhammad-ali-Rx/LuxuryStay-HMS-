@@ -1,156 +1,276 @@
+"use client"
+
+import { useState, useEffect } from "react"
+import { useNavigate } from "react-router-dom"
+import { Search, Filter, Star, Clock, Users, MapPin } from "lucide-react"
+import { motion } from "framer-motion"
+import axios from "axios"
 import Navbar from "../components/Navbar"
 import Footer from "../components/Footer"
-import { Star, Clock, Users } from "lucide-react"
 
-export default function Dining() {
-  const restaurants = [
-    {
-      id: 1,
-      name: "Le Prestige",
-      cuisine: "French Fine Dining",
-      description: "Experience exquisite French cuisine prepared by our Michelin-trained chefs in an elegant setting.",
-      image: "/placeholder.svg?key=dining1",
-      rating: 4.9,
-      hours: "6:00 PM - 11:00 PM",
-      capacity: "80 guests",
-    },
-    {
-      id: 2,
-      name: "Sakura",
-      cuisine: "Japanese Kaiseki",
-      description: "Authentic Japanese dining experience with fresh seafood and traditional preparation methods.",
-      image: "/placeholder.svg?key=dining2",
-      rating: 4.8,
-      hours: "5:30 PM - 10:30 PM",
-      capacity: "60 guests",
-    },
-    {
-      id: 3,
-      name: "Bella Italia",
-      cuisine: "Italian Contemporary",
-      description: "Modern Italian cuisine featuring handmade pasta and premium imported ingredients.",
-      image: "/placeholder.svg?key=dining3",
-      rating: 4.7,
-      hours: "6:00 PM - 11:00 PM",
-      capacity: "100 guests",
-    },
-    {
-      id: 4,
-      name: "The Terrace Lounge",
-      cuisine: "International Casual",
-      description: "Relaxed dining with panoramic views, perfect for lunch, dinner, or cocktails.",
-      image: "/placeholder.svg?key=dining4",
-      rating: 4.6,
-      hours: "11:00 AM - 11:00 PM",
-      capacity: "120 guests",
-    },
-  ]
+const RestaurantListingPage = () => {
+  const navigate = useNavigate()
+  const [restaurants, setRestaurants] = useState([])
+  const [filteredRestaurants, setFilteredRestaurants] = useState([])
+  const [loading, setLoading] = useState(true)
+  const [searchTerm, setSearchTerm] = useState("")
+  const [filters, setFilters] = useState({
+    cuisine: "all",
+    priceRange: "all",
+    rating: "all"
+  })
+
+  const cuisines = ["all", "French", "Italian", "Japanese", "Indian", "International", "Mexican", "Chinese"]
+  const priceRanges = ["all", "$", "$$", "$$$", "$$$$"]
+  const ratings = ["all", "4.5", "4.0", "3.5", "3.0"]
+
+  useEffect(() => {
+    fetchRestaurants()
+  }, [])
+
+  useEffect(() => {
+    filterRestaurants()
+  }, [searchTerm, filters, restaurants])
+
+  const fetchRestaurants = async () => {
+    try {
+      const response = await axios.get("http://localhost:3000/api/restaurants")
+      setRestaurants(response.data.data || response.data)
+      setLoading(false)
+    } catch (error) {
+      console.error("Error fetching restaurants:", error)
+      setLoading(false)
+    }
+  }
+
+  const filterRestaurants = () => {
+    let filtered = restaurants
+
+    // Search filter
+    if (searchTerm) {
+      filtered = filtered.filter(restaurant =>
+        restaurant.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        restaurant.cuisine.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        restaurant.tags?.some(tag => tag.toLowerCase().includes(searchTerm.toLowerCase()))
+      )
+    }
+
+    // Cuisine filter
+    if (filters.cuisine !== "all") {
+      filtered = filtered.filter(restaurant => restaurant.cuisine === filters.cuisine)
+    }
+
+    // Price range filter
+    if (filters.priceRange !== "all") {
+      filtered = filtered.filter(restaurant => restaurant.priceRange === filters.priceRange)
+    }
+
+    // Rating filter
+    if (filters.rating !== "all") {
+      const minRating = parseFloat(filters.rating)
+      filtered = filtered.filter(restaurant => restaurant.rating >= minRating)
+    }
+
+    setFilteredRestaurants(filtered)
+  }
+
+  const getPriceRangeText = (priceRange) => {
+    const ranges = {
+      "$": "Budget",
+      "$$": "Moderate", 
+      "$$$": "Expensive",
+      "$$$$": "Luxury"
+    }
+    return ranges[priceRange] || priceRange
+  }
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <Navbar />
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#D4AF37]"></div>
+      </div>
+    )
+  }
 
   return (
-    <main className="min-h-screen bg-background">
+    <div className="min-h-screen bg-gray-50">
       <Navbar />
-
       {/* Hero Section */}
-      <section className="pt-32 pb-16 px-4 bg-gradient-to-b from-primary/5 to-background">
-        <div className="max-w-6xl mx-auto text-center">
-          <h1 className="text-5xl md:text-6xl font-bold text-primary mb-4">Culinary Excellence</h1>
-          <p className="text-xl text-primary/70 max-w-2xl mx-auto">
+      <section className="bg-gradient-to-r from-[#0A1F44] to-[#1a365d] text-white py-20">
+        <div className="container mx-auto px-4 text-center">
+          <motion.h1 
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="text-5xl font-bold mb-4"
+          >
+            Culinary Excellence
+          </motion.h1>
+          <motion.p 
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.1 }}
+            className="text-xl text-gray-300 max-w-2xl mx-auto"
+          >
             Discover world-class dining experiences crafted by our award-winning chefs
-          </p>
+          </motion.p>
+        </div>
+      </section>
+
+      {/* Search and Filters */}
+      <section className="py-8 bg-white shadow-sm">
+        <div className="container mx-auto px-4">
+          <div className="flex flex-col lg:flex-row gap-4 items-center justify-between">
+            {/* Search Bar */}
+            <div className="flex-1 max-w-lg">
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
+                <input
+                  type="text"
+                  placeholder="Search restaurants, cuisines..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#D4AF37] focus:border-transparent"
+                />
+              </div>
+            </div>
+
+            {/* Filters */}
+            <div className="flex flex-wrap gap-4">
+              <select
+                value={filters.cuisine}
+                onChange={(e) => setFilters({...filters, cuisine: e.target.value})}
+                className="border border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-[#D4AF37] focus:border-transparent"
+              >
+                {cuisines.map(cuisine => (
+                  <option key={cuisine} value={cuisine}>
+                    {cuisine === "all" ? "All Cuisines" : cuisine}
+                  </option>
+                ))}
+              </select>
+
+              <select
+                value={filters.priceRange}
+                onChange={(e) => setFilters({...filters, priceRange: e.target.value})}
+                className="border border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-[#D4AF37] focus:border-transparent"
+              >
+                {priceRanges.map(range => (
+                  <option key={range} value={range}>
+                    {range === "all" ? "All Prices" : getPriceRangeText(range)}
+                  </option>
+                ))}
+              </select>
+
+              <select
+                value={filters.rating}
+                onChange={(e) => setFilters({...filters, rating: e.target.value})}
+                className="border border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-[#D4AF37] focus:border-transparent"
+              >
+                {ratings.map(rating => (
+                  <option key={rating} value={rating}>
+                    {rating === "all" ? "All Ratings" : `${rating}+ Stars`}
+                  </option>
+                ))}
+              </select>
+            </div>
+          </div>
         </div>
       </section>
 
       {/* Restaurants Grid */}
-      <section className="py-16 px-4">
-        <div className="max-w-6xl mx-auto">
-          <div className="grid md:grid-cols-2 gap-8">
-            {restaurants.map((restaurant) => (
-              <div
-                key={restaurant.id}
-                className="group bg-white rounded-xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-300"
-              >
-                <div className="relative h-64 overflow-hidden">
-                  <img
-                    src={restaurant.image || "/placeholder.svg"}
-                    alt={restaurant.name}
-                    className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
-                  />
-                  <div className="absolute inset-0 bg-black/20 group-hover:bg-black/40 transition-colors" />
-                </div>
-                <div className="p-6">
-                  <div className="flex justify-between items-start mb-3">
-                    <div>
-                      <h3 className="text-2xl font-bold text-primary mb-1">{restaurant.name}</h3>
-                      <p className="text-accent font-medium">{restaurant.cuisine}</p>
+      <section className="py-12">
+        <div className="container mx-auto px-4">
+          <div className="flex justify-between items-center mb-8">
+            <h2 className="text-3xl font-bold text-gray-900">
+              Our Restaurants {filteredRestaurants.length > 0 && `(${filteredRestaurants.length})`}
+            </h2>
+          </div>
+
+          {filteredRestaurants.length === 0 ? (
+            <div className="text-center py-12">
+              <div className="text-gray-400 mb-4">
+                <Search size={64} className="mx-auto" />
+              </div>
+              <p className="text-xl text-gray-600">No restaurants found matching your criteria.</p>
+            </div>
+          ) : (
+            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+              {filteredRestaurants.map((restaurant, index) => (
+                <motion.div
+                  key={restaurant._id}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: index * 0.1 }}
+                  className="bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition-all duration-300 group cursor-pointer"
+                  onClick={() => navigate(`/restaurants/${restaurant._id}`)}
+                >
+                  <div className="relative h-48 overflow-hidden">
+                    <img
+                      src={restaurant.images?.[0] || "/api/placeholder/400/300"}
+                      alt={restaurant.name}
+                      className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
+                    />
+                    <div className="absolute inset-0 bg-black/20 group-hover:bg-black/40 transition-colors" />
+                    <div className="absolute top-4 right-4 bg-white/90 backdrop-blur-sm px-3 py-1 rounded-full">
+                      <span className="text-sm font-semibold text-gray-900">{restaurant.priceRange}</span>
                     </div>
-                    <div className="flex items-center gap-1 bg-accent/10 px-3 py-1 rounded-full">
-                      <Star size={16} className="text-accent fill-accent" />
-                      <span className="text-primary font-semibold">{restaurant.rating}</span>
+                    <div className="absolute bottom-4 left-4">
+                      <span className="bg-[#D4AF37] text-[#0A1F44] px-2 py-1 rounded-full text-sm font-semibold">
+                        {restaurant.cuisine}
+                      </span>
                     </div>
                   </div>
-                  <p className="text-primary/70 mb-4">{restaurant.description}</p>
-                  <div className="flex flex-wrap gap-4 text-sm text-primary/60 mb-4">
-                    <div className="flex items-center gap-2">
-                      <Clock size={16} />
-                      {restaurant.hours}
+                  
+                  <div className="p-6">
+                    <div className="flex justify-between items-start mb-3">
+                      <h3 className="text-xl font-bold text-gray-900 group-hover:text-[#D4AF37] transition-colors">
+                        {restaurant.name}
+                      </h3>
+                      <div className="flex items-center gap-1 bg-[#D4AF37]/10 px-2 py-1 rounded-full">
+                        <Star size={16} className="text-[#D4AF37] fill-[#D4AF37]" />
+                        <span className="text-sm font-semibold text-gray-900">{restaurant.rating}</span>
+                      </div>
                     </div>
-                    <div className="flex items-center gap-2">
-                      <Users size={16} />
-                      {restaurant.capacity}
+                    
+                    <p className="text-gray-600 mb-4 line-clamp-2">{restaurant.description}</p>
+                    
+                    <div className="flex items-center gap-2 text-sm text-gray-500 mb-3">
+                      <MapPin size={16} />
+                      <span>{restaurant.location}</span>
+                    </div>
+                    
+                    <div className="flex items-center justify-between text-sm text-gray-500">
+                      <div className="flex items-center gap-2">
+                        <Clock size={16} />
+                        <span>{restaurant.openingHours?.monday?.open} - {restaurant.openingHours?.monday?.close}</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <Users size={16} />
+                        <span>Up to {restaurant.capacity} guests</span>
+                      </div>
+                    </div>
+
+                    {/* Tags */}
+                    <div className="flex flex-wrap gap-2 mt-4">
+                      {restaurant.tags?.slice(0, 3).map((tag, idx) => (
+                        <span
+                          key={idx}
+                          className="px-2 py-1 bg-gray-100 text-gray-700 rounded-full text-xs font-medium"
+                        >
+                          {tag}
+                        </span>
+                      ))}
                     </div>
                   </div>
-                  <button className="w-full bg-primary text-white py-2 rounded-lg hover:bg-primary/90 transition-colors">
-                    Reserve Table
-                  </button>
-                </div>
-              </div>
-            ))}
-          </div>
+                </motion.div>
+              ))}
+            </div>
+          )}
         </div>
       </section>
-
-      {/* Special Offers */}
-      <section className="py-16 px-4 bg-primary/5">
-        <div className="max-w-6xl mx-auto">
-          <h2 className="text-4xl font-bold text-primary mb-12 text-center">Special Dining Packages</h2>
-          <div className="grid md:grid-cols-3 gap-8">
-            {[
-              {
-                title: "Romantic Dinner",
-                price: "$150",
-                items: ["3-course meal", "Wine pairing", "Dessert & champagne"],
-              },
-              {
-                title: "Business Lunch",
-                price: "$85",
-                items: ["2-course meal", "Coffee & tea", "Private dining room"],
-              },
-              {
-                title: "Celebration Menu",
-                price: "$200",
-                items: ["5-course tasting", "Premium wine", "Personalized service"],
-              },
-            ].map((pkg, idx) => (
-              <div key={idx} className="bg-white p-8 rounded-xl shadow-lg text-center">
-                <h3 className="text-2xl font-bold text-primary mb-2">{pkg.title}</h3>
-                <p className="text-3xl font-bold text-accent mb-6">{pkg.price}</p>
-                <ul className="space-y-3 mb-6">
-                  {pkg.items.map((item, i) => (
-                    <li key={i} className="text-primary/70">
-                      ✓ {item}
-                    </li>
-                  ))}
-                </ul>
-                <button className="w-full bg-accent text-white py-2 rounded-lg hover:bg-accent/90 transition-colors">
-                  Book Package
-                </button>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
       <Footer />
-    </main>
+    </div>
   )
 }
+
+export default RestaurantListingPage  
