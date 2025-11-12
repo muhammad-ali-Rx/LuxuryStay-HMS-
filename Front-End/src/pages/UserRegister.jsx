@@ -338,7 +338,7 @@ export default function HMSRegister() {
     <div className="min-h-screen bg-[#1D293D] flex">
       {/* Left Side - Form */}
       <div className="flex-1 flex items-center justify-center p-6">
-        <div className="w-full max-w-2xl">
+        <div className="w-full max-w-lg">
           {/* Back Button */}
           <motion.button
             onClick={handleBackClick}
