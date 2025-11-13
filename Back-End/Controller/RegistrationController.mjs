@@ -1,6 +1,15 @@
 import User from '../Models/users.mjs';
-import { generateOTP, sendOTPEmail, sendWelcomeEmail } from '../services/emailService.mjs';
-import { storeOTP, getOTP, getOTPTTL, deleteOTP } from '../services/otpService.mjs';
+import {
+  generateOTP,
+  sendOTPEmail,
+  sendWelcomeEmail
+} from '../services/emailService.mjs';
+import {
+  storeOTP,
+  getOTP,
+  getOTPTTL,
+  deleteOTP
+} from '../services/otpService.mjs';
 
 // Send OTP for registration
 export const sendOTP = async (req, res) => {
