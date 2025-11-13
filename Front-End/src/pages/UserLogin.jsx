@@ -1,86 +1,78 @@
-import { useState } from "react"
-import { useNavigate, Link } from "react-router-dom"
-import { motion } from "framer-motion"
-import { Mail, Lock, Eye, EyeOff, LogIn } from "lucide-react" // Fixed import
-import FrontendNavbar from "../components/Navbar"
-import { useAuth } from "../context/AuthContext"
+import { useState } from "react";
+import { useNavigate, Link } from "react-router-dom";
+import { motion } from "framer-motion";
+import { Mail, Lock, Eye, EyeOff, LogIn } from "lucide-react"; // Fixed import
+import FrontendNavbar from "../components/Navbar";
+import { useAuth } from "../context/AuthContext";
 
-const API_BASE_URL = "http://localhost:3000"
+const API_BASE_URL = "http://localhost:3000";
 
 export default function UserLogin() {
-  const navigate = useNavigate()
-  const { setUserFromAPI } = useAuth()
-  const [showPassword, setShowPassword] = useState(false)
-  const [email, setEmail] = useState("")
-  const [password, setPassword] = useState("")
-  const [error, setError] = useState("")
-  const [loading, setLoading] = useState(false)
+  const navigate = useNavigate();
+  const { setUserFromAPI } = useAuth();
+  const [showPassword, setShowPassword] = useState(false);
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
 
   const handleSubmit = async (e) => {
-    e.preventDefault()
-    setError("")
-    setLoading(true)
+    e.preventDefault();
+    setError("");
+    setLoading(true);
 
     try {
       if (!email || !password) {
-        setError("Please fill in all fields")
-        setLoading(false)
-        return
+        setError("Please fill in all fields");
+        setLoading(false);
+        return;
       }
 
       const response = await fetch(`${API_BASE_URL}/users/login`, {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, password }),
-      })
+      });
 
-      console.log("[v0] Login response status:", response.status)
+      console.log("[v0] Login response status:", response.status);
 
       if (!response.ok) {
-        const text = await response.text()
-        console.log("[v0] Error response text:", text)
-        throw new Error(`HTTP Error: ${response.status}`)
+        const text = await response.text();
+        console.log("[v0] Error response text:", text);
+        throw new Error(`HTTP Error: ${response.status}`);
       }
 
-      const data = await response.json()
-      console.log("[v0] Login data received:", data)
+      const data = await response.json();
+      console.log("[v0] Login data received:", data);
 
-      const user = setUserFromAPI(data)
+      const user = setUserFromAPI(data);
 
-      // Add null check for user
       if (!user || !user.role) {
-        setError("Invalid user data received")
-        setLoading(false)
-        return
+        setError("Invalid user data received");
+        setLoading(false);
+        return;
       }
 
       if (user.role === "guest") {
-        navigate("/reservations", { state: { from: "login" } })
-      } else if (["admin", "manager", "receptionist", "housekeeping", "staff"].includes(user.role)) {
-        navigate("/admin", { state: { from: "login" } })
+        navigate("/reservations", { state: { from: "login" } });
+      } else if (
+        ["admin", "manager", "receptionist", "housekeeping", "staff"].includes(
+          user.role
+        )
+      ) {
+        navigate("/admin", { state: { from: "login" } });
       } else {
-        navigate("/booking", { state: { from: "login" } })
+        navigate("/booking", { state: { from: "login" } });
       }
     } catch (err) {
-      setError(err.message || "Invalid credentials. Please try again.")
+      setError(err.message || "Invalid credentials. Please try again.");
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
 
-  // Add the missing quick login functions
-  const handleQuickAdminLogin = () => {
-    setEmail("admin@luxurystay.com")
-    setPassword("admin123")
-  }
-
-  const handleQuickUserLogin = () => {
-    setEmail("user@example.com")
-    setPassword("password123")
-  }
-
+  // ✅ Quick admin login only
+ 
   return (
     <div className="min-h-screen bg-[#1D293D]">
       <FrontendNavbar />
@@ -96,8 +88,12 @@ export default function UserLogin() {
           >
             <div className="w-full max-w-md">
               <div className="text-center mb-8">
-                <h1 className="text-4xl font-bold text-white mb-3">Welcome Back</h1>
-                <p className="text-white/70 text-lg">Sign in to your LuxuryStay account</p>
+                <h1 className="text-4xl font-bold text-white mb-3">
+                  Welcome Back
+                </h1>
+                <p className="text-white/70 text-lg">
+                  Sign in to your LuxuryStay account
+                </p>
               </div>
 
               <div className="bg-white rounded-2xl shadow-2xl overflow-hidden">
@@ -114,7 +110,9 @@ export default function UserLogin() {
                     )}
 
                     <div>
-                      <label className="block text-sm font-semibold text-gray-700 mb-2">Email Address</label>
+                      <label className="block text-sm font-semibold text-gray-700 mb-2">
+                        Email Address
+                      </label>
                       <div className="relative">
                         <Mail className="absolute left-3 top-3.5 w-5 h-5 text-gray-400" />
                         <input
@@ -129,7 +127,9 @@ export default function UserLogin() {
                     </div>
 
                     <div>
-                      <label className="block text-sm font-semibold text-gray-700 mb-2">Password</label>
+                      <label className="block text-sm font-semibold text-gray-700 mb-2">
+                        Password
+                      </label>
                       <div className="relative">
                         <Lock className="absolute left-3 top-3.5 w-5 h-5 text-gray-400" />
                         <input
@@ -145,17 +145,29 @@ export default function UserLogin() {
                           onClick={() => setShowPassword(!showPassword)}
                           className="absolute right-3 top-3.5 text-gray-400 hover:text-gray-600 transition"
                         >
-                          {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                          {showPassword ? (
+                            <EyeOff className="w-5 h-5" />
+                          ) : (
+                            <Eye className="w-5 h-5" />
+                          )}
                         </button>
                       </div>
                     </div>
 
                     <div className="flex items-center justify-between">
                       <label className="flex items-center">
-                        <input type="checkbox" className="w-4 h-4 text-[#1C3888] rounded focus:ring-0" />
-                        <span className="ml-2 text-sm text-gray-600">Remember me</span>
+                        <input
+                          type="checkbox"
+                          className="w-4 h-4 text-[#1C3888] rounded focus:ring-0"
+                        />
+                        <span className="ml-2 text-sm text-gray-600">
+                          Remember me
+                        </span>
                       </label>
-                      <Link to="#" className="text-sm text-[#1C3888] hover:text-[#1C3888]/80 font-semibold transition">
+                      <Link
+                        to="#"
+                        className="text-sm text-[#1C3888] hover:text-[#1C3888]/80 font-semibold transition"
+                      >
                         Forgot Password?
                       </Link>
                     </div>
@@ -178,35 +190,15 @@ export default function UserLogin() {
                           Sign In
                         </>
                       )}
-                    </motion.button>
-
-                    {/* Development Quick Access */}
-                    {process.env.NODE_ENV === 'development' && (
-                      <div className="space-y-2 pt-4 border-t border-gray-200">
-                        <p className="text-center text-xs text-gray-500 mb-2">Development Quick Access:</p>
-                        <div className="grid grid-cols-2 gap-2">
-                          <button
-                            type="button"
-                            onClick={handleQuickAdminLogin}
-                            className="bg-green-600 text-white text-xs py-2 rounded-lg hover:bg-green-700 transition-colors"
-                          >
-                            Quick Admin
-                          </button>
-                          <button
-                            type="button"
-                            onClick={handleQuickUserLogin}
-                            className="bg-blue-600 text-white text-xs py-2 rounded-lg hover:bg-blue-700 transition-colors"
-                          >
-                            Quick User
-                          </button>
-                        </div>
-                      </div>
-                    )}
+                    </motion.button> 0+
 
                     <div className="text-center">
                       <p className="text-gray-600 text-sm">
                         Don't have an account?{" "}
-                        <Link to="/register" className="text-[#1C3888] hover:text-[#1C3888]/80 font-semibold transition">
+                        <Link
+                          to="/register"
+                          className="text-[#1C3888] hover:text-[#1C3888]/80 font-semibold transition"
+                        >
                           Create Account
                         </Link>
                       </p>
@@ -216,8 +208,12 @@ export default function UserLogin() {
 
                 <div className="bg-gray-50 border-t border-gray-200 p-4">
                   <div className="text-center">
-                    <p className="text-gray-600 text-xs font-medium mb-1">Endpoint: /users/login</p>
-                    <p className="text-gray-500 text-xs">Connected to backend API</p>
+                    <p className="text-gray-600 text-xs font-medium mb-1">
+                      Endpoint: /users/login
+                    </p>
+                    <p className="text-gray-500 text-xs">
+                      Connected to backend API
+                    </p>
                   </div>
                 </div>
               </div>
@@ -240,30 +236,41 @@ export default function UserLogin() {
               {/* Main Content */}
               <h2 className="text-5xl font-bold mb-6 leading-tight">
                 Welcome to
-                <span className="block text-transparent bg-gradient-to-r from-white to-white/80 bg-clip-text">LuxuryStay</span>
+                <span className="block text-transparent bg-gradient-to-r from-white to-white/80 bg-clip-text">
+                  LuxuryStay
+                </span>
               </h2>
 
               <p className="text-white/80 text-xl leading-relaxed mb-8">
-                Access your personalized dashboard and manage your hotel experience with ease.
+                Access your personalized dashboard and manage your hotel
+                experience with ease.
               </p>
 
               {/* Features */}
               <div className="space-y-4 mb-8">
                 <div className="flex items-center justify-center gap-3 text-white/70">
                   <div className="w-2 h-2 bg-[#1C3888] rounded-full"></div>
-                  <span className="text-lg">Manage your bookings and reservations</span>
+                  <span className="text-lg">
+                    Manage your bookings and reservations
+                  </span>
                 </div>
                 <div className="flex items-center justify-center gap-3 text-white/70">
                   <div className="w-2 h-2 bg-[#1C3888] rounded-full"></div>
-                  <span className="text-lg">Access exclusive member benefits</span>
+                  <span className="text-lg">
+                    Access exclusive member benefits
+                  </span>
                 </div>
                 <div className="flex items-center justify-center gap-3 text-white/70">
                   <div className="w-2 h-2 bg-[#1C3888] rounded-full"></div>
-                  <span className="text-lg">View your stay history and preferences</span>
+                  <span className="text-lg">
+                    View your stay history and preferences
+                  </span>
                 </div>
                 <div className="flex items-center justify-center gap-3 text-white/70">
                   <div className="w-2 h-2 bg-[#1C3888] rounded-full"></div>
-                  <span className="text-lg">Get personalized recommendations</span>
+                  <span className="text-lg">
+                    Get personalized recommendations
+                  </span>
                 </div>
               </div>
 
@@ -274,7 +281,8 @@ export default function UserLogin() {
                   <span className="text-white font-semibold">Secure Login</span>
                 </div>
                 <p className="text-white/70 text-sm">
-                  Your account security is our priority. All login information is encrypted and protected.
+                  Your account security is our priority. All login information
+                  is encrypted and protected.
                 </p>
               </div>
             </div>
@@ -282,5 +290,5 @@ export default function UserLogin() {
         </div>
       </div>
     </div>
-  )
+  );
 }

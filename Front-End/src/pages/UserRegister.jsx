@@ -18,11 +18,13 @@ import {
   Users,
   TrendingUp
 } from "lucide-react";
+import { useAuth } from "../context/AuthContext"; // Import AuthContext
 
 const API_BASE_URL = "http://localhost:3000";
 
 export default function HMSRegister() {
   const navigate = useNavigate();
+  const auth = useAuth(); // Use AuthContext
   const [step, setStep] = useState(1);
   const [formData, setFormData] = useState({
     email: "",
@@ -220,6 +222,7 @@ export default function HMSRegister() {
         return;
       }
 
+      // Complete registration
       const response = await fetch(`${API_BASE_URL}/register/complete`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -236,6 +239,15 @@ export default function HMSRegister() {
 
       if (!response.ok) {
         setError(data.message || "Failed to complete registration");
+        setLoading(false);
+        return;
+      }
+
+      // Auto-login after successful registration
+      const loginResult = await auth.loginUser(formData.email, formData.password);
+
+      if (!loginResult.success) {
+        setError("Registration successful but login failed. Please login manually.");
         setLoading(false);
         return;
       }

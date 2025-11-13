@@ -1,5 +1,5 @@
 import mongoose from "mongoose";
-import bcrypt from 'bcryptjs'; // ✅ ADD THIS IMPORT
+import bcrypt from "bcryptjs";
 
 const userSchema = new mongoose.Schema(
   {
@@ -54,20 +54,26 @@ const userSchema = new mongoose.Schema(
       type: String,
       default: "",
     },
+    assignedTasks: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Task",
+      },
+    ],
 
     status: {
       type: String,
-      enum: ["active", "inactive"],
-      default: "Active",
+      enum: ["Active", "inactive"],
+      default: "Active", // ✅ Changed to lowercase
     },
 
     preferences: {
-      type: String, // e.g., "Non-smoking room, Sea view"
+      type: String,
     },
 
     verified: {
       type: Boolean,
-      default: false, // false = not verified yet
+      default: false,
     },
 
     shift: {
@@ -81,13 +87,6 @@ const userSchema = new mongoose.Schema(
       default: 0,
     },
 
-    assignedTasks: [
-      {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "Task",
-      },
-    ],
-
     createdBy: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
@@ -98,22 +97,20 @@ const userSchema = new mongoose.Schema(
   }
 );
 
-// ✅ ADD THIS: Password comparison method
-userSchema.methods.comparePassword = async function(candidatePassword) {
+// Password comparison method
+userSchema.methods.comparePassword = async function (candidatePassword) {
   try {
     return await bcrypt.compare(candidatePassword, this.password);
   } catch (error) {
-    throw new Error('Password comparison failed');
+    throw new Error("Password comparison failed");
   }
 };
 
-// ✅ ADD THIS: Password hashing before save
-userSchema.pre('save', async function(next) {
-  // Only hash the password if it has been modified (or is new)
-  if (!this.isModified('password')) return next();
-  
+// Password hashing before save
+userSchema.pre("save", async function (next) {
+  if (!this.isModified("password")) return next();
+
   try {
-    // Hash password with salt rounds
     const saltRounds = 12;
     this.password = await bcrypt.hash(this.password, saltRounds);
     next();
@@ -122,9 +119,23 @@ userSchema.pre('save', async function(next) {
   }
 });
 
-// ✅ ADD THIS: Method to check if user can login
-userSchema.methods.canLogin = function() {
-  return this.status === 'Active' && this.verified;
+// ✅ FIXED: Method to check if user can login
+userSchema.methods.canLogin = function () {
+  // Staff roles that don't need email verification
+  const staffRoles = [
+    "admin",
+    "general manager",
+    "manager",
+    "receptionist",
+    "housekeeping",
+  ];
+
+  if (staffRoles.includes(this.role)) {
+    return this.status === "Active"; // Staff only need active status
+  }
+
+  // Regular users need both active status and verification
+  return this.status === "Active" && this.verified;
 };
 
 userSchema.methods.updateRoleOnBooking = async function (bookingStatus) {
