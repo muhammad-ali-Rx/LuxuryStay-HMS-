@@ -224,7 +224,7 @@ export const completeRegistration = async (req, res) => {
       preferences: preferences || '',
       role: 'user', // Default role for regular users
       bookingStatus: 'none',
-      status: 'active',
+      status: 'Active',
       verified: true, // ✅ YAHAN CHANGE KARO: true karo kyunki OTP verify ho chuka hai
     });
 
