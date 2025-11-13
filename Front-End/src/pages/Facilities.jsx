@@ -1,6 +1,7 @@
 import Navbar from "../components/Navbar"
 import Footer from "../components/Footer"
-import { Dumbbell, Waves, Leaf, Wifi, Utensils, Zap } from "lucide-react"
+import { Dumbbell, Waves, Leaf, Wifi, Utensils, Zap, CheckCircle, ArrowRight } from "lucide-react"
+import { motion } from "framer-motion"
 
 export default function Facilities() {
   const facilities = [
@@ -42,54 +43,129 @@ export default function Facilities() {
     },
   ]
 
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    visible: {
+      opacity: 1,
+      transition: {
+        staggerChildren: 0.15
+      }
+    }
+  }
+
+  const itemVariants = {
+    hidden: { y: 25, opacity: 0 },
+    visible: {
+      y: 0,
+      opacity: 1,
+      transition: {
+        duration: 0.6,
+        ease: "easeOut"
+      }
+    }
+  }
+
   return (
-    <main className="min-h-screen bg-background">
+    <main className="min-h-screen bg-white">
       <Navbar />
 
       {/* Hero Section */}
-      <section className="pt-32 pb-16 px-4 bg-gradient-to-b from-primary/5 to-background">
-        <div className="max-w-6xl mx-auto text-center">
-          <h1 className="text-5xl md:text-6xl font-bold text-primary mb-4">World-Class Facilities</h1>
-          <p className="text-xl text-primary/70 max-w-2xl mx-auto">Everything you need for an unforgettable stay</p>
+      <section className="pt-32 pb-20 px-6 bg-gradient-to-br from-slate-50 to-white">
+        <div className="max-w-4xl mx-auto text-center">
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8 }}
+          >
+            <h1 className="text-4xl md:text-5xl font-bold text-slate-800 mb-6 leading-tight">
+              World-Class <span className="text-amber-600">Facilities</span>
+            </h1>
+            <p className="text-lg text-slate-600 max-w-2xl mx-auto leading-relaxed">
+              Discover our premium amenities designed to make your stay extraordinary and memorable
+            </p>
+          </motion.div>
         </div>
       </section>
 
       {/* Facilities Grid */}
-      <section className="py-16 px-4">
-        <div className="max-w-6xl mx-auto">
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+      <section className="py-20 px-6">
+        <div className="max-w-7xl mx-auto">
+          <motion.div
+            variants={containerVariants}
+            initial="hidden"
+            animate="visible"
+            className="grid md:grid-cols-2 lg:grid-cols-3 gap-8"
+          >
             {facilities.map((facility, idx) => {
               const Icon = facility.icon
               return (
-                <div
+                <motion.div
                   key={idx}
-                  className="bg-white p-8 rounded-xl shadow-lg hover:shadow-2xl transition-all duration-300 group"
+                  variants={itemVariants}
+                  className="group relative"
                 >
-                  <div className="w-16 h-16 bg-accent/10 rounded-lg flex items-center justify-center mb-4 group-hover:bg-accent group-hover:text-white transition-all">
-                    <Icon size={32} className="text-accent group-hover:text-white" />
+                  <div className="bg-white rounded-2xl p-8 border border-slate-200 shadow-sm hover:shadow-xl hover:border-amber-200 transition-all duration-500 h-full flex flex-col">
+                    
+                    {/* Icon Container */}
+                    <div className="w-16 h-16 bg-gradient-to-br from-amber-500 to-orange-500 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-500 shadow-lg">
+                      <Icon size={28} className="text-white" />
+                    </div>
+                    
+                    {/* Content */}
+                    <h3 className="text-xl font-bold text-slate-800 mb-4 leading-tight group-hover:text-slate-900 transition-colors">
+                      {facility.title}
+                    </h3>
+                    <p className="text-slate-600 mb-6 leading-relaxed flex-grow">
+                      {facility.description}
+                    </p>
+                    
+                    {/* Features List */}
+                    <ul className="space-y-3">
+                      {facility.features.map((feature, i) => (
+                        <li key={i} className="flex items-center gap-3 text-slate-700">
+                          <div className="w-6 h-6 rounded-full bg-amber-100 flex items-center justify-center flex-shrink-0">
+                            <CheckCircle size={14} className="text-amber-600" />
+                          </div>
+                          <span className="font-medium text-sm">{feature}</span>
+                        </li>
+                      ))}
+                    </ul>
+
+                    {/* Hover Effect */}
+                    <div className="absolute inset-0 rounded-2xl border-2 border-transparent bg-gradient-to-r from-amber-500 to-orange-500 opacity-0 group-hover:opacity-5 transition-opacity duration-500 -z-10" />
                   </div>
-                  <h3 className="text-2xl font-bold text-primary mb-3">{facility.title}</h3>
-                  <p className="text-primary/70 mb-4">{facility.description}</p>
-                  <ul className="space-y-2">
-                    {facility.features.map((feature, i) => (
-                      <li key={i} className="flex items-center gap-2 text-primary/60">
-                        <span className="w-2 h-2 bg-accent rounded-full" />
-                        {feature}
-                      </li>
-                    ))}
-                  </ul>
-                </div>
+                </motion.div>
               )
             })}
-          </div>
+          </motion.div>
         </div>
       </section>
 
-      {/* Amenities Highlight */}
-      <section className="py-16 px-4 bg-primary text-white">
+      {/* Amenities Section */}
+      <section className="py-20 px-6 bg-slate-50">
         <div className="max-w-6xl mx-auto">
-          <h2 className="text-4xl font-bold mb-12 text-center">Premium Amenities</h2>
-          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6 }}
+            viewport={{ once: true }}
+            className="text-center mb-16"
+          >
+            <h2 className="text-3xl font-bold text-slate-800 mb-4">
+              Premium <span className="text-amber-600">Amenities</span>
+            </h2>
+            <p className="text-slate-600 max-w-2xl mx-auto">
+              Additional services and features to enhance your luxury experience
+            </p>
+          </motion.div>
+
+          <motion.div
+            variants={containerVariants}
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true }}
+            className="grid md:grid-cols-2 lg:grid-cols-4 gap-6"
+          >
             {[
               "24/7 Concierge Service",
               "Free High-Speed WiFi",
@@ -100,12 +176,53 @@ export default function Facilities() {
               "Laundry Service",
               "Pet-Friendly Rooms",
             ].map((amenity, idx) => (
-              <div key={idx} className="flex items-center gap-3 p-4 bg-white/10 rounded-lg">
-                <span className="text-accent text-xl">✓</span>
-                <span>{amenity}</span>
-              </div>
+              <motion.div
+                key={idx}
+                variants={itemVariants}
+                className="group"
+              >
+                <div className="bg-white rounded-xl p-6 border border-slate-200 shadow-sm hover:shadow-md hover:border-amber-200 transition-all duration-300">
+                  <div className="flex items-center gap-4">
+                    <div className="w-12 h-12 rounded-xl bg-amber-100 flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform duration-300">
+                      <CheckCircle size={20} className="text-amber-600" />
+                    </div>
+                    <span className="text-slate-800 font-medium group-hover:text-slate-900 transition-colors">
+                      {amenity}
+                    </span>
+                  </div>
+                </div>
+              </motion.div>
             ))}
-          </div>
+          </motion.div>
+        </div>
+      </section>
+
+      {/* CTA Section */}
+      <section className="py-20 px-6 bg-white">
+        <div className="max-w-3xl mx-auto text-center">
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6 }}
+            viewport={{ once: true }}
+            className="bg-gradient-to-br from-slate-800 to-slate-900 rounded-3xl p-12 text-white"
+          >
+            <h2 className="text-3xl font-bold mb-4">
+              Ready to Experience Luxury?
+            </h2>
+            <p className="text-slate-300 mb-8 text-lg">
+              Book your stay now and immerse yourself in our world-class facilities
+            </p>
+            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+              <button className="bg-amber-500 text-white px-8 py-4 rounded-xl font-semibold hover:bg-amber-600 transition-all duration-300 hover:scale-105 flex items-center gap-2 justify-center">
+                Book Your Stay
+                <ArrowRight size={20} />
+              </button>
+              <button className="border-2 border-white text-white px-8 py-4 rounded-xl font-semibold hover:bg-white hover:text-slate-900 transition-all duration-300">
+                View Gallery
+              </button>
+            </div>
+          </motion.div>
         </div>
       </section>
 

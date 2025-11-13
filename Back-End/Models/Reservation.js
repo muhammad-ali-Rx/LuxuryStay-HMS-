@@ -8,6 +8,20 @@ const reservationSchema = new mongoose.Schema(
       ref: "User",
       required: true
     },
+    guestDetails: {
+      name: {
+        type: String,
+        required: function() { return !this.guest; } // Required if no guest ID
+      },
+      email: {
+        type: String,
+        required: function() { return !this.guest; }
+      },
+      phone: {
+        type: String,
+        required: function() { return !this.guest; }
+      }
+    },
 
     // 🍽️ Restaurant
     restaurant: {
@@ -122,5 +136,50 @@ reservationSchema.virtual('formattedDate').get(function() {
 reservationSchema.index({ restaurant: 1, reservationDate: 1 });
 reservationSchema.index({ guest: 1, createdAt: -1 });
 reservationSchema.index({ status: 1 });
+
+// Simplified checkAvailability (if you don't have Reservation model)
+export const checkAvailability = async (req, res) => {
+  try {
+    const { date, time, partySize } = req.query;
+    const restaurant = await Restaurant.findById(req.params.id);
+
+    if (!restaurant) {
+      return res.status(404).json({
+        success: false,
+        message: 'Restaurant not found'
+      });
+    }
+
+    // Check if restaurant is open at requested time
+    const reservationDate = new Date(date);
+    const dayOfWeek = reservationDate.toLocaleDateString('en', { weekday: 'long' }).toLowerCase();
+    const operatingHours = restaurant.openingHours[dayOfWeek];
+
+    if (!operatingHours || operatingHours.closed) {
+      return res.json({
+        success: true,
+        available: false,
+        message: 'Restaurant is closed on this day'
+      });
+    }
+
+    // Simple capacity check (without reservation data)
+    const available = parseInt(partySize) <= restaurant .capacity;
+
+    res.json({
+      success: true,
+      available,
+      availableCapacity: restaurant.capacity,
+      message: available ? 'Table available' : 'No tables available for requested party size'
+    });
+  } catch (error) {
+    console.error('Error in checkAvailability:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Server error',
+      error: error.message
+    });
+  }
+};
 
 export default mongoose.model("Reservation", reservationSchema);

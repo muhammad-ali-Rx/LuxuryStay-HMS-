@@ -5,19 +5,24 @@ import {
   getAllReservations,
   updateReservationStatus,
   checkInGuest,
-  addFeedback
+  addFeedback,
+  checkAvailability
 } from '../Controller/reservationController.mjs';
+import { auth } from '../middleware/auth.mjs';
 
 const router = express.Router();
 
-// User routes (any authenticated user)
-router.post('/',  createReservation);
-router.get('/my-reservations',  getUserReservations);
-router.post('/:id/feedback',  addFeedback);
+// Public routes (no authentication required)
+router.post('/', createReservation); // Anyone can make reservation
+router.get('/:id/availability', checkAvailability); // Check availability
 
-// Staff routes (admin, manager, receptionist)
-router.get('/',getAllReservations);
-router.put('/:id/status',  updateReservationStatus);
-router.put('/:id/checkin',  checkInGuest);
+// Protected routes (require authentication)
+router.get('/my-reservations', auth, getUserReservations);
+router.post('/:id/feedback', auth, addFeedback);
+
+// Admin routes
+router.get('/', auth, getAllReservations);
+router.put('/:id/status', auth, updateReservationStatus);
+router.put('/:id/checkin', auth, checkInGuest);
 
 export default router;

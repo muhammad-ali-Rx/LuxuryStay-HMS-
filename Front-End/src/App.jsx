@@ -21,6 +21,7 @@ import ConfirmationPage from "./pages/BookingConfirmation"
 import UserLogin from "./pages/UserLogin"
 import UserRegister from "./pages/UserRegister"
 import Reservations from "./pages/Reservations"
+import RestaurantDetailsPage from "./pages/RestaurantDetailsPage"
 
 // Admin Pages
 import AdminLogin from "./pages/admin/AdminLogin"
@@ -107,6 +108,7 @@ function AppRoutes() {
         <Route path="/dining" element={<Dining />} />
         <Route path="/facilities" element={<Facilities />} />
         <Route path="/gallery" element={<Gallery />} />
+        <Route path="/restaurants/:id" element={<RestaurantDetailsPage />} />
 
         {/* User Auth Routes */}
         <Route path="/login" element={<UserLogin />} />

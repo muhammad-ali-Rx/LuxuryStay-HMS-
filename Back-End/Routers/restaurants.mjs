@@ -6,23 +6,30 @@ import {
   updateRestaurant,
   deleteRestaurant,
   addRating,
-  checkAvailability
+  checkAvailability,
+  getRestaurantStats,
+  testAuth
 } from '../Controller/restaurantController.mjs';
-import { auth,  } from '../middleware/auth.mjs'; 
+import { auth } from '../middleware/auth.mjs'; // Use your auth middleware
+import { upload } from "../Config/cloudinary.config.mjs"; 
 
 const router = express.Router();
 
 // Public routes
 router.get('/', getAllRestaurants);
+router.get('/stats', getRestaurantStats);
 router.get('/:id', getRestaurantById);
 router.get('/:id/availability', checkAvailability);
 
-// Protected routes (any authenticated user)
+// Test auth route
+router.get('/test/auth', auth, testAuth);
+
+// Protected routes (require authentication)
 router.post('/:id/rating', auth, addRating);
 
-// Admin/Manager routes - ADD AUTH MIDDLEWARE
-router.post('/', auth,  createRestaurant);
-router.put('/:id', auth,  updateRestaurant);
-router.delete('/:id', auth,  deleteRestaurant);
+// Admin routes (require authentication)
+router.post('/', auth, upload.array("images"),  createRestaurant);
+router.put('/:id', upload.array("images"),  updateRestaurant);
+router.delete('/:id', auth, deleteRestaurant);
 
 export default router;

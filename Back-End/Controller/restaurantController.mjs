@@ -1,23 +1,30 @@
 import Restaurant from "../Models/Restaurant.mjs";
-import Reservation from "../Models/Reservation.js";
 
 export const createRestaurant = async (req, res) => {
   try {
-    console.log('🔐 User creating restaurant:', req.user); // Debug log
+    console.log('🔐 User creating restaurant:', req.user);
     
-    // Now req.user should be available from the authentication middleware
-    if (!req.user || !req.user.id) {
+    if (!req.user || !req.user.userId) {
+      return res.status(401).json({
+        success: false,
+        message: 'Authentication required'
+      });
+    }
+
+    // Validate required fields
+    const requiredFields = ['name', 'cuisine', 'description','capacity', 'location'];
+    const missingFields = requiredFields.filter(field => !req.body[field]);
+    
+    if (missingFields.length > 0) {
       return res.status(400).json({
         success: false,
-        message: 'User authentication failed',
-        error: 'User information not found in request'
+        message: `Missing required fields: ${missingFields.join(', ')}`
       });
     }
 
     const restaurantData = {
       ...req.body,
-      createdBy: req.user.id, // Use the authenticated user's ID
-      userId: req.user.id
+      createdBy: req.user.userId // Use userId from decoded token
     };
 
     console.log('📝 Creating restaurant with data:', restaurantData);
@@ -32,6 +39,16 @@ export const createRestaurant = async (req, res) => {
 
   } catch (error) {
     console.error('❌ Error creating restaurant:', error);
+    
+    if (error.name === 'ValidationError') {
+      const errors = Object.values(error.errors).map(err => err.message);
+      return res.status(400).json({
+        success: false,
+        message: 'Validation error',
+        errors: errors
+      });
+    }
+    
     res.status(500).json({
       success: false,
       message: 'Error creating restaurant',
@@ -40,14 +57,11 @@ export const createRestaurant = async (req, res) => {
   }
 };
 
-// Update other controller functions to use req.user if needed
 export const updateRestaurant = async (req, res) => {
   try {
-    console.log('🔐 User updating restaurant:', req.user);
-    
     const restaurant = await Restaurant.findByIdAndUpdate(
       req.params.id,
-      { ...req.body, updatedBy: req.user.id },
+      req.body,
       { new: true, runValidators: true }
     );
 
@@ -66,6 +80,16 @@ export const updateRestaurant = async (req, res) => {
 
   } catch (error) {
     console.error('Error updating restaurant:', error);
+    
+    if (error.name === 'ValidationError') {
+      const errors = Object.values(error.errors).map(err => err.message);
+      return res.status(400).json({
+        success: false,
+        message: 'Validation error',
+        errors: errors
+      });
+    }
+    
     res.status(500).json({
       success: false,
       message: 'Error updating restaurant',
@@ -74,7 +98,6 @@ export const updateRestaurant = async (req, res) => {
   }
 };
 
-// Keep other functions as they are, but add req.user logging for debugging
 export const getAllRestaurants = async (req, res) => {
   try {
     const restaurants = await Restaurant.find().populate('createdBy', 'name email');
@@ -119,8 +142,6 @@ export const getRestaurantById = async (req, res) => {
 
 export const deleteRestaurant = async (req, res) => {
   try {
-    console.log('🔐 User deleting restaurant:', req.user);
-    
     const restaurant = await Restaurant.findByIdAndDelete(req.params.id);
     
     if (!restaurant) {
@@ -144,7 +165,6 @@ export const deleteRestaurant = async (req, res) => {
   }
 };
 
-// ✅ Add rating to restaurant
 export const addRating = async (req, res) => {
   try {
     const { rating } = req.body;
@@ -157,7 +177,7 @@ export const addRating = async (req, res) => {
       });
     }
 
-    await restaurant.addRating(req.user.id, rating);
+    await restaurant.addRating(req.user.userId, rating);
     await restaurant.save();
 
     res.json({
@@ -175,7 +195,6 @@ export const addRating = async (req, res) => {
   }
 };
 
-// ✅ Check table availability
 export const checkAvailability = async (req, res) => {
   try {
     const { date, time, partySize } = req.query;
@@ -193,7 +212,7 @@ export const checkAvailability = async (req, res) => {
     const dayOfWeek = reservationDate.toLocaleDateString('en', { weekday: 'long' }).toLowerCase();
     const operatingHours = restaurant.openingHours[dayOfWeek];
 
-    if (!operatingHours || !operatingHours.open || !operatingHours.close) {
+    if (!operatingHours || operatingHours.closed) {
       return res.json({
         success: true,
         available: false,
@@ -201,23 +220,13 @@ export const checkAvailability = async (req, res) => {
       });
     }
 
-    // Check capacity
-    const existingReservations = await Reservation.countDocuments({
-      restaurant: req.params.id,
-      reservationDate: date,
-      reservationTime: time,
-      status: { $in: ['confirmed', 'pending'] }
-    });
-
-    const totalBookedCapacity = existingReservations * 4;
-    const availableCapacity = restaurant.capacity - totalBookedCapacity;
-
-    const available = availableCapacity >= parseInt(partySize);
+    // Simple capacity check
+    const available = parseInt(partySize) <= restaurant.capacity;
 
     res.json({
       success: true,
       available,
-      availableCapacity,
+      availableCapacity: restaurant.capacity,
       message: available ? 'Table available' : 'No tables available for requested party size'
     });
   } catch (error) {
@@ -230,7 +239,6 @@ export const checkAvailability = async (req, res) => {
   }
 };
 
-// ✅ Get restaurant statistics
 export const getRestaurantStats = async (req, res) => {
   try {
     const totalRestaurants = await Restaurant.countDocuments();
@@ -255,6 +263,24 @@ export const getRestaurantStats = async (req, res) => {
     res.status(500).json({
       success: false,
       message: 'Server error',
+      error: error.message
+    });
+  }
+};
+
+// Test auth endpoint
+export const testAuth = async (req, res) => {
+  try {
+    console.log('🔐 Test Auth - User:', req.user);
+    res.json({
+      success: true,
+      message: 'Authentication successful',
+      user: req.user
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: 'Auth test failed',
       error: error.message
     });
   }

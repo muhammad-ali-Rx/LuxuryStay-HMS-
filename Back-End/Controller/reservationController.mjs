@@ -1,7 +1,7 @@
 import Reservation from "../Models/Reservation.js";
 import Restaurant from "../Models/Restaurant.mjs";
 
-// ✅ Create new reservation
+// ✅ Create new reservation (for both authenticated and non-authenticated users)
 export const createReservation = async (req, res) => {
   try {
     const {
@@ -10,7 +10,10 @@ export const createReservation = async (req, res) => {
       reservationTime,
       partySize,
       specialRequests,
-      occasion
+      occasion,
+      guestName,
+      guestEmail,
+      guestPhone
     } = req.body;
 
     // Check restaurant exists
@@ -38,20 +41,37 @@ export const createReservation = async (req, res) => {
       });
     }
 
-    // Create reservation
-    const reservation = await Reservation.create({
-      guest: req.user.id,
+    // Prepare reservation data
+    const reservationData = {
       restaurant: restaurantId,
       reservationDate,
       reservationTime,
       partySize,
-      specialRequests,
-      occasion,
+      specialRequests: specialRequests || "",
+      occasion: occasion || "none",
       status: 'confirmed'
-    });
+    };
 
-    await reservation.populate('restaurant', 'name cuisine priceRange location');
-    await reservation.populate('guest', 'name email phone');
+    // Add guest information based on authentication
+    if (req.user && req.user.userId) {
+      // Authenticated user
+      reservationData.guest = req.user.userId;
+    } else {
+      // Non-authenticated guest
+      reservationData.guestDetails = {
+        name: guestName,
+        email: guestEmail,
+        phone: guestPhone
+      };
+    }
+
+    // Create reservation
+    const reservation = await Reservation.create(reservationData);
+
+    await reservation.populate('restaurant', 'name cuisine location');
+    if (reservation.guest) {
+      await reservation.populate('guest', 'name email phone');
+    }
 
     res.status(201).json({
       success: true,
@@ -59,6 +79,7 @@ export const createReservation = async (req, res) => {
       data: reservation
     });
   } catch (error) {
+    console.error('Error creating reservation:', error);
     res.status(400).json({
       success: false,
       message: 'Error creating reservation',
@@ -70,7 +91,7 @@ export const createReservation = async (req, res) => {
 // ✅ Get user's reservations
 export const getUserReservations = async (req, res) => {
   try {
-    const reservations = await Reservation.find({ guest: req.user.id })
+    const reservations = await Reservation.find({ guest: req.user.userId })
       .populate('restaurant', 'name cuisine location images')
       .sort({ reservationDate: -1, reservationTime: -1 });
 
@@ -80,6 +101,7 @@ export const getUserReservations = async (req, res) => {
       data: reservations
     });
   } catch (error) {
+    console.error('Error getting user reservations:', error);
     res.status(500).json({
       success: false,
       message: 'Server error',
@@ -110,6 +132,7 @@ export const getAllReservations = async (req, res) => {
       data: reservations
     });
   } catch (error) {
+    console.error('Error getting all reservations:', error);
     res.status(500).json({
       success: false,
       message: 'Server error',
@@ -144,6 +167,7 @@ export const updateReservationStatus = async (req, res) => {
       data: reservation
     });
   } catch (error) {
+    console.error('Error updating reservation status:', error);
     res.status(400).json({
       success: false,
       message: 'Error updating reservation',
@@ -160,7 +184,7 @@ export const checkInGuest = async (req, res) => {
       {
         checkedIn: true,
         checkedInAt: new Date(),
-        assignedStaff: req.user.id
+        assignedStaff: req.user.userId
       },
       { new: true }
     );
@@ -178,6 +202,7 @@ export const checkInGuest = async (req, res) => {
       data: reservation
     });
   } catch (error) {
+    console.error('Error during check-in:', error);
     res.status(400).json({
       success: false,
       message: 'Error during check-in',
@@ -211,10 +236,12 @@ export const addFeedback = async (req, res) => {
     }
 
     // Update restaurant rating
-    if (rating) {
+    if (rating && reservation.restaurant) {
       const restaurant = await Restaurant.findById(reservation.restaurant);
-      await restaurant.addRating(req.user.id, rating);
-      await restaurant.save();
+      if (restaurant) {
+        await restaurant.addRating(req.user.userId, rating);
+        await restaurant.save();
+      }
     }
 
     res.json({
@@ -223,9 +250,66 @@ export const addFeedback = async (req, res) => {
       data: reservation
     });
   } catch (error) {
+    console.error('Error submitting feedback:', error);
     res.status(400).json({
       success: false,
       message: 'Error submitting feedback',
+      error: error.message
+    });
+  }
+};
+
+// ✅ Check availability
+export const checkAvailability = async (req, res) => {
+  try {
+    const { date, time, partySize } = req.query;
+    const restaurant = await Restaurant.findById(req.params.id);
+
+    if (!restaurant) {
+      return res.status(404).json({
+        success: false,
+        message: 'Restaurant not found'
+      });
+    }
+
+    // Check if restaurant is open at requested time
+    const reservationDate = new Date(date);
+    const dayOfWeek = reservationDate.toLocaleDateString('en', { weekday: 'long' }).toLowerCase();
+    const operatingHours = restaurant.openingHours[dayOfWeek];
+
+    if (!operatingHours || operatingHours.closed) {
+      return res.json({
+        success: true,
+        available: false,
+        message: 'Restaurant is closed on this day'
+      });
+    }
+
+    // Check capacity against existing reservations
+    const existingReservations = await Reservation.countDocuments({
+      restaurant: req.params.id,
+      reservationDate: date,
+      reservationTime: time,
+      status: { $in: ['confirmed', 'pending'] }
+    });
+
+    const totalBookedCapacity = existingReservations * 4; // Assuming 4 people per reservation
+    const availableCapacity = restaurant.capacity - totalBookedCapacity;
+
+    const available = availableCapacity >= parseInt(partySize);
+
+    res.json({
+      success: true,
+      available,
+      availableCapacity,
+      totalCapacity: restaurant.capacity,
+      message: available ? 'Table available' : 'No tables available for requested party size'
+    });
+  } catch (error) {
+    console.error('Error in checkAvailability:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Server error',
       error: error.message
     });
   }

@@ -16,6 +16,11 @@ import {
   Image as ImageIcon,
   Building,
   Clock,
+  CheckCircle,
+  XCircle,
+  Clock as ClockIcon,
+  Eye,
+  ExternalLink,
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import axios from "axios";
@@ -30,23 +35,40 @@ const RestaurantsManagement = () => {
     "Mexican", "Chinese", "Mediterranean", "American", "Fusion",
   ];
   
-  const priceRanges = ["$", "$$", "$$$", "$$$$"];
   const statuses = ["active", "inactive", "under_renovation"];
-  const reservationStatuses = ["pending", "confirmed", "cancelled", "completed"];
+  const reservationStatuses = ["confirmed", "pending", "cancelled", "completed", "no_show"];
 
   // State
   const [restaurants, setRestaurants] = useState([]);
   const [reservations, setReservations] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
+  const [showReservationModal, setShowReservationModal] = useState(false);
+  const [showViewModal, setShowViewModal] = useState(false);
   const [editingRestaurant, setEditingRestaurant] = useState(null);
+  const [selectedRestaurant, setSelectedRestaurant] = useState(null);
+  const [viewingRestaurant, setViewingRestaurant] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [filterStatus, setFilterStatus] = useState("all");
-  const [error, setError] = useState("");
-  const [activeTab, setActiveTab] = useState("restaurants");
   const [reservationFilter, setReservationFilter] = useState("all");
+  const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
+  const [activeTab, setActiveTab] = useState("restaurants");
   const [imageUploading, setImageUploading] = useState(false);
 
+  // Reservation Form State
+  const [reservationForm, setReservationForm] = useState({
+    guestName: "",
+    guestEmail: "",
+    guestPhone: "",
+    reservationDate: "",
+    reservationTime: "",
+    partySize: 1,
+    specialRequests: "",
+    occasion: "none"
+  });
+
+  // Restaurant Form State
   const [formData, setFormData] = useState({
     name: "",
     cuisine: "French",
@@ -83,14 +105,29 @@ const RestaurantsManagement = () => {
   // Auth helper
   const getToken = () => {
     try {
-      return localStorage.getItem("authToken");
+      return localStorage.getItem("authToken") || 
+             localStorage.getItem("token") ||
+             sessionStorage.getItem("authToken") ||
+             sessionStorage.getItem("token");
     } catch (error) {
       console.error("Error getting token:", error);
       return null;
     }
   };
 
+  // Debug auth function
+  const debugAuth = () => {
+    const token = getToken();
+    console.log('🔐 Auth Debug:', {
+      token: token ? 'Present' : 'Missing',
+      tokenLength: token?.length,
+      userAuth,
+      adminUser
+    });
+  };
+
   useEffect(() => {
+    debugAuth();
     fetchRestaurants();
     fetchReservations();
   }, []);
@@ -100,21 +137,11 @@ const RestaurantsManagement = () => {
     try {
       setError("");
       setLoading(true);
-      const token = getToken();
-      
-      if (!token) {
-        setError("Authentication required. Please login again.");
-        return;
-      }
-
       const response = await axios.get("http://localhost:3000/restaurants", {
-        headers: { 
-          Authorization: `Bearer ${token}`,
-        },
         timeout: 10000,
       });
       
-      const restaurantsData = response.data?.data || response.data || [];
+      const restaurantsData = response.data?.data || [];
       setRestaurants(Array.isArray(restaurantsData) ? restaurantsData : []);
     } catch (error) {
       console.error("Error fetching restaurants:", error);
@@ -136,10 +163,33 @@ const RestaurantsManagement = () => {
         timeout: 10000,
       });
       
-      const reservationsData = response.data?.data || response.data || [];
+      const reservationsData = response.data?.data || [];
       setReservations(Array.isArray(reservationsData) ? reservationsData : []);
     } catch (error) {
       console.error("Error fetching reservations:", error);
+    }
+  };
+
+  const createReservation = async (e) => {
+    e.preventDefault();
+    try {
+      setError("");
+      const response = await axios.post(
+        "http://localhost:3000/reservations", 
+        {
+          restaurantId: selectedRestaurant._id,
+          ...reservationForm
+        }
+      );
+
+      setSuccess("Reservation created successfully!");
+      setShowReservationModal(false);
+      resetReservationForm();
+      fetchReservations();
+      
+    } catch (error) {
+      console.error("Error creating reservation:", error);
+      setError(error.response?.data?.message || "Error creating reservation.");
     }
   };
 
@@ -147,7 +197,7 @@ const RestaurantsManagement = () => {
     try {
       const token = getToken();
       await axios.put(
-        `http://localhost:3000/reservations/${reservationId}`,
+        `http://localhost:3000/reservations/${reservationId}/status`,
         { status: newStatus },
         {
           headers: { 
@@ -155,6 +205,7 @@ const RestaurantsManagement = () => {
           },
         }
       );
+      setSuccess(`Reservation status updated to ${newStatus}`);
       fetchReservations();
     } catch (error) {
       console.error("Error updating reservation:", error);
@@ -198,6 +249,12 @@ const RestaurantsManagement = () => {
     }));
   };
 
+  // View Restaurant Function
+  const handleView = (restaurant) => {
+    setViewingRestaurant(restaurant);
+    setShowViewModal(true);
+  };
+
   // Form Handlers
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -210,7 +267,7 @@ const RestaurantsManagement = () => {
         return;
       }
 
-      const currentUserId = userAuth?.id || adminUser?.id;
+      const currentUserId = userAuth?.id || adminUser?.id || userAuth?._id || adminUser?._id;
       if (!currentUserId) {
         setError("User information not found. Please login again.");
         return;
@@ -255,6 +312,7 @@ const RestaurantsManagement = () => {
             headers: { Authorization: `Bearer ${token}` },
           }
         );
+        setSuccess("Restaurant updated successfully!");
       } else {
         response = await axios.post(
           "http://localhost:3000/restaurants", 
@@ -263,6 +321,7 @@ const RestaurantsManagement = () => {
             headers: { Authorization: `Bearer ${token}` },
           }
         );
+        setSuccess("Restaurant created successfully!");
       }
 
       setShowModal(false);
@@ -314,6 +373,7 @@ const RestaurantsManagement = () => {
         await axios.delete(`http://localhost:3000/restaurants/${id}`, {
           headers: { Authorization: `Bearer ${token}` },
         });
+        setSuccess("Restaurant deleted successfully!");
         fetchRestaurants();
       } catch (error) {
         console.error("Error deleting restaurant:", error);
@@ -345,6 +405,26 @@ const RestaurantsManagement = () => {
     setError("");
   };
 
+  const resetReservationForm = () => {
+    setReservationForm({
+      guestName: "",
+      guestEmail: "",
+      guestPhone: "",
+      reservationDate: "",
+      reservationTime: "",
+      partySize: 1,
+      specialRequests: "",
+      occasion: "none"
+    });
+    setSelectedRestaurant(null);
+    setError("");
+  };
+
+  const openReservationModal = (restaurant) => {
+    setSelectedRestaurant(restaurant);
+    setShowReservationModal(true);
+  };
+
   // Utility Functions
   const filteredRestaurants = restaurants.filter((restaurant) => {
     const matchesSearch = restaurant.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -373,9 +453,33 @@ const RestaurantsManagement = () => {
       confirmed: "bg-green-100 text-green-800 border border-green-200",
       pending: "bg-yellow-100 text-yellow-800 border border-yellow-200",
       cancelled: "bg-red-100 text-red-800 border border-red-200",
-      completed: "bg-blue-100 text-blue-800 border border-blue-200"
+      completed: "bg-blue-100 text-blue-800 border border-blue-200",
+      no_show: "bg-gray-100 text-gray-800 border border-gray-200"
     };
     return colors[status] || "bg-gray-100 text-gray-800 border border-gray-200";
+  };
+
+  const getReservationStatusIcon = (status) => {
+    const icons = {
+      confirmed: <CheckCircle size={16} className="text-green-600" />,
+      pending: <ClockIcon size={16} className="text-yellow-600" />,
+      cancelled: <XCircle size={16} className="text-red-600" />,
+      completed: <CheckCircle size={16} className="text-blue-600" />,
+      no_show: <XCircle size={16} className="text-gray-600" />
+    };
+    return icons[status] || <ClockIcon size={16} />;
+  };
+
+  // Format Opening Hours
+  const formatOpeningHours = (openingHours) => {
+    if (!openingHours) return "Not available";
+    
+    const days = Object.entries(openingHours);
+    return days.map(([day, hours]) => {
+      const dayName = day.charAt(0).toUpperCase() + day.slice(1);
+      if (hours.closed) return `${dayName}: Closed`;
+      return `${dayName}: ${hours.open} - ${hours.close}`;
+    }).join('\n');
   };
 
   // Stats
@@ -385,6 +489,7 @@ const RestaurantsManagement = () => {
     pending: reservations.filter(r => r.status === 'pending').length,
     cancelled: reservations.filter(r => r.status === 'cancelled').length,
     completed: reservations.filter(r => r.status === 'completed').length,
+    no_show: reservations.filter(r => r.status === 'no_show').length,
   };
 
   if (loading) {
@@ -412,7 +517,7 @@ const RestaurantsManagement = () => {
             Reservations ({reservations.length})
           </button>
           <button
-            onClick={() => { setActiveTab("restaurants"); setShowModal(true); }}
+            onClick={() => { setActiveTab("restaurants"); setShowModal(true); resetForm(); }}
             className="bg-[#D4AF37] text-[#0A1F44] px-4 py-2.5 rounded-lg flex items-center gap-2 hover:bg-[#c19b2a] transition-colors text-sm font-medium shadow-sm"
           >
             <Plus size={18} />
@@ -420,6 +525,21 @@ const RestaurantsManagement = () => {
           </button>
         </div>
       </div>
+
+      {/* Success Message */}
+      {success && (
+        <div className="bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-lg mb-6">
+          <div className="flex justify-between items-center">
+            <span className="text-sm">{success}</span>
+            <button 
+              onClick={() => setSuccess("")} 
+              className="text-green-700 hover:text-green-900 ml-4"
+            >
+              <X size={16} />
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* Error Message */}
       {error && (
@@ -523,6 +643,8 @@ const RestaurantsManagement = () => {
                   index={index}
                   onEdit={handleEdit}
                   onDelete={handleDelete}
+                  onView={handleView}
+                  onReserve={openReservationModal}
                   getStatusColor={getStatusColor}
                 />
               ))
@@ -535,12 +657,13 @@ const RestaurantsManagement = () => {
       {activeTab === "reservations" && (
         <div className="space-y-6">
           {/* Reservation Stats */}
-          <div className="grid grid-cols-2 lg:grid-cols-5 gap-4">
+          <div className="grid grid-cols-2 lg:grid-cols-6 gap-4">
             <StatCard title="Total" value={reservationStats.total} color="gray" />
             <StatCard title="Confirmed" value={reservationStats.confirmed} color="green" />
             <StatCard title="Pending" value={reservationStats.pending} color="yellow" />
             <StatCard title="Cancelled" value={reservationStats.cancelled} color="red" />
             <StatCard title="Completed" value={reservationStats.completed} color="blue" />
+            <StatCard title="No Show" value={reservationStats.no_show} color="gray" />
           </div>
 
           {/* Reservation Filter */}
@@ -555,7 +678,7 @@ const RestaurantsManagement = () => {
                 <option value="all">All Reservations</option>
                 {reservationStatuses.map((status) => (
                   <option key={status} value={status}>
-                    {status.charAt(0).toUpperCase() + status.slice(1)}
+                    {status.charAt(0).toUpperCase() + status.slice(1).replace("_", " ")}
                   </option>
                 ))}
               </select>
@@ -609,6 +732,7 @@ const RestaurantsManagement = () => {
                         reservation={reservation}
                         onStatusUpdate={updateReservationStatus}
                         getStatusColor={getReservationStatusColor}
+                        getStatusIcon={getReservationStatusIcon}
                       />
                     ))}
                   </tbody>
@@ -631,17 +755,37 @@ const RestaurantsManagement = () => {
         handleImageUpload={handleImageUpload}
         removeImage={removeImage}
         cuisines={cuisines}
-        priceRanges={priceRanges}
         statuses={statuses}
         error={error}
         imageUploading={imageUploading}
+      />
+
+      {/* View Restaurant Modal */}
+      <ViewRestaurantModal
+        showModal={showViewModal}
+        setShowModal={setShowViewModal}
+        restaurant={viewingRestaurant}
+        getStatusColor={getStatusColor}
+        formatOpeningHours={formatOpeningHours}
+      />
+
+      {/* Reservation Modal */}
+      <ReservationModal
+        showModal={showReservationModal}
+        setShowModal={setShowReservationModal}
+        selectedRestaurant={selectedRestaurant}
+        reservationForm={reservationForm}
+        setReservationForm={setReservationForm}
+        handleSubmit={createReservation}
+        resetForm={resetReservationForm}
+        error={error}
       />
     </div>
   );
 };
 
 // Restaurant Card Component
-const RestaurantCard = ({ restaurant, index, onEdit, onDelete, getStatusColor }) => (
+const RestaurantCard = ({ restaurant, index, onEdit, onDelete, onView, onReserve, getStatusColor }) => (
   <motion.div
     initial={{ opacity: 0, y: 20 }}
     animate={{ opacity: 1, y: 0 }}
@@ -702,6 +846,20 @@ const RestaurantCard = ({ restaurant, index, onEdit, onDelete, getStatusColor })
         </span>
         <div className="flex gap-2">
           <button
+            onClick={() => onView(restaurant)}
+            className="text-green-600 hover:text-green-800 transition-colors p-1.5 hover:bg-green-50 rounded"
+            title="View restaurant details"
+          >
+            <Eye size={16} />
+          </button>
+          <button
+            onClick={() => onReserve(restaurant)}
+            className="text-blue-600 hover:text-blue-800 transition-colors p-1.5 hover:bg-blue-50 rounded text-xs font-medium"
+            title="Make reservation"
+          >
+            Reserve
+          </button>
+          <button
             onClick={() => onEdit(restaurant)}
             className="text-gray-600 hover:text-[#D4AF37] transition-colors p-1.5 hover:bg-gray-100 rounded"
             title="Edit restaurant"
@@ -721,8 +879,194 @@ const RestaurantCard = ({ restaurant, index, onEdit, onDelete, getStatusColor })
   </motion.div>
 );
 
+// View Restaurant Modal Component
+const ViewRestaurantModal = ({ showModal, setShowModal, restaurant, getStatusColor, formatOpeningHours }) => {
+  if (!showModal || !restaurant) return null;
+
+  const handleClose = () => {
+    setShowModal(false);
+  };
+
+  return (
+    <AnimatePresence>
+      {showModal && (
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          className="fixed inset-0 bg-gray-900/40 backdrop-blur-sm flex items-center justify-center z-50 p-4"
+        >
+          <motion.div
+            initial={{ scale: 0.95, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            exit={{ scale: 0.95, opacity: 0 }}
+            className="bg-white rounded-xl max-w-4xl w-full max-h-[90vh] overflow-y-auto shadow-xl"
+          >
+            <div className="p-6">
+              <div className="flex justify-between items-center mb-6">
+                <h2 className="text-2xl font-bold text-gray-900">
+                  Restaurant Details
+                </h2>
+                <button
+                  onClick={handleClose}
+                  className="text-gray-500 hover:text-gray-700 transition-colors p-2 hover:bg-gray-100 rounded-lg"
+                >
+                  <X size={24} />
+                </button>
+              </div>
+
+              <div className="space-y-6">
+                {/* Images */}
+                {restaurant.images && restaurant.images.length > 0 && (
+                  <div>
+                    <h3 className="text-lg font-semibold text-gray-900 mb-3">Images</h3>
+                    <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                      {restaurant.images.map((image, index) => (
+                        <img
+                          key={index}
+                          src={image}
+                          alt={`${restaurant.name} ${index + 1}`}
+                          className="w-full h-32 object-cover rounded-lg border border-gray-300"
+                        />
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* Basic Information */}
+                <div className="grid md:grid-cols-2 gap-6">
+                  <div>
+                    <h3 className="text-lg font-semibold text-gray-900 mb-3">Basic Information</h3>
+                    <div className="space-y-3">
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700">Name</label>
+                        <p className="text-gray-900 font-semibold">{restaurant.name}</p>
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700">Cuisine</label>
+                        <p className="text-gray-900">{restaurant.cuisine}</p>
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700">Price Range</label>
+                        <p className="text-gray-900">{restaurant.priceRange}</p>
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700">Status</label>
+                        <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getStatusColor(restaurant.status)}`}>
+                          {restaurant.status?.replace("_", " ") || "active"}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div>
+                    <h3 className="text-lg font-semibold text-gray-900 mb-3">Location & Capacity</h3>
+                    <div className="space-y-3">
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700">Location</label>
+                        <p className="text-gray-900">{restaurant.location}</p>
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700">Capacity</label>
+                        <p className="text-gray-900">{restaurant.capacity} seats</p>
+                      </div>
+                      {restaurant.contact && (
+                        <>
+                          {restaurant.contact.phone && (
+                            <div>
+                              <label className="block text-sm font-medium text-gray-700">Phone</label>
+                              <p className="text-gray-900">{restaurant.contact.phone}</p>
+                            </div>
+                          )}
+                          {restaurant.contact.email && (
+                            <div>
+                              <label className="block text-sm font-medium text-gray-700">Email</label>
+                              <p className="text-gray-900">{restaurant.contact.email}</p>
+                            </div>
+                          )}
+                        </>
+                      )}
+                    </div>
+                  </div>
+                </div>
+
+                {/* Description */}
+                {restaurant.description && (
+                  <div>
+                    <h3 className="text-lg font-semibold text-gray-900 mb-3">Description</h3>
+                    <p className="text-gray-700 leading-relaxed">{restaurant.description}</p>
+                  </div>
+                )}
+
+                {/* Features */}
+                {restaurant.features && (
+                  <div>
+                    <h3 className="text-lg font-semibold text-gray-900 mb-3">Features</h3>
+                    <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
+                      {restaurant.features.hasOutdoorSeating && (
+                        <span className="bg-green-100 text-green-800 px-2 py-1 rounded text-sm">Outdoor Seating</span>
+                      )}
+                      {restaurant.features.hasPrivateDining && (
+                        <span className="bg-blue-100 text-blue-800 px-2 py-1 rounded text-sm">Private Dining</span>
+                      )}
+                      {restaurant.features.hasWifi && (
+                        <span className="bg-purple-100 text-purple-800 px-2 py-1 rounded text-sm">WiFi</span>
+                      )}
+                      {restaurant.features.isWheelchairAccessible && (
+                        <span className="bg-orange-100 text-orange-800 px-2 py-1 rounded text-sm">Wheelchair Accessible</span>
+                      )}
+                      {restaurant.features.hasParking && (
+                        <span className="bg-indigo-100 text-indigo-800 px-2 py-1 rounded text-sm">Parking</span>
+                      )}
+                    </div>
+                  </div>
+                )}
+
+                {/* Opening Hours */}
+                {restaurant.openingHours && (
+                  <div>
+                    <h3 className="text-lg font-semibold text-gray-900 mb-3">Opening Hours</h3>
+                    <div className="bg-gray-50 rounded-lg p-4">
+                      <pre className="text-sm text-gray-700 whitespace-pre-wrap">
+                        {formatOpeningHours(restaurant.openingHours)}
+                      </pre>
+                    </div>
+                  </div>
+                )}
+
+                {/* Tags */}
+                {restaurant.tags && restaurant.tags.length > 0 && (
+                  <div>
+                    <h3 className="text-lg font-semibold text-gray-900 mb-3">Tags</h3>
+                    <div className="flex flex-wrap gap-2">
+                      {restaurant.tags.map((tag, index) => (
+                        <span key={index} className="bg-gray-100 text-gray-700 px-2 py-1 rounded text-sm">
+                          {tag}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              <div className="flex gap-3 pt-6 mt-6 border-t border-gray-200">
+                <button
+                  onClick={handleClose}
+                  className="bg-gray-300 text-gray-700 px-6 py-3 rounded-lg font-semibold hover:bg-gray-400 transition-colors flex-1"
+                >
+                  Close
+                </button>
+              </div>
+            </div>
+          </motion.div>
+        </motion.div>
+      )}
+    </AnimatePresence>
+  );
+};
+
 // Reservation Row Component
-const ReservationRow = ({ reservation, onStatusUpdate, getStatusColor }) => {
+const ReservationRow = ({ reservation, onStatusUpdate, getStatusColor, getStatusIcon }) => {
   const [isUpdating, setIsUpdating] = useState(false);
 
   const handleStatusUpdate = async (newStatus) => {
@@ -730,6 +1074,25 @@ const ReservationRow = ({ reservation, onStatusUpdate, getStatusColor }) => {
     await onStatusUpdate(reservation._id, newStatus);
     setIsUpdating(false);
   };
+
+  const getGuestInfo = (reservation) => {
+    if (reservation.guest) {
+      return {
+        name: reservation.guest.name || "Unknown User",
+        email: reservation.guest.email || "No email",
+        phone: reservation.guest.phone || "No phone"
+      };
+    } else if (reservation.guestDetails) {
+      return {
+        name: reservation.guestDetails.name,
+        email: reservation.guestDetails.email,
+        phone: reservation.guestDetails.phone
+      };
+    }
+    return { name: "Unknown", email: "No email", phone: "No phone" };
+  };
+
+  const guestInfo = getGuestInfo(reservation);
 
   return (
     <tr className="hover:bg-gray-50 transition-colors duration-200">
@@ -740,17 +1103,23 @@ const ReservationRow = ({ reservation, onStatusUpdate, getStatusColor }) => {
           </div>
           <div className="ml-3">
             <div className="text-sm font-medium text-gray-900">
-              {reservation.guestName || "Unknown Guest"}
+              {guestInfo.name}
             </div>
             <div className="text-sm text-gray-500">
-              {reservation.guestEmail || "No email"}
+              {guestInfo.email}
+            </div>
+            <div className="text-xs text-gray-400">
+              {guestInfo.phone}
             </div>
           </div>
         </div>
       </td>
       <td className="px-6 py-4 whitespace-nowrap">
         <div className="text-sm text-gray-900">
-          {reservation.restaurantId?.name || "Restaurant"}
+          {reservation.restaurant?.name || "Restaurant"}
+        </div>
+        <div className="text-sm text-gray-500">
+          {reservation.restaurant?.cuisine || "Cuisine"}
         </div>
       </td>
       <td className="px-6 py-4 whitespace-nowrap">
@@ -763,13 +1132,16 @@ const ReservationRow = ({ reservation, onStatusUpdate, getStatusColor }) => {
       </td>
       <td className="px-6 py-4 whitespace-nowrap">
         <div className="text-sm text-gray-900">
-          {reservation.numberOfGuests || 0} guests
+          {reservation.partySize || 0} guests
         </div>
       </td>
       <td className="px-6 py-4 whitespace-nowrap">
-        <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getStatusColor(reservation.status)}`}>
-          {reservation.status || "unknown"}
-        </span>
+        <div className="flex items-center gap-2">
+          {getStatusIcon(reservation.status)}
+          <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getStatusColor(reservation.status)}`}>
+            {reservation.status?.replace("_", " ") || "unknown"}
+          </span>
+        </div>
       </td>
       <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
         <div className="flex gap-2">
@@ -792,15 +1164,24 @@ const ReservationRow = ({ reservation, onStatusUpdate, getStatusColor }) => {
             </>
           )}
           {reservation.status === 'confirmed' && (
-            <button
-              onClick={() => handleStatusUpdate('completed')}
-              disabled={isUpdating}
-              className="text-blue-600 hover:text-blue-800 disabled:opacity-50 text-xs px-2 py-1 border border-blue-600 rounded hover:bg-blue-50 transition-colors"
-            >
-              {isUpdating ? "..." : "Complete"}
-            </button>
+            <>
+              <button
+                onClick={() => handleStatusUpdate('completed')}
+                disabled={isUpdating}
+                className="text-blue-600 hover:text-blue-800 disabled:opacity-50 text-xs px-2 py-1 border border-blue-600 rounded hover:bg-blue-50 transition-colors"
+              >
+                {isUpdating ? "..." : "Complete"}
+              </button>
+              <button
+                onClick={() => handleStatusUpdate('cancelled')}
+                disabled={isUpdating}
+                className="text-red-600 hover:text-red-800 disabled:opacity-50 text-xs px-2 py-1 border border-red-600 rounded hover:bg-red-50 transition-colors"
+              >
+                {isUpdating ? "..." : "Cancel"}
+              </button>
+            </>
           )}
-          {(reservation.status === 'cancelled' || reservation.status === 'completed') && (
+          {(reservation.status === 'cancelled' || reservation.status === 'completed' || reservation.status === 'no_show') && (
             <span className="text-gray-400 text-xs">No actions</span>
           )}
         </div>
@@ -829,11 +1210,11 @@ const StatCard = ({ title, value, color }) => {
   );
 };
 
-// Restaurant Modal Component
+// Restaurant Modal Component (Add/Edit)
 const RestaurantModal = ({
   showModal, setShowModal, editingRestaurant, formData, setFormData,
   handleSubmit, resetForm, handleImageUpload, removeImage,
-  cuisines, priceRanges, statuses, error, imageUploading
+  cuisines, statuses, error, imageUploading
 }) => {
   if (!showModal) return null;
 
@@ -849,7 +1230,7 @@ const RestaurantModal = ({
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50"
+          className="fixed inset-0 bg-gray-900/40 backdrop-blur-sm flex items-center justify-center z-50 p-4"
         >
           <motion.div
             initial={{ scale: 0.95, opacity: 0 }}
@@ -969,21 +1350,6 @@ const RestaurantModal = ({
                 <div className="grid md:grid-cols-3 gap-4">
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Price Range *
-                    </label>
-                    <select
-                      value={formData.priceRange}
-                      onChange={(e) => setFormData({ ...formData, priceRange: e.target.value })}
-                      className="w-full border border-gray-300 rounded-lg px-3 py-2.5 focus:ring-2 focus:ring-[#D4AF37] focus:border-transparent"
-                    >
-                      {priceRanges.map((range) => (
-                        <option key={range} value={range}>{range}</option>
-                      ))}
-                    </select>
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
                       Capacity *
                     </label>
                     <input
@@ -1052,4 +1418,214 @@ const RestaurantModal = ({
   );
 };
 
-export default RestaurantsManagement;
+// Reservation Modal Component
+const ReservationModal = ({
+  showModal,
+  setShowModal,
+  selectedRestaurant,
+  reservationForm,
+  setReservationForm,
+  handleSubmit,
+  resetForm,
+  error
+}) => {
+  if (!showModal) return null;
+
+  const handleClose = () => {
+    setShowModal(false);
+    resetForm();
+  };
+
+  const occasions = [
+    "none",
+    "birthday",
+    "anniversary", 
+    "business",
+    "celebration",
+    "romantic",
+    "family"
+  ];
+
+  return (
+    <AnimatePresence>
+      {showModal && (
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50"
+        >
+          <motion.div
+            initial={{ scale: 0.95, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            exit={{ scale: 0.95, opacity: 0 }}
+            className="bg-white rounded-xl max-w-md w-full max-h-[90vh] overflow-y-auto shadow-xl"
+          >
+            <div className="p-6">
+              <div className="flex justify-between items-center mb-6">
+                <h2 className="text-2xl font-bold text-gray-900">
+                  Make Reservation
+                </h2>
+                <button
+                  onClick={handleClose}
+                  className="text-gray-500 hover:text-gray-700 transition-colors p-2 hover:bg-gray-100 rounded-lg"
+                >
+                  <X size={24} />
+                </button>
+              </div>
+
+              {selectedRestaurant && (
+                <div className="mb-4 p-3 bg-blue-50 rounded-lg">
+                  <h3 className="font-semibold text-blue-900">{selectedRestaurant.name}</h3>
+                  <p className="text-sm text-blue-700">{selectedRestaurant.cuisine} • {selectedRestaurant.location}</p>
+                  <p className="text-sm text-blue-600">Capacity: {selectedRestaurant.capacity} seats</p>
+                </div>
+              )}
+
+              {error && (
+                <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg mb-6">
+                  {error}
+                </div>
+              )}
+
+              <form onSubmit={handleSubmit} className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Full Name *
+                  </label>
+                  <input
+                    type="text"
+                    required
+                    value={reservationForm.guestName}
+                    onChange={(e) => setReservationForm({...reservationForm, guestName: e.target.value})}
+                    className="w-full border border-gray-300 rounded-lg px-3 py-2.5 focus:ring-2 focus:ring-blue-600 focus:border-transparent"
+                    placeholder="Enter your full name"
+                  />
+                </div>
+                
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Email *
+                  </label>
+                  <input
+                    type="email"
+                    required
+                    value={reservationForm.guestEmail}
+                    onChange={(e) => setReservationForm({...reservationForm, guestEmail: e.target.value})}
+                    className="w-full border border-gray-300 rounded-lg px-3 py-2.5 focus:ring-2 focus:ring-blue-600 focus:border-transparent"
+                    placeholder="Enter your email"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Phone *
+                  </label>
+                  <input
+                    type="tel"
+                    required
+                    value={reservationForm.guestPhone}
+                    onChange={(e) => setReservationForm({...reservationForm, guestPhone: e.target.value})}
+                    className="w-full border border-gray-300 rounded-lg px-3 py-2.5 focus:ring-2 focus:ring-blue-600 focus:border-transparent"
+                    placeholder="Enter your phone number"
+                  />
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Date *
+                    </label>
+                    <input
+                      type="date"
+                      required
+                      value={reservationForm.reservationDate}
+                      onChange={(e) => setReservationForm({...reservationForm, reservationDate: e.target.value})}
+                      className="w-full border border-gray-300 rounded-lg px-3 py-2.5 focus:ring-2 focus:ring-blue-600 focus:border-transparent"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Time *
+                    </label>
+                    <input
+                      type="time"
+                      required
+                      value={reservationForm.reservationTime}
+                      onChange={(e) => setReservationForm({...reservationForm, reservationTime: e.target.value})}
+                      className="w-full border border-gray-300 rounded-lg px-3 py-2.5 focus:ring-2 focus:ring-blue-600 focus:border-transparent"
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Party Size *
+                  </label>
+                  <input
+                    type="number"
+                    min="1"
+                    max="20"
+                    required
+                    value={reservationForm.partySize}
+                    onChange={(e) => setReservationForm({...reservationForm, partySize: parseInt(e.target.value)})}
+                    className="w-full border border-gray-300 rounded-lg px-3 py-2.5 focus:ring-2 focus:ring-blue-600 focus:border-transparent"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Occasion
+                  </label>
+                  <select
+                    value={reservationForm.occasion}
+                    onChange={(e) => setReservationForm({...reservationForm, occasion: e.target.value})}
+                    className="w-full border border-gray-300 rounded-lg px-3 py-2.5 focus:ring-2 focus:ring-blue-600 focus:border-transparent"
+                  >
+                    {occasions.map((occasion) => (
+                      <option key={occasion} value={occasion}>
+                        {occasion.charAt(0).toUpperCase() + occasion.slice(1)}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Special Requests
+                  </label>
+                  <textarea
+                    rows={3}
+                    value={reservationForm.specialRequests}
+                    onChange={(e) => setReservationForm({...reservationForm, specialRequests: e.target.value})}
+                    className="w-full border border-gray-300 rounded-lg px-3 py-2.5 focus:ring-2 focus:ring-blue-600 focus:border-transparent"
+                    placeholder="Any special requirements or requests..."
+                  />
+                </div>
+
+                <div className="flex gap-3 pt-4">
+                  <button
+                    type="submit"
+                    className="bg-blue-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-blue-700 transition-colors flex-1"
+                  >
+                    Make Reservation
+                  </button>
+                  <button
+                    type="button"
+                    onClick={handleClose}
+                    className="bg-gray-300 text-gray-700 px-6 py-3 rounded-lg font-semibold hover:bg-gray-400 transition-colors flex-1"
+                  >
+                    Cancel
+                  </button>
+                </div>
+              </form>
+            </div>
+          </motion.div>
+        </motion.div>
+      )}
+    </AnimatePresence>
+  );
+};
+
+export default RestaurantsManagement; 

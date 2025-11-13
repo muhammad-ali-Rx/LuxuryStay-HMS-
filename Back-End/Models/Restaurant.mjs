@@ -7,49 +7,32 @@ const restaurantSchema = new mongoose.Schema(
       required: true,
       trim: true,
     },
-
     cuisine: {
       type: String,
       required: true,
       enum: [
-        "French",
-        "Italian", 
-        "Japanese",
-        "Chinese",
-        "Indian",
-        "Mexican",
-        "Mediterranean",
-        "American",
-        "International",
-        "Fusion"
+        "French", "Italian", "Japanese", "Chinese", "Indian",
+        "Mexican", "Mediterranean", "American", "International", "Fusion"
       ],
     },
-
     description: {
       type: String,
       required: true,
     },
-
-    // 🖼️ Restaurant images
     images: {
       type: [String],
       default: [],
     },
-
-    // ⭐ Rating System
     rating: {
       type: Number,
       min: 0,
       max: 5,
       default: 0,
     },
-
     totalRatings: {
       type: Number,
       default: 0,
     },
-
-    // 📊 Rating distribution
     ratingCounts: {
       1: { type: Number, default: 0 },
       2: { type: Number, default: 0 },
@@ -57,7 +40,6 @@ const restaurantSchema = new mongoose.Schema(
       4: { type: Number, default: 0 },
       5: { type: Number, default: 0 }
     },
-
     userRatings: [{
       userId: {
         type: mongoose.Schema.Types.ObjectId,
@@ -75,99 +57,31 @@ const restaurantSchema = new mongoose.Schema(
         default: Date.now
       }
     }],
-
-    // 🕒 Operating Hours
     openingHours: {
-      monday: { open: String, close: String },
-      tuesday: { open: String, close: String },
-      wednesday: { open: String, close: String },
-      thursday: { open: String, close: String },
-      friday: { open: String, close: String },
-      saturday: { open: String, close: String },
-      sunday: { open: String, close: String }
+      monday: { open: String, close: String, closed: Boolean },
+      tuesday: { open: String, close: String, closed: Boolean },
+      wednesday: { open: String, close: String, closed: Boolean },
+      thursday: { open: String, close: String, closed: Boolean },
+      friday: { open: String, close: String, closed: Boolean },
+      saturday: { open: String, close: String, closed: Boolean },
+      sunday: { open: String, close: String, closed: Boolean }
     },
-
-    // 💰 Price Range
-    priceRange: {
-      type: String,
-      enum: ["$", "$$", "$$$", "$$$$"],
-      required: true
-    },
-
-    // 👥 Capacity
     capacity: {
       type: Number,
       required: true,
     },
-
-    // 📍 Location in hotel
     location: {
       type: String,
       required: true,
     },
-
-    // 🏷️ Tags for filtering
     tags: [{
-      type: String,
-      enum: [
-        "Fine Dining",
-        "Casual", 
-        "Romantic",
-        "Family Friendly",
-        "Business",
-        "Outdoor",
-        "Buffet",
-        "Bar",
-        "View",
-        "Live Music"
-      ]
+      type: String
     }],
-
-    // 🍽️ Menu Categories
-    menuCategories: [{
-      name: {
-        type: String,
-        required: true
-      },
-      items: [{
-        name: {
-          type: String,
-          required: true
-        },
-        description: String,
-        price: {
-          type: Number,
-          required: true
-        },
-        image: String,
-        isVegetarian: {
-          type: Boolean,
-          default: false
-        },
-        isSpicy: {
-          type: Boolean,
-          default: false
-        },
-        allergens: [String],
-        preparationTime: Number // in minutes
-      }]
-    }],
-
-    // 📞 Contact
     contact: {
       phone: String,
       email: String,
       extension: String
     },
-
-    // 👨‍🍳 Chef Information
-    chef: {
-      name: String,
-      specialty: String,
-      bio: String
-    },
-
-    // 🎯 Features
     features: {
       hasOutdoorSeating: { type: Boolean, default: false },
       hasPrivateDining: { type: Boolean, default: false },
@@ -175,27 +89,15 @@ const restaurantSchema = new mongoose.Schema(
       isWheelchairAccessible: { type: Boolean, default: true },
       hasParking: { type: Boolean, default: true }
     },
-
-    // 📋 Reservation Settings
-    reservationSettings: {
-      maxAdvanceDays: { type: Number, default: 30 },
-      minPartySize: { type: Number, default: 1 },
-      maxPartySize: { type: Number, default: 20 },
-      requiresDeposit: { type: Boolean, default: false },
-      depositAmount: { type: Number, default: 0 }
-    },
-
-    // 📊 Status
     status: {
       type: String,
       enum: ["active", "inactive", "under_renovation"],
       default: "active"
     },
-
-    // 👤 Created by
     createdBy: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
+      required: true
     }
   },
   {
@@ -203,7 +105,7 @@ const restaurantSchema = new mongoose.Schema(
   }
 );
 
-// ✅ Rating calculation methods
+// Rating calculation methods
 restaurantSchema.pre('save', function(next) {
   if (this.userRatings && this.isModified('userRatings')) {
     this.calculateRatingStats();
