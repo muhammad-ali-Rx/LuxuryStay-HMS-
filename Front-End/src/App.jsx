@@ -84,7 +84,7 @@ function AppRoutes() {
   return (
     <AnimatePresence mode="wait">
       <Routes>
-        <Route path="/" element={splashShown ? <Navigate to="/home" replace /> : <Navigate to="/splash" replace />} />
+        <Route path="/" element={<Navigate to="/splash" replace />} />
 
         {/* Splash Screen - only shown once */}
         <Route

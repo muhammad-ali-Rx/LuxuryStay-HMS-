@@ -75,8 +75,6 @@ export default function UserLogin() {
  
   return (
     <div className="min-h-screen bg-[#1D293D]">
-      <FrontendNavbar />
-
       <div className="flex items-center justify-center min-h-[calc(100vh-80px)] px-4 pt-20">
         <div className="w-full max-w-6xl grid grid-cols-1 lg:grid-cols-2 gap-8">
           {/* Left Side - Login Form */}
