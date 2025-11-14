@@ -70,7 +70,7 @@ export default function Facilities() {
       <Navbar />
 
       {/* Hero Section */}
-      <section className="pt-32 pb-20 px-6 bg-gradient-to-br from-slate-50 to-white">
+      <section className="pt-32 pb-20 px-6 bg-gradient-to-br from-blue-50 to-white">
         <div className="max-w-4xl mx-auto text-center">
           <motion.div
             initial={{ opacity: 0, y: 30 }}
@@ -78,7 +78,7 @@ export default function Facilities() {
             transition={{ duration: 0.8 }}
           >
             <h1 className="text-4xl md:text-5xl font-bold text-slate-800 mb-6 leading-tight">
-              World-Class <span className="text-amber-600">Facilities</span>
+              World-Class <span className="text-[#1B3788]">Facilities</span>
             </h1>
             <p className="text-lg text-slate-600 max-w-2xl mx-auto leading-relaxed">
               Discover our premium amenities designed to make your stay extraordinary and memorable
@@ -104,10 +104,10 @@ export default function Facilities() {
                   variants={itemVariants}
                   className="group relative"
                 >
-                  <div className="bg-white rounded-2xl p-8 border border-slate-200 shadow-sm hover:shadow-xl hover:border-amber-200 transition-all duration-500 h-full flex flex-col">
+                  <div className="bg-white rounded-2xl p-8 border border-slate-200 shadow-sm hover:shadow-xl hover:border-blue-200 transition-all duration-500 h-full flex flex-col">
                     
                     {/* Icon Container */}
-                    <div className="w-16 h-16 bg-gradient-to-br from-amber-500 to-orange-500 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-500 shadow-lg">
+                    <div className="w-16 h-16 bg-gradient-to-br from-[#1B3788] to-blue-800 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-500 shadow-lg">
                       <Icon size={28} className="text-white" />
                     </div>
                     
@@ -123,8 +123,8 @@ export default function Facilities() {
                     <ul className="space-y-3">
                       {facility.features.map((feature, i) => (
                         <li key={i} className="flex items-center gap-3 text-slate-700">
-                          <div className="w-6 h-6 rounded-full bg-amber-100 flex items-center justify-center flex-shrink-0">
-                            <CheckCircle size={14} className="text-amber-600" />
+                          <div className="w-6 h-6 rounded-full bg-blue-100 flex items-center justify-center flex-shrink-0">
+                            <CheckCircle size={14} className="text-[#1B3788]" />
                           </div>
                           <span className="font-medium text-sm">{feature}</span>
                         </li>
@@ -132,7 +132,7 @@ export default function Facilities() {
                     </ul>
 
                     {/* Hover Effect */}
-                    <div className="absolute inset-0 rounded-2xl border-2 border-transparent bg-gradient-to-r from-amber-500 to-orange-500 opacity-0 group-hover:opacity-5 transition-opacity duration-500 -z-10" />
+                    <div className="absolute inset-0 rounded-2xl border-2 border-transparent bg-gradient-to-r from-[#1B3788] to-blue-800 opacity-0 group-hover:opacity-5 transition-opacity duration-500 -z-10" />
                   </div>
                 </motion.div>
               )
@@ -142,7 +142,7 @@ export default function Facilities() {
       </section>
 
       {/* Amenities Section */}
-      <section className="py-20 px-6 bg-slate-50">
+      <section className="py-20 px-6 bg-blue-50">
         <div className="max-w-6xl mx-auto">
           <motion.div
             initial={{ opacity: 0, y: 30 }}
@@ -152,7 +152,7 @@ export default function Facilities() {
             className="text-center mb-16"
           >
             <h2 className="text-3xl font-bold text-slate-800 mb-4">
-              Premium <span className="text-amber-600">Amenities</span>
+              Premium <span className="text-[#1B3788]">Amenities</span>
             </h2>
             <p className="text-slate-600 max-w-2xl mx-auto">
               Additional services and features to enhance your luxury experience
@@ -181,10 +181,10 @@ export default function Facilities() {
                 variants={itemVariants}
                 className="group"
               >
-                <div className="bg-white rounded-xl p-6 border border-slate-200 shadow-sm hover:shadow-md hover:border-amber-200 transition-all duration-300">
+                <div className="bg-white rounded-xl p-6 border border-slate-200 shadow-sm hover:shadow-md hover:border-blue-200 transition-all duration-300">
                   <div className="flex items-center gap-4">
-                    <div className="w-12 h-12 rounded-xl bg-amber-100 flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform duration-300">
-                      <CheckCircle size={20} className="text-amber-600" />
+                    <div className="w-12 h-12 rounded-xl bg-blue-100 flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform duration-300">
+                      <CheckCircle size={20} className="text-[#1B3788]" />
                     </div>
                     <span className="text-slate-800 font-medium group-hover:text-slate-900 transition-colors">
                       {amenity}
@@ -205,20 +205,20 @@ export default function Facilities() {
             whileInView={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6 }}
             viewport={{ once: true }}
-            className="bg-gradient-to-br from-slate-800 to-slate-900 rounded-3xl p-12 text-white"
+            className="bg-gradient-to-br from-[#1B3788] to-blue-900 rounded-3xl p-12 text-white"
           >
             <h2 className="text-3xl font-bold mb-4">
               Ready to Experience Luxury?
             </h2>
-            <p className="text-slate-300 mb-8 text-lg">
+            <p className="text-blue-200 mb-8 text-lg">
               Book your stay now and immerse yourself in our world-class facilities
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <button className="bg-amber-500 text-white px-8 py-4 rounded-xl font-semibold hover:bg-amber-600 transition-all duration-300 hover:scale-105 flex items-center gap-2 justify-center">
+              <button className="bg-[#1B3788] text-white px-8 py-4 rounded-xl font-semibold hover:bg-blue-800 transition-all duration-300 hover:scale-105 flex items-center gap-2 justify-center">
                 Book Your Stay
                 <ArrowRight size={20} />
               </button>
-              <button className="border-2 border-white text-white px-8 py-4 rounded-xl font-semibold hover:bg-white hover:text-slate-900 transition-all duration-300">
+              <button className="border-2 border-white text-white px-8 py-4 rounded-xl font-semibold hover:bg-white hover:text-[#1B3788] transition-all duration-300">
                 View Gallery
               </button>
             </div>
