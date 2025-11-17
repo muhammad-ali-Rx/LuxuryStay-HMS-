@@ -24,7 +24,6 @@ import Reservations from "./pages/Reservations"
 import RestaurantDetailsPage from "./pages/RestaurantDetailsPage"
 import BookingDetails from "./pages/BookingDetails"
 // Admin Pages
-import AdminLogin from "./pages/admin/AdminLogin"
 import AdminPanel from "./pages/admin/AdminPanel"
 
 // Protected Route Component for User Booking
@@ -62,6 +61,8 @@ function ProtectedAdminRoute() {
   if (loading) {
     return <div className="h-screen flex items-center justify-center">Loading...</div>
   }
+
+  console.log(adminUser);
 
   const adminRoles = ["admin", "manager", "receptionist", "housekeeping"]
   if (!adminUser || !adminRoles.includes(adminUser.role)) {
