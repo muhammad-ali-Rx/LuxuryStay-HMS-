@@ -11,42 +11,84 @@ export function AuthProvider({ children }) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Check localStorage for existing sessions
-    const savedUserAuth = localStorage.getItem("userAuth");
-    const savedAdminAuth = localStorage.getItem("adminAuth");
-    const savedToken = localStorage.getItem("authToken");
-
-    if (savedUserAuth && savedToken) {
-      const auth = JSON.parse(savedUserAuth);
-      setUserAuth(auth);
-      setIsAuthenticated(true);
-    }
-
-    if (savedAdminAuth && savedToken) {
-      const admin = JSON.parse(savedAdminAuth);
-      setAdminUser(admin);
-    }
-
-    // 🧩 Development only — auto-login as admin if none found
-    if (!savedAdminAuth) {
-      const devAdmin = {
-        id: "1",
-        name: "Developer Admin",
-        email: "admin@luxurystay.com",
-        role: "admin",
-      };
-
-      localStorage.setItem("authToken", "dev-token");
-      localStorage.setItem("adminAuth", JSON.stringify(devAdmin));
-
-      setAdminUser(devAdmin);
-    }
-
-    setLoading(false);
+    checkExistingAuth();
   }, []);
 
+  const checkExistingAuth = () => {
+    try {
+      const savedUserAuth = localStorage.getItem("userAuth");
+      const savedAdminAuth = localStorage.getItem("adminAuth");
+      const savedToken = localStorage.getItem("authToken");
+
+      console.log("Auth check - Token:", savedToken ? savedToken.substring(0, 20) + "..." : "No token");
+      console.log("Auth check - User auth:", savedUserAuth);
+      console.log("Auth check - Admin auth:", savedAdminAuth);
+
+      // Validate token format before using it
+      if (savedToken && isValidToken(savedToken)) {
+        if (savedUserAuth) {
+          try {
+            const auth = JSON.parse(savedUserAuth);
+            setUserAuth(auth);
+            setIsAuthenticated(true);
+            console.log("User auth restored");
+          } catch (e) {
+            console.error("Failed to parse user auth:", e);
+            clearAuthData();
+          }
+        }
+
+        if (savedAdminAuth) {
+          try {
+            const admin = JSON.parse(savedAdminAuth);
+            setAdminUser(admin);
+            console.log("Admin auth restored");
+          } catch (e) {
+            console.error("Failed to parse admin auth:", e);
+            localStorage.removeItem("adminAuth");
+          }
+        }
+      } else {
+        // Invalid token, clear everything
+        console.log("Invalid token found, clearing auth data");
+        clearAuthData();
+      }
+
+    } catch (error) {
+      console.error("Auth check error:", error);
+      clearAuthData();
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const isValidToken = (token) => {
+    // Basic JWT format validation
+    if (!token || typeof token !== 'string') return false;
+    
+    const tokenParts = token.split('.');
+    if (tokenParts.length !== 3) return false;
+    
+    try {
+      // Try to parse the payload to check if it's valid JSON
+      JSON.parse(atob(tokenParts[1]));
+      return true;
+    } catch (e) {
+      return false;
+    }
+  };
+
+  const clearAuthData = () => {
+    localStorage.removeItem("authToken");
+    localStorage.removeItem("userAuth");
+    localStorage.removeItem("adminAuth");
+    setUserAuth(null);
+    setAdminUser(null);
+    setIsAuthenticated(false);
+  };
+
   const setUserFromAPI = (apiResponse) => {
-    const userData = apiResponse.user || apiResponse; // handle both cases
+    const userData = apiResponse.user || apiResponse;
     const user = {
       id: userData.id,
       name: userData.name,
@@ -54,6 +96,11 @@ export function AuthProvider({ children }) {
       role: userData.role,
       phone: userData.phone,
     };
+
+    // Validate token before storing
+    if (!apiResponse.token || !isValidToken(apiResponse.token)) {
+      throw new Error("Invalid token received from server");
+    }
 
     localStorage.setItem("authToken", apiResponse.token);
     localStorage.setItem("userAuth", JSON.stringify(user));
@@ -76,7 +123,7 @@ export function AuthProvider({ children }) {
           email: userData.email,
           phone: userData.phone,
           password: userData.password,
-          role: "user", // default role for new users
+          role: "user",
         }),
       });
 
@@ -96,7 +143,6 @@ export function AuthProvider({ children }) {
   const loginUser = async (email, password) => {
     try {
       const response = await fetch(`${API_BASE_URL}/users/login`, {
-        // Updated endpoint
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -110,7 +156,11 @@ export function AuthProvider({ children }) {
         throw new Error(data.message || "Login failed");
       }
 
-      // Handle the response format from your backend
+      // Validate the token from server
+      if (!data.token || !isValidToken(data.token)) {
+        throw new Error("Invalid token received from server");
+      }
+
       const user = {
         id: data.user.id,
         name: data.user.name,
@@ -120,11 +170,14 @@ export function AuthProvider({ children }) {
         profileImage: data.user.profileImage,
       };
 
+      // Store auth data
       localStorage.setItem("authToken", data.token);
       localStorage.setItem("userAuth", JSON.stringify(user));
 
       setUserAuth(user);
       setIsAuthenticated(true);
+
+      console.log("User login successful, token stored");
 
       return { success: true, user, token: data.token };
     } catch (error) {
@@ -134,10 +187,8 @@ export function AuthProvider({ children }) {
   };
 
   const logoutUser = () => {
-    setUserAuth(null);
-    setIsAuthenticated(false);
-    localStorage.removeItem("userAuth");
-    localStorage.removeItem("authToken");
+    console.log("Logging out user");
+    clearAuthData();
   };
 
   const canAccessAdmin = () => {
@@ -175,6 +226,11 @@ export function AuthProvider({ children }) {
         throw new Error(data.message || "Admin login failed");
       }
 
+      // Validate token
+      if (!data.token || !isValidToken(data.token)) {
+        throw new Error("Invalid token received from server");
+      }
+
       const adminRoles = ["admin", "manager", "receptionist", "housekeeping"];
       if (!adminRoles.includes(data.user.role)) {
         throw new Error("User does not have admin access");
@@ -200,15 +256,31 @@ export function AuthProvider({ children }) {
   };
 
   const logoutAdmin = () => {
+    console.log("Logging out admin");
     setAdminUser(null);
     localStorage.removeItem("adminAuth");
-    localStorage.removeItem("authToken");
-  };
-  const getToken = () => {
-    return localStorage.getItem("authToken");
+    // Don't remove user auth if admin is also a user
+    if (!userAuth) {
+      localStorage.removeItem("authToken");
+    }
   };
 
-  // Then add it to the value object:
+  const getToken = () => {
+    const token = localStorage.getItem("authToken");
+    console.log("Getting token:", token ? token.substring(0, 20) + "..." : "No token");
+    
+    if (token && !isValidToken(token)) {
+      console.error("Invalid token found, clearing auth");
+      clearAuthData();
+      return null;
+    }
+    
+    return token;
+  };
+
+  // Remove the auto-login for admin in development
+  // This was causing issues with invalid tokens
+
   return (
     <AuthContext.Provider
       value={{
@@ -226,8 +298,7 @@ export function AuthProvider({ children }) {
         loginAdmin,
         logoutAdmin,
         loading,
-        // Add this:
-        getToken, // ✅ Add this line
+        getToken,
       }}
     >
       {children}

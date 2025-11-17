@@ -8,6 +8,8 @@ import room from "./Routers/RoomRoute.mjs"
 import roomRating from "./Routers/ratingRoutes.mjs"
 import restaurants from "./Routers/restaurants.mjs" // Make sure this path is correct
 import reservations from "./Routers/reservations.mjs"
+import contect from "./Routers/contactRoutes.mjs"
+import Booking from "./Routers/bookingRoutes.mjs";
 import path from 'path';
 import { fileURLToPath } from 'url';
 
@@ -47,6 +49,8 @@ app.use("/room", room)
 app.use("/room", roomRating)
 app.use("/restaurants", restaurants) // This should point to your fixed routes file
 app.use("/reservations", reservations)
+app.use("/booking", Booking)
+app.use('/form', contect)
 
 // Global error handler
 app.use((err, req, res, next) => {

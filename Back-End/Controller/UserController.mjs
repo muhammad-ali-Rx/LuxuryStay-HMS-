@@ -3,10 +3,17 @@ import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 
 // Generate JWT Token
+// UserController.mjs - generateToken function
 const generateToken = (userId) => {
-  return jwt.sign({ userId }, process.env.JWT_SECRET || 'your-secret-key', {
-    expiresIn: '7d',
-  });
+  return jwt.sign(
+    { 
+      id: userId, // ✅ 'id' use karo instead of 'userId'
+    }, 
+    process.env.JWT_SECRET, 
+    {
+      expiresIn: process.env.JWT_EXPIRES_IN || '30d',
+    }
+  );
 };
 
 // Login User
@@ -433,6 +440,28 @@ export const updateUserRole = async (req, res) => {
       success: false,
       message: 'Failed to update user role',
       error: error.message,
+    });
+  }
+};
+
+// UserController.mjs - Add this function
+export const getAllGuests = async (req, res) => {
+  try {
+    // Assuming you have a User model
+    const guests = await User.find({ 
+      role: { $in: ['user', 'guest'] } // Filter by guest roles
+    }).select('-password').sort({ createdAt: -1 });
+
+    res.json({
+      success: true,
+      data: guests,
+      message: 'Guests fetched successfully'
+    });
+  } catch (error) {
+    console.error('Get guests error:', error);
+    res.status(500).json({
+      success: false,
+      message: error.message
     });
   }
 };

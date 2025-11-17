@@ -177,7 +177,7 @@ const RestaurantListingPage = () => {
       }
 
       const response = await axios.post(
-        "http://localhost:3000/reservations", 
+        "http://localhost:3000/reservations/create", 
         {
           restaurantId: selectedRestaurant._id,
           ...reservationForm

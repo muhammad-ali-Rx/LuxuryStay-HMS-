@@ -18,7 +18,7 @@ const UserReservations = () => {
   const fetchUserReservations = async () => {
     try {
       const token = localStorage.getItem('token')
-      const response = await axios.get("http://localhost:3000/api/reservations/my-reservations", {
+      const response = await axios.get("http://localhost:3000/reservations/reservations/my-reservations", {
         headers: { Authorization: `Bearer ${token}` }
       })
       setReservations(response.data.data || response.data)
@@ -33,7 +33,7 @@ const UserReservations = () => {
     if (window.confirm('Are you sure you want to cancel this reservation?')) {
       try {
         const token = localStorage.getItem('token')
-        await axios.put(`http://localhost:3000/api/reservations/${reservationId}/cancel`, {}, {
+        await axios.put(`http://localhost:3000/reservations/reservations/${reservationId}/cancel`, {}, {
           headers: { Authorization: `Bearer ${token}` }
         })
         fetchUserReservations()
@@ -48,7 +48,7 @@ const UserReservations = () => {
   const handleAddFeedback = async (reservationId, rating, comment) => {
     try {
       const token = localStorage.getItem('token')
-      await axios.post(`http://localhost:3000/api/reservations/${reservationId}/feedback`, 
+      await axios.post(`http://localhost:3000/reservations/reservations/${reservationId}/feedback`, 
         { rating, comment },
         { headers: { Authorization: `Bearer ${token}` } }
       )

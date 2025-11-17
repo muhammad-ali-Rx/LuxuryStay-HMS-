@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
-import { Star, Users } from "lucide-react";
+import { Star, Users, DollarSign } from "lucide-react";
 import { Button } from "../components/UI/button";
 
 export default function Rooms() {
@@ -237,11 +237,19 @@ export default function Rooms() {
                     className="w-full"
                   />
                   <div className="flex justify-between text-sm text-muted">
-                    <span>Rs. {dynamicPriceRange[0]}</span>
-                    <span>Rs. {dynamicPriceRange[1]}</span>
+                    <span className="flex items-center gap-1">
+                      <DollarSign size={12} />
+                      {dynamicPriceRange[0]}
+                    </span>
+                    <span className="flex items-center gap-1">
+                      <DollarSign size={12} />
+                      {dynamicPriceRange[1]}
+                    </span>
                   </div>
-                  <p className="text-sm text-muted text-center">
-                    Rs. {priceRange[0]} - Rs. {priceRange[1]} per night
+                  <p className="text-sm text-muted text-center flex items-center justify-center gap-1">
+                    <DollarSign size={12} />
+                    {priceRange[0]} - <DollarSign size={12} />
+                    {priceRange[1]} per night
                   </p>
                 </div>
               </div>
@@ -281,8 +289,9 @@ export default function Rooms() {
                               </p>
                             </div>
                             <div className="text-right">
-                              <p className="text-3xl font-bold text-teal-600">
-                                Rs. {room.pricePerNight}
+                              <p className="text-3xl font-bold text-teal-600 flex items-center gap-1">
+                                <DollarSign size={24} />
+                                {room.pricePerNight}
                               </p>
                               <p className="text-sm text-gray-600">per night</p>
                             </div>

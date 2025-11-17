@@ -10,7 +10,7 @@ import {
   getRestaurantStats,
   testAuth
 } from '../Controller/restaurantController.mjs';
-import { auth } from '../middleware/auth.mjs'; // Use your auth middleware
+import { auth } from "../middleware/auth.mjs" ;
 import { upload } from "../Config/cloudinary.config.mjs"; 
 
 const router = express.Router();

@@ -13,7 +13,7 @@ import { auth } from '../middleware/auth.mjs';
 const router = express.Router();
 
 // Public routes (no authentication required)
-router.post('/', createReservation); // Anyone can make reservation
+router.post('/create', createReservation); // Anyone can make reservation
 router.get('/:id/availability', checkAvailability); // Check availability
 
 // Protected routes (require authentication)

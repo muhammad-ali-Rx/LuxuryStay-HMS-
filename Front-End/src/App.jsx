@@ -22,7 +22,7 @@ import UserLogin from "./pages/UserLogin"
 import UserRegister from "./pages/UserRegister"
 import Reservations from "./pages/Reservations"
 import RestaurantDetailsPage from "./pages/RestaurantDetailsPage"
-
+import BookingDetails from "./pages/BookingDetails"
 // Admin Pages
 import AdminLogin from "./pages/admin/AdminLogin"
 import AdminPanel from "./pages/admin/AdminPanel"
@@ -117,6 +117,7 @@ function AppRoutes() {
         {/* Protected Booking Routes - Requires Authentication */}
         <Route path="/booking" element={<ProtectedBookingRoute />} />
         <Route path="/BookingConfirmation" element={<ConfirmationPage />} />
+        <Route path="/booking-details/:id" element={<BookingDetails />} />
 
         <Route path="/reservations" element={<ProtectedReservationsRoute />} />
 

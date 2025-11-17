@@ -1,6 +1,7 @@
 import express from "express";
 import{
     getAllUsers,
+    getAllGuests,
     updateUser,
     deleteUser,
     searchUsers,
@@ -15,7 +16,9 @@ import{
 const router = express.Router();
 
 router.get('/', getAllUsers);
+router.get('/guests', getAllGuests); 
 router.put('/update/:id', updateUser);
+
 router.delete('/delete/:id', deleteUser);
 // router.get('/protected', auth , (req , res)=>res.send('hello'));
 router.get('/:id', searchUsers);    
