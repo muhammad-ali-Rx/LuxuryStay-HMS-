@@ -213,7 +213,7 @@ const RestaurantListingPage = () => {
       <Navbar />
       
       {/* Hero Section */}
-      <section className="relative bg-gradient-to-br from-[#0A1F44] via-[#1a365d] to-[#2D4B85] text-white py-24 overflow-hidden">
+      <section className="relative bg-gradient-to-br from-[#1D293D] via-[#2D3B5D] to-[#3D4B7D] text-white py-24 overflow-hidden">
         <div className="absolute inset-0 bg-black/20"></div>
         <div className="container mx-auto px-4 text-center relative z-10">
           <motion.h1 
@@ -247,7 +247,7 @@ const RestaurantListingPage = () => {
                   placeholder="Search restaurants, cuisines, or tags..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className="w-full pl-12 pr-4 py-4 border border-gray-200 rounded-2xl focus:ring-3 focus:ring-[#D4AF37]/30 focus:border-[#D4AF37] bg-white shadow-sm transition-all duration-200 text-lg"
+                  className="w-full pl-12 pr-4 py-4 border border-gray-200 rounded-2xl focus:ring-3 focus:ring-[#1D293D]/30 focus:border-[#1D293D] bg-white shadow-sm transition-all duration-200 text-lg"
                 />
               </div>
             </div>
@@ -268,7 +268,7 @@ const RestaurantListingPage = () => {
                 <select
                   value={activeFilters.sortBy}
                   onChange={(e) => handleFilterChange("sortBy", e.target.value)}
-                  className="appearance-none bg-white border border-gray-300 rounded-2xl px-4 py-3 pr-10 focus:ring-2 focus:ring-[#D4AF37] focus:border-transparent font-medium cursor-pointer"
+                  className="appearance-none bg-white border border-gray-300 rounded-2xl px-4 py-3 pr-10 focus:ring-2 focus:ring-[#1D293D] focus:border-transparent font-medium cursor-pointer"
                 >
                   {sortOptions.map(option => (
                     <option key={option.value} value={option.value}>
@@ -294,7 +294,7 @@ const RestaurantListingPage = () => {
                   <select
                     value={activeFilters.cuisine}
                     onChange={(e) => handleFilterChange("cuisine", e.target.value)}
-                    className="flex-1 min-w-[150px] border border-gray-300 rounded-xl px-4 py-2.5 focus:ring-2 focus:ring-[#D4AF37] focus:border-transparent"
+                    className="flex-1 min-w-[150px] border border-gray-300 rounded-xl px-4 py-2.5 focus:ring-2 focus:ring-[#1D293D] focus:border-transparent"
                   >
                     {cuisines.map(cuisine => (
                       <option key={cuisine} value={cuisine}>
@@ -306,7 +306,7 @@ const RestaurantListingPage = () => {
                   <select
                     value={activeFilters.rating}
                     onChange={(e) => handleFilterChange("rating", e.target.value)}
-                    className="flex-1 min-w-[150px] border border-gray-300 rounded-xl px-4 py-2.5 focus:ring-2 focus:ring-[#D4AF37] focus:border-transparent"
+                    className="flex-1 min-w-[150px] border border-gray-300 rounded-xl px-4 py-2.5 focus:ring-2 focus:ring-[#1D293D] focus:border-transparent"
                   >
                     {ratings.map(rating => (
                       <option key={rating} value={rating}>
@@ -324,7 +324,7 @@ const RestaurantListingPage = () => {
             <select
               value={activeFilters.cuisine}
               onChange={(e) => handleFilterChange("cuisine", e.target.value)}
-              className="border border-gray-300 rounded-xl px-4 py-2.5 focus:ring-2 focus:ring-[#D4AF37] focus:border-transparent font-medium"
+              className="border border-gray-300 rounded-xl px-4 py-2.5 focus:ring-2 focus:ring-[#1D293D] focus:border-transparent font-medium"
             >
               {cuisines.map(cuisine => (
                 <option key={cuisine} value={cuisine}>
@@ -336,7 +336,7 @@ const RestaurantListingPage = () => {
             <select
               value={activeFilters.rating}
               onChange={(e) => handleFilterChange("rating", e.target.value)}
-              className="border border-gray-300 rounded-xl px-4 py-2.5 focus:ring-2 focus:ring-[#D4AF37] focus:border-transparent font-medium"
+              className="border border-gray-300 rounded-xl px-4 py-2.5 focus:ring-2 focus:ring-[#1D293D] focus:border-transparent font-medium"
             >
               {ratings.map(rating => (
                 <option key={rating} value={rating}>
@@ -380,7 +380,7 @@ const RestaurantListingPage = () => {
             // Enhanced Loading State
             <div className="flex flex-col items-center justify-center py-20">
               <div className="relative">
-                <div className="animate-spin rounded-full h-16 w-16 border-4 border-[#D4AF37] border-t-transparent mb-6"></div>
+                <div className="animate-spin rounded-full h-16 w-16 border-4 border-[#1D293D] border-t-transparent mb-6"></div>
                 <div className="absolute inset-0 rounded-full border-4 border-gray-200 border-t-transparent"></div>
               </div>
               <h3 className="text-2xl font-semibold text-gray-800 mb-3">Discovering Culinary Gems</h3>
@@ -404,7 +404,7 @@ const RestaurantListingPage = () => {
               {hasActiveFilters && (
                 <button
                   onClick={clearFilters}
-                  className="bg-[#D4AF37] text-[#0A1F44] px-8 py-3 rounded-xl font-semibold hover:bg-[#c19b2a] transition-colors"
+                  className="bg-[#1D293D] text-white px-8 py-3 rounded-xl font-semibold hover:bg-[#2D3B5D] transition-colors"
                 >
                   Clear All Filters
                 </button>
@@ -438,7 +438,7 @@ const RestaurantListingPage = () => {
                       <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
                       
                       {/* Premium Badge */}
-                      <div className="absolute top-4 right-4 bg-gradient-to-r from-[#D4AF37] to-[#F4D03F] text-[#0A1F44] px-3 py-1.5 rounded-full shadow-lg">
+                      <div className="absolute top-4 right-4 bg-gradient-to-r from-[#1D293D] to-[#2D3B5D] text-white px-3 py-1.5 rounded-full shadow-lg">
                         <span className="text-sm font-bold">FREE</span>
                       </div>
                       
@@ -451,14 +451,14 @@ const RestaurantListingPage = () => {
 
                       {/* Rating Overlay */}
                       <div className="absolute top-4 left-4 bg-black/70 backdrop-blur-sm text-white px-2 py-1 rounded-full flex items-center gap-1">
-                        <Star size={14} className="text-[#D4AF37] fill-[#D4AF37]" />
+                        <Star size={14} className="text-[#E2BD3A] fill-[#E2BD3A]" />
                         <span className="text-sm font-semibold">{restaurant.rating || "N/A"}</span>
                       </div>
                     </div>
                     
                     <div className="p-6">
                       <div className="flex justify-between items-start mb-3">
-                        <h3 className="text-xl font-bold text-gray-900 group-hover:text-[#D4AF37] transition-colors line-clamp-1">
+                        <h3 className="text-xl font-bold text-gray-900 group-hover:text-[#1D293D] transition-colors line-clamp-1">
                           {restaurant.name}
                         </h3>
                       </div>
@@ -468,17 +468,17 @@ const RestaurantListingPage = () => {
                       </p>
                       
                       <div className="flex items-center gap-2 text-sm text-gray-500 mb-3">
-                        <MapPin size={16} className="text-[#D4AF37]" />
+                        <MapPin size={16} className="text-[#1D293D]" />
                         <span className="line-clamp-1">{restaurant.location}</span>
                       </div>
                       
                       <div className="flex items-center justify-between text-sm text-gray-500 mb-4">
                         <div className="flex items-center gap-2">
-                          <Clock size={16} className="text-[#D4AF37]" />
+                          <Clock size={16} className="text-[#1D293D]" />
                           <span>Today: {restaurant.openingHours?.monday?.open} - {restaurant.openingHours?.monday?.close}</span>
                         </div>
                         <div className="flex items-center gap-2">
-                          <Users size={16} className="text-[#D4AF37]" />
+                          <Users size={16} className="text-[#1D293D]" />
                           <span>Up to {restaurant.capacity}</span>
                         </div>
                       </div>
@@ -503,7 +503,7 @@ const RestaurantListingPage = () => {
                           e.stopPropagation()
                           openReservationModal(restaurant)
                         }}
-                        className="w-full bg-gradient-to-r from-[#D4AF37] to-[#F4D03F] text-[#0A1F44] py-3.5 rounded-xl font-bold hover:shadow-lg transition-all duration-300 transform hover:scale-[1.02] flex items-center justify-center gap-3 group/btn"
+                        className="w-full bg-[#1D293D] text-white py-3.5 rounded-xl font-bold hover:bg-[#2D3B5D] shadow-lg transition-all duration-300 transform hover:scale-[1.02] flex items-center justify-center gap-3 group/btn"
                       >
                         <Calendar size={18} className="group-hover/btn:scale-110 transition-transform" />
                         Reserve Now - Free
@@ -586,7 +586,7 @@ const RestaurantListingPage = () => {
                       required
                       value={reservationForm.guestName}
                       onChange={(e) => setReservationForm({...reservationForm, guestName: e.target.value})}
-                      className="w-full border border-gray-300 rounded-xl px-4 py-3.5 focus:ring-3 focus:ring-[#D4AF37]/30 focus:border-[#D4AF37] transition-all duration-200"
+                      className="w-full border border-gray-300 rounded-xl px-4 py-3.5 focus:ring-3 focus:ring-[#1D293D]/30 focus:border-[#1D293D] transition-all duration-200"
                       placeholder="Enter your full name"
                     />
                   </div>
@@ -601,7 +601,7 @@ const RestaurantListingPage = () => {
                         required
                         value={reservationForm.guestEmail}
                         onChange={(e) => setReservationForm({...reservationForm, guestEmail: e.target.value})}
-                        className="w-full border border-gray-300 rounded-xl px-4 py-3.5 focus:ring-3 focus:ring-[#D4AF37]/30 focus:border-[#D4AF37] transition-all duration-200"
+                        className="w-full border border-gray-300 rounded-xl px-4 py-3.5 focus:ring-3 focus:ring-[#1D293D]/30 focus:border-[#1D293D] transition-all duration-200"
                         placeholder="your@email.com"
                       />
                     </div>
@@ -615,7 +615,7 @@ const RestaurantListingPage = () => {
                         required
                         value={reservationForm.guestPhone}
                         onChange={(e) => setReservationForm({...reservationForm, guestPhone: e.target.value})}
-                        className="w-full border border-gray-300 rounded-xl px-4 py-3.5 focus:ring-3 focus:ring-[#D4AF37]/30 focus:border-[#D4AF37] transition-all duration-200"
+                        className="w-full border border-gray-300 rounded-xl px-4 py-3.5 focus:ring-3 focus:ring-[#1D293D]/30 focus:border-[#1D293D] transition-all duration-200"
                         placeholder="+1 (555) 000-0000"
                       />
                     </div>
@@ -632,7 +632,7 @@ const RestaurantListingPage = () => {
                         min={new Date().toISOString().split('T')[0]}
                         value={reservationForm.reservationDate}
                         onChange={(e) => setReservationForm({...reservationForm, reservationDate: e.target.value})}
-                        className="w-full border border-gray-300 rounded-xl px-4 py-3.5 focus:ring-3 focus:ring-[#D4AF37]/30 focus:border-[#D4AF37] transition-all duration-200"
+                        className="w-full border border-gray-300 rounded-xl px-4 py-3.5 focus:ring-3 focus:ring-[#1D293D]/30 focus:border-[#1D293D] transition-all duration-200"
                       />
                     </div>
 
@@ -645,7 +645,7 @@ const RestaurantListingPage = () => {
                         required
                         value={reservationForm.reservationTime}
                         onChange={(e) => setReservationForm({...reservationForm, reservationTime: e.target.value})}
-                        className="w-full border border-gray-300 rounded-xl px-4 py-3.5 focus:ring-3 focus:ring-[#D4AF37]/30 focus:border-[#D4AF37] transition-all duration-200"
+                        className="w-full border border-gray-300 rounded-xl px-4 py-3.5 focus:ring-3 focus:ring-[#1D293D]/30 focus:border-[#1D293D] transition-all duration-200"
                       />
                     </div>
                   </div>
@@ -661,7 +661,7 @@ const RestaurantListingPage = () => {
                       required
                       value={reservationForm.partySize}
                       onChange={(e) => setReservationForm({...reservationForm, partySize: parseInt(e.target.value) || 1})}
-                      className="w-full border border-gray-300 rounded-xl px-4 py-3.5 focus:ring-3 focus:ring-[#D4AF37]/30 focus:border-[#D4AF37] transition-all duration-200"
+                      className="w-full border border-gray-300 rounded-xl px-4 py-3.5 focus:ring-3 focus:ring-[#1D293D]/30 focus:border-[#1D293D] transition-all duration-200"
                     />
                   </div>
 
@@ -672,7 +672,7 @@ const RestaurantListingPage = () => {
                     <select
                       value={reservationForm.occasion}
                       onChange={(e) => setReservationForm({...reservationForm, occasion: e.target.value})}
-                      className="w-full border border-gray-300 rounded-xl px-4 py-3.5 focus:ring-3 focus:ring-[#D4AF37]/30 focus:border-[#D4AF37] transition-all duration-200"
+                      className="w-full border border-gray-300 rounded-xl px-4 py-3.5 focus:ring-3 focus:ring-[#1D293D]/30 focus:border-[#1D293D] transition-all duration-200"
                     >
                       {occasions.map((occasion) => (
                         <option key={occasion} value={occasion}>
@@ -690,7 +690,7 @@ const RestaurantListingPage = () => {
                       rows={3}
                       value={reservationForm.specialRequests}
                       onChange={(e) => setReservationForm({...reservationForm, specialRequests: e.target.value})}
-                      className="w-full border border-gray-300 rounded-xl px-4 py-3.5 focus:ring-3 focus:ring-[#D4AF37]/30 focus:border-[#D4AF37] transition-all duration-200 resize-none"
+                      className="w-full border border-gray-300 rounded-xl px-4 py-3.5 focus:ring-3 focus:ring-[#1D293D]/30 focus:border-[#1D293D] transition-all duration-200 resize-none"
                       placeholder="Any dietary restrictions, allergies, or special requirements..."
                     />
                   </div>
@@ -698,7 +698,7 @@ const RestaurantListingPage = () => {
                   <div className="flex gap-3 pt-2">
                     <button
                       type="submit"
-                      className="flex-1 bg-gradient-to-r from-[#D4AF37] to-[#F4D03F] text-[#0A1F44] px-6 py-4 rounded-xl font-bold hover:shadow-lg transition-all duration-300 transform hover:scale-[1.02]"
+                      className="flex-1 bg-[#1D293D] text-white px-6 py-4 rounded-xl font-bold hover:bg-[#2D3B5D] shadow-lg transition-all duration-300 transform hover:scale-[1.02]"
                     >
                       Confirm Reservation
                     </button>

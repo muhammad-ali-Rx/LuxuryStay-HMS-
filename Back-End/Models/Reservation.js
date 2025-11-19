@@ -6,51 +6,57 @@ const reservationSchema = new mongoose.Schema(
     guest: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
-      required: true
+      required: false, // Change from true to false temporarily
     },
     guestDetails: {
       name: {
         type: String,
-        required: function() { return !this.guest; } // Required if no guest ID
+        required: function () {
+          return !this.guest;
+        }, // Required if no guest ID
       },
       email: {
         type: String,
-        required: function() { return !this.guest; }
+        required: function () {
+          return !this.guest;
+        },
       },
       phone: {
         type: String,
-        required: function() { return !this.guest; }
-      }
+        required: function () {
+          return !this.guest;
+        },
+      },
     },
 
     // 🍽️ Restaurant
     restaurant: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Restaurant",
-      required: true
+      required: true,
     },
 
     // 📅 Reservation Details
     reservationDate: {
       type: Date,
-      required: true
+      required: true,
     },
 
     reservationTime: {
       type: String,
-      required: true
+      required: true,
     },
 
     partySize: {
       type: Number,
       required: true,
-      min: 1
+      min: 1,
     },
 
     // 📋 Special Requirements
     specialRequests: {
       type: String,
-      default: ""
+      default: "",
     },
 
     // 🎯 Occasion Type
@@ -59,56 +65,56 @@ const reservationSchema = new mongoose.Schema(
       enum: [
         "none",
         "birthday",
-        "anniversary", 
+        "anniversary",
         "business",
         "celebration",
         "romantic",
-        "family"
+        "family",
       ],
-      default: "none"
+      default: "none",
     },
 
     // 💰 Payment Information
     paymentStatus: {
       type: String,
       enum: ["pending", "paid", "cancelled", "refunded"],
-      default: "pending"
+      default: "pending",
     },
 
     depositAmount: {
       type: Number,
-      default: 0
+      default: 0,
     },
 
     totalAmount: {
       type: Number,
-      default: 0
+      default: 0,
     },
 
     // 📊 Status
     status: {
       type: String,
       enum: ["confirmed", "pending", "cancelled", "completed", "no_show"],
-      default: "pending"
+      default: "pending",
     },
 
     // 🔔 Notifications
     notifications: {
       reminderSent: { type: Boolean, default: false },
-      confirmationSent: { type: Boolean, default: false }
+      confirmationSent: { type: Boolean, default: false },
     },
 
     // 👨‍💼 Assigned Table/Staff
     assignedTable: String,
     assignedStaff: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "User"
+      ref: "User",
     },
 
     // 📝 Check-in/Check-out
     checkedIn: {
       type: Boolean,
-      default: false
+      default: false,
     },
 
     checkedInAt: Date,
@@ -118,9 +124,8 @@ const reservationSchema = new mongoose.Schema(
     feedback: {
       rating: { type: Number, min: 1, max: 5 },
       comment: String,
-      submittedAt: Date
-    }
-
+      submittedAt: Date,
+    },
   },
   {
     timestamps: true,
@@ -128,7 +133,7 @@ const reservationSchema = new mongoose.Schema(
 );
 
 // ✅ Virtual for formatted date
-reservationSchema.virtual('formattedDate').get(function() {
+reservationSchema.virtual("formattedDate").get(function () {
   return this.reservationDate.toLocaleDateString();
 });
 
@@ -146,38 +151,42 @@ export const checkAvailability = async (req, res) => {
     if (!restaurant) {
       return res.status(404).json({
         success: false,
-        message: 'Restaurant not found'
+        message: "Restaurant not found",
       });
     }
 
     // Check if restaurant is open at requested time
     const reservationDate = new Date(date);
-    const dayOfWeek = reservationDate.toLocaleDateString('en', { weekday: 'long' }).toLowerCase();
+    const dayOfWeek = reservationDate
+      .toLocaleDateString("en", { weekday: "long" })
+      .toLowerCase();
     const operatingHours = restaurant.openingHours[dayOfWeek];
 
     if (!operatingHours || operatingHours.closed) {
       return res.json({
         success: true,
         available: false,
-        message: 'Restaurant is closed on this day'
+        message: "Restaurant is closed on this day",
       });
     }
 
     // Simple capacity check (without reservation data)
-    const available = parseInt(partySize) <= restaurant .capacity;
+    const available = parseInt(partySize) <= restaurant.capacity;
 
     res.json({
       success: true,
       available,
       availableCapacity: restaurant.capacity,
-      message: available ? 'Table available' : 'No tables available for requested party size'
+      message: available
+        ? "Table available"
+        : "No tables available for requested party size",
     });
   } catch (error) {
-    console.error('Error in checkAvailability:', error);
+    console.error("Error in checkAvailability:", error);
     res.status(500).json({
       success: false,
-      message: 'Server error',
-      error: error.message
+      message: "Server error",
+      error: error.message,
     });
   }
 };

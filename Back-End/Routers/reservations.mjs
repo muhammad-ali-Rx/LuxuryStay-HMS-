@@ -6,7 +6,8 @@ import {
   updateReservationStatus,
   checkInGuest,
   addFeedback,
-  checkAvailability
+  checkAvailability,
+  cancelReservation
 } from '../Controller/reservationController.mjs';
 import { auth } from '../middleware/auth.mjs';
 
@@ -19,10 +20,11 @@ router.get('/:id/availability', checkAvailability); // Check availability
 // Protected routes (require authentication)
 router.get('/my-reservations', auth, getUserReservations);
 router.post('/:id/feedback', auth, addFeedback);
+router.put('/:id/cancel', auth, (req, res ) => cancelReservation(req, res)); // ✅ ADD THIS
+router.put('/:id/status', auth, updateReservationStatus);
 
 // Admin routes
 router.get('/', auth, getAllReservations);
-router.put('/:id/status', auth, updateReservationStatus);
 router.put('/:id/checkin', auth, checkInGuest);
 
 export default router;

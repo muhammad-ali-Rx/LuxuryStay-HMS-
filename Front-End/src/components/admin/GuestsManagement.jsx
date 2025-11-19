@@ -209,7 +209,7 @@ export default function GuestsManagement() {
       <div className="p-6 space-y-6 bg-gray-50 min-h-screen">
         <h2 className="text-3xl font-bold text-[#0A1F44]">Guests Management</h2>
         <div className="flex flex-col items-center justify-center h-64 space-y-4">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#D4AF37]"></div>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#0A1F44]"></div>
           <p className="text-gray-600">Loading guests data...</p>
         </div>
       </div>
@@ -228,7 +228,7 @@ export default function GuestsManagement() {
           <Button
             onClick={handleExportGuests}
             variant="outline"
-            className="flex items-center gap-2 border-[#D4AF37] text-[#D4AF37] hover:bg-[#D4AF37] hover:text-white transition-colors"
+            className="flex items-center gap-2 border-[#0A1F44] text-[#0A1F44] hover:bg-[#0A1F44] hover:text-white transition-colors rounded-lg"
             disabled={guests.length === 0}
           >
             <Download size={18} />
@@ -236,7 +236,7 @@ export default function GuestsManagement() {
           </Button>
           <Button 
             onClick={handleAddGuest}
-            className="flex items-center gap-2 bg-[#0A1F44] hover:bg-[#1a3a6d] text-white transition-colors"
+            className="flex items-center gap-2 bg-[#0A1F44] text-white rounded-lg hover:bg-[#00326f] transition-colors"
           >
             <Plus size={18} />
             Add Guest
@@ -244,10 +244,10 @@ export default function GuestsManagement() {
         </div>
       </div>
 
-      {/* Search and Filters - IMPROVED STYLING */}
-      <div className="bg-white rounded-xl p-4 shadow-sm border border-gray-200">
+      {/* Search and Filters */}
+      <div className="bg-white rounded-lg p-4 shadow-sm border border-gray-200">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          {/* Search - FIXED: Icon properly centered */}
+          {/* Search */}
           <div className="relative">
             <Search className="absolute left-3 top-1/3 transform -translate-y-1/2 text-gray-400" size={20} />
             <input
@@ -255,17 +255,17 @@ export default function GuestsManagement() {
               placeholder="Search by name, email, or phone..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#D4AF37] focus:border-transparent transition-all duration-200"
+              className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0A1F44] focus:border-transparent transition-all duration-200"
             />
           </div>
 
-          {/* Country Filter - FIXED: Icon properly centered */}
+          {/* Country Filter */}
           <div className="relative">
             <Filter className="absolute left-3 top-1/3 transform -translate-y-1/2 text-gray-400" size={20} />
             <select
               value={filterCountry}
               onChange={(e) => setFilterCountry(e.target.value)}
-              className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#D4AF37] focus:border-transparent appearance-none bg-white cursor-pointer transition-all duration-200"
+              className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0A1F44] focus:border-transparent appearance-none bg-white cursor-pointer transition-all duration-200"
             >
               <option value="">All Countries</option>
               {uniqueCountries.map(country => (
@@ -274,7 +274,7 @@ export default function GuestsManagement() {
             </select>
           </div>
 
-          {/* Stats - IMPROVED STYLING */}
+          {/* Stats */}
           <div className="bg-gradient-to-r from-[#0A1F44] to-[#1a3a6d] rounded-lg p-4 text-center text-white shadow-md">
             <p className="text-sm opacity-90">Total Guests</p>
             <p className="text-2xl font-bold">{filteredGuests.length}</p>
@@ -282,9 +282,9 @@ export default function GuestsManagement() {
         </div>
       </div>
 
-      {/* Error Display - IMPROVED STYLING */}
+      {/* Error Display */}
       {error && (
-        <div className="bg-red-50 border border-red-200 rounded-xl p-4 shadow-sm">
+        <div className="bg-red-50 border border-red-200 rounded-lg p-4 shadow-sm">
           <div className="flex items-center gap-2 text-red-700">
             <AlertCircle size={20} />
             <p className="font-semibold">Error Loading Guests</p>
@@ -292,15 +292,14 @@ export default function GuestsManagement() {
           <p className="text-red-600 mt-1">{error}</p>
           <Button 
             onClick={fetchGuests}
-            variant="outline" 
-            className="mt-3 bg-red-100 text-red-700 hover:bg-red-200 border-red-300"
+            className="mt-3 bg-[#0A1F44] text-white rounded-lg hover:bg-[#00326f] transition-colors"
           >
             Try Again
           </Button>
         </div>
       )}
 
-      {/* Guests Grid - IMPROVED STYLING */}
+      {/* Guests Grid */}
       {!error && (
         <>
           {filteredGuests.length > 0 ? (
@@ -311,7 +310,7 @@ export default function GuestsManagement() {
                   initial={{ opacity: 0, scale: 0.9 }}
                   animate={{ opacity: 1, scale: 1 }}
                   transition={{ delay: idx * 0.1 }}
-                  className="bg-white rounded-xl shadow-lg p-6 hover:shadow-xl transition-all duration-300 border border-gray-200 hover:border-[#D4AF37]"
+                  className="bg-white rounded-lg shadow-lg p-6 hover:shadow-xl transition-all duration-300 border border-gray-200 hover:border-[#0A1F44]"
                 >
                   <div className="flex justify-between items-start mb-4">
                     <div>
@@ -321,8 +320,8 @@ export default function GuestsManagement() {
                         {guest.role || 'user'}
                       </p>
                     </div>
-                    <div className="w-12 h-12 bg-gradient-to-r from-[#D4AF37] to-[#f4d158] rounded-full flex items-center justify-center shadow-md">
-                      <span className="text-[#0A1F44] font-bold text-lg">
+                    <div className="w-12 h-12 bg-gradient-to-r from-[#0A1F44] to-[#1a3a6d] rounded-full flex items-center justify-center shadow-md">
+                      <span className="text-white font-bold text-lg">
                         {(guest.name || 'U').charAt(0).toUpperCase()}
                       </span>
                     </div>
@@ -330,15 +329,15 @@ export default function GuestsManagement() {
 
                   <div className="space-y-3 mb-4">
                     <div className="flex items-center gap-2 text-gray-700">
-                      <Mail size={18} className="text-[#D4AF37] flex-shrink-0" />
+                      <Mail size={18} className="text-[#0A1F44] flex-shrink-0" />
                       <span className="text-sm truncate">{guest.email || 'No email'}</span>
                     </div>
                     <div className="flex items-center gap-2 text-gray-700">
-                      <Phone size={18} className="text-[#D4AF37] flex-shrink-0" />
+                      <Phone size={18} className="text-[#0A1F44] flex-shrink-0" />
                       <span className="text-sm">{guest.phone || 'Not provided'}</span>
                     </div>
                     <div className="flex items-center gap-2 text-gray-700">
-                      <MapPin size={18} className="text-[#D4AF37] flex-shrink-0" />
+                      <MapPin size={18} className="text-[#0A1F44] flex-shrink-0" />
                       <span className="text-sm">{guest.address?.country || "Not specified"}</span>
                     </div>
                   </div>
@@ -385,7 +384,7 @@ export default function GuestsManagement() {
               ))}
             </div>
           ) : (
-            <div className="text-center py-16 bg-white rounded-xl shadow-lg border border-gray-200">
+            <div className="text-center py-16 bg-white rounded-lg shadow-lg border border-gray-200">
               <div className="w-20 h-20 mx-auto mb-4 bg-gray-100 rounded-full flex items-center justify-center">
                 <User size={32} className="text-gray-400" />
               </div>
@@ -403,7 +402,7 @@ export default function GuestsManagement() {
                   setSearchTerm("")
                   setFilterCountry("")
                 }}
-                className="bg-[#0A1F44] hover:bg-[#1a3a6d] transition-colors"
+                className="bg-[#0A1F44] text-white rounded-lg hover:bg-[#00326f] transition-colors"
               >
                 Clear Filters
               </Button>
@@ -412,13 +411,13 @@ export default function GuestsManagement() {
         </>
       )}
 
-      {/* Guest Details/Edit Modal - IMPROVED STYLING */}
+      {/* Guest Details/Edit Modal */}
       {showModal && selectedGuest && (
         <div className="fixed inset-0 bg-gray-900/30 backdrop-blur-sm flex items-center justify-center p-4 z-50">
           <motion.div
             initial={{ opacity: 0, scale: 0.9 }}
             animate={{ opacity: 1, scale: 1 }}
-            className="bg-white rounded-2xl p-6 w-full max-w-md max-h-[90vh] overflow-y-auto shadow-2xl border border-gray-300"
+            className="bg-white rounded-xl p-6 w-full max-w-md max-h-[90vh] overflow-y-auto shadow-2xl border border-gray-300"
           >
             <div className="flex items-center justify-between mb-6 pb-4 border-b border-gray-200">
               <h3 className="text-2xl font-bold text-[#0A1F44]">
@@ -442,7 +441,7 @@ export default function GuestsManagement() {
                   type="text"
                   value={selectedGuest.name || ''}
                   onChange={(e) => setSelectedGuest({...selectedGuest, name: e.target.value})}
-                  className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#D4AF37] focus:border-transparent transition-all duration-200"
+                  className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0A1F44] focus:border-transparent transition-all duration-200"
                   readOnly={selectedGuest.viewMode}
                 />
               </div>
@@ -453,7 +452,7 @@ export default function GuestsManagement() {
                   type="email"
                   value={selectedGuest.email || ''}
                   onChange={(e) => setSelectedGuest({...selectedGuest, email: e.target.value})}
-                  className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#D4AF37] focus:border-transparent transition-all duration-200"
+                  className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0A1F44] focus:border-transparent transition-all duration-200"
                   readOnly={selectedGuest.viewMode}
                 />
               </div>
@@ -464,7 +463,7 @@ export default function GuestsManagement() {
                   type="tel"
                   value={selectedGuest.phone || ''}
                   onChange={(e) => setSelectedGuest({...selectedGuest, phone: e.target.value})}
-                  className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#D4AF37] focus:border-transparent transition-all duration-200"
+                  className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0A1F44] focus:border-transparent transition-all duration-200"
                   readOnly={selectedGuest.viewMode}
                 />
               </div>
@@ -478,7 +477,7 @@ export default function GuestsManagement() {
                     ...selectedGuest, 
                     address: {...selectedGuest.address, country: e.target.value}
                   })}
-                  className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#D4AF37] focus:border-transparent transition-all duration-200"
+                  className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0A1F44] focus:border-transparent transition-all duration-200"
                   readOnly={selectedGuest.viewMode}
                 />
               </div>
@@ -502,14 +501,14 @@ export default function GuestsManagement() {
                   setShowModal(false)
                   setSelectedGuest(null)
                 }}
-                className="flex-1 border-gray-300 text-gray-700 hover:bg-gray-50 transition-colors"
+                className="flex-1 border-gray-300 text-gray-700 hover:bg-gray-50 transition-colors rounded-lg"
               >
                 {selectedGuest.viewMode ? 'Close' : 'Cancel'}
               </Button>
               {!selectedGuest.viewMode && (
                 <Button
                   onClick={() => handleUpdateGuest(selectedGuest)}
-                  className="flex-1 bg-[#0A1F44] hover:bg-[#1a3a6d] text-white transition-colors"
+                  className="flex-1 bg-[#0A1F44] text-white rounded-lg hover:bg-[#00326f] transition-colors"
                 >
                   Save Changes
                 </Button>

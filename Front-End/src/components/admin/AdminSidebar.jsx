@@ -13,6 +13,7 @@ import {
   Home,
   Utensils,
   BookOpen,
+  WalletCards,
 } from "lucide-react"
 import { useAuth } from "../../context/AuthContext"
 import { useNavigate } from "react-router-dom"
@@ -21,10 +22,10 @@ const menuItems = [
   { id: "dashboard", label: "Dashboard", icon: LayoutDashboard },
   { id: "rooms", label: "Rooms", icon: DoorOpen },
   { id: "dining", label: "Dining", icon: Utensils },
-  { id: "bookings", label: "Bookings", icon: Calendar },
-  { id: "reservations", label: "reservations", icon: BookOpen },
+  { id: "bookings", label: "Bookings", icon: Calendar },  
   { id: "guests", label: "Guests", icon: Users },
   { id: "staff", label: "Staff", icon: UserCheck },
+  {id:  "Biling", label : "Billing" , icon: WalletCards},
   { id: "reports", label: "Reports", icon: FileText },
   { id: "settings", label: "Settings", icon: Settings },
 ]

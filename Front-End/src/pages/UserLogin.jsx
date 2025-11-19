@@ -53,12 +53,11 @@ export default function UserLogin() {
         return;
       }
 
+      // Check the user role and navigate accordingly
       if (user.role === "guest") {
         navigate("/reservations", { state: { from: "login" } });
       } else if (
-        ["admin", "manager", "receptionist", "housekeeping", "staff"].includes(
-          user.role
-        )
+        ["admin", "manager", "receptionist", "housekeeping", "staff"].includes(user.role)
       ) {
         navigate("/admin", { state: { from: "login" } });
       } else {
@@ -188,7 +187,7 @@ export default function UserLogin() {
                           Sign In
                         </>
                       )}
-                    </motion.button> 0+
+                    </motion.button>
 
                     <div className="text-center">
                       <p className="text-gray-600 text-sm">

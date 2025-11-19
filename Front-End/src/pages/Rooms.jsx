@@ -195,7 +195,7 @@ export default function Rooms() {
 
               {/* Capacity Filter */}
               <div className="mb-8">
-                <h4 className="font-semibold text-primary mb-4">
+                <h4 className="font-semibold text-[#1D293D] mb-4">
                   Guest Capacity
                 </h4>
                 <div className="space-y-2">
@@ -209,11 +209,11 @@ export default function Rooms() {
                       }
                       className={`w-full text-left px-4 py-2 rounded-lg transition-colors ${
                         selectedCapacity === capacity
-                          ? "bg-accent text-primary"
+                          ? "bg-accent text-[#1D293D]"
                           : "bg-secondary hover:bg-muted"
                       }`}
                     >
-                      {capacity}+ Guests {/* ✅ Changed back to show capacity and above */}
+                      {capacity}+ Guests
                     </button>
                   ))}
                 </div>
@@ -221,7 +221,7 @@ export default function Rooms() {
 
               {/* Price Filter */}
               <div>
-                <h4 className="font-semibold text-primary mb-4">Price Range</h4>
+                <h4 className="font-semibold text-[#1D293D] mb-4">Price Range</h4>
                 <div className="space-y-4">
                   <input
                     type="range"
@@ -234,7 +234,7 @@ export default function Rooms() {
                         Number.parseInt(e.target.value),
                       ])
                     }
-                    className="w-full"
+                    className="w-full accent-[#1D293D]"
                   />
                   <div className="flex justify-between text-sm text-muted">
                     <span className="flex items-center gap-1">
@@ -289,7 +289,7 @@ export default function Rooms() {
                               </p>
                             </div>
                             <div className="text-right">
-                              <p className="text-3xl font-bold text-teal-600 flex items-center gap-1">
+                              <p className="text-3xl font-bold text-[#1D293D] flex items-center gap-1">
                                 <DollarSign size={24} />
                                 {room.pricePerNight}
                               </p>
@@ -300,11 +300,10 @@ export default function Rooms() {
                           {/* Room Info */}
                           <div className="grid grid-cols-2 gap-4 mb-4">
                             <div className="flex items-center gap-2 text-sm">
-                              <Users size={16} className="text-accent" />
+                              <Users size={16} className="text-[#1D293D]" />
                               <span>Up to {room.capacity || 2} guests</span>
                             </div>
                             <div className="flex items-center gap-2 text-sm">
-                              <span className="text-accent">📐</span>
                               <span>{room.roomType}</span>
                             </div>
                           </div>
@@ -365,7 +364,7 @@ export default function Rooms() {
                                     size={16}
                                     className={
                                       i < Math.floor(room.rating || 0)
-                                        ? "fill-yellow-400 text-yellow-400"
+                                        ? "fill-[#E2BD3A] text-[#E2BD3A]"
                                         : "text-gray-300"
                                     }
                                   />
@@ -385,9 +384,9 @@ export default function Rooms() {
                                   <button
                                     key={star}
                                     onClick={() => submitRating(room._id, star)}
-                                    className="text-lg transition-transform hover:scale-110 focus:outline-none"
+                                    className="text-lg transition-transform hover:scale-110 focus:outline-none border-none outline-none"
                                   >
-                                    <span className="text-gray-400 hover:text-yellow-400">⭐</span>
+                                    <span className="text-[#E2BD3A] hover:text-[#d4ab2a] transition-colors">⭐</span>
                                   </button>
                                 ))}
                               </div>

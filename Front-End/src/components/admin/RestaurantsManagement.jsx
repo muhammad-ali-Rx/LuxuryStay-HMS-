@@ -24,19 +24,33 @@ import {
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import axios from "axios";
-import { useAuth } from "../../context/AuthContext"; 
+import { useAuth } from "../../context/AuthContext";
 
 const RestaurantsManagement = () => {
   const { userAuth, adminUser } = useAuth();
-  
+
   // Constants
   const cuisines = [
-    "French", "Italian", "Japanese", "Indian", "International",
-    "Mexican", "Chinese", "Mediterranean", "American", "Fusion",
+    "French",
+    "Italian",
+    "Japanese",
+    "Indian",
+    "International",
+    "Mexican",
+    "Chinese",
+    "Mediterranean",
+    "American",
+    "Fusion",
   ];
-  
+
   const statuses = ["active", "inactive", "under_renovation"];
-  const reservationStatuses = ["confirmed", "pending", "cancelled", "completed", "no_show"];
+  const reservationStatuses = [
+    "confirmed",
+    "pending",
+    "cancelled",
+    "completed",
+    "no_show",
+  ];
 
   // State
   const [restaurants, setRestaurants] = useState([]);
@@ -65,7 +79,7 @@ const RestaurantsManagement = () => {
     reservationTime: "",
     partySize: 1,
     specialRequests: "",
-    occasion: "none"
+    occasion: "none",
   });
 
   // Restaurant Form State
@@ -103,12 +117,29 @@ const RestaurantsManagement = () => {
   });
 
   // Auth helper
+  // Update the getToken function
   const getToken = () => {
     try {
-      return localStorage.getItem("authToken") || 
-             localStorage.getItem("token") ||
-             sessionStorage.getItem("authToken") ||
-             sessionStorage.getItem("token");
+      const token =
+        localStorage.getItem("authToken") ||
+        localStorage.getItem("token") ||
+        sessionStorage.getItem("authToken") ||
+        sessionStorage.getItem("token");
+
+      console.log("🔑 Token check:", {
+        hasToken: !!token,
+        tokenLength: token?.length,
+        storage: {
+          localStorageAuth: localStorage.getItem("authToken") ? "Yes" : "No",
+          localStorageToken: localStorage.getItem("token") ? "Yes" : "No",
+          sessionStorageAuth: sessionStorage.getItem("authToken")
+            ? "Yes"
+            : "No",
+          sessionStorageToken: sessionStorage.getItem("token") ? "Yes" : "No",
+        },
+      });
+
+      return token;
     } catch (error) {
       console.error("Error getting token:", error);
       return null;
@@ -116,21 +147,39 @@ const RestaurantsManagement = () => {
   };
 
   // Debug auth function
-  const debugAuth = () => {
-    const token = getToken();
-    console.log('🔐 Auth Debug:', {
-      token: token ? 'Present' : 'Missing',
-      tokenLength: token?.length,
-      userAuth,
-      adminUser
-    });
-  };
+  // Add this better debug function
+const debugAuth = () => {
+  const token = getToken();
+  console.log('🔐 COMPLETE AUTH DEBUG:', {
+    token: token ? `Present (${token.length} chars)` : 'Missing',
+    tokenDecoded: token ? JSON.parse(atob(token.split('.')[1])) : 'No token',
+    userAuth: userAuth,
+    adminUser: adminUser,
+    allUserIds: {
+      userAuth: {
+        id: userAuth?.id,
+        _id: userAuth?._id, 
+        userId: userAuth?.userId
+      },
+      adminUser: {
+        id: adminUser?.id,
+        _id: adminUser?._id,
+        userId: adminUser?.userId
+      }
+    },
+    localStorage: {
+      authToken: localStorage.getItem("authToken") ? 'Yes' : 'No',
+      token: localStorage.getItem("token") ? 'Yes' : 'No'
+    }
+  });
+};
 
-  useEffect(() => {
-    debugAuth();
-    fetchRestaurants();
-    fetchReservations();
-  }, []);
+// Call this when component mounts
+useEffect(() => {
+  debugAuth();
+  fetchRestaurants();
+  fetchReservations();
+}, []);
 
   // API Functions
   const fetchRestaurants = async () => {
@@ -140,7 +189,7 @@ const RestaurantsManagement = () => {
       const response = await axios.get("http://localhost:3000/restaurants", {
         timeout: 10000,
       });
-      
+
       const restaurantsData = response.data?.data || [];
       setRestaurants(Array.isArray(restaurantsData) ? restaurantsData : []);
     } catch (error) {
@@ -157,12 +206,12 @@ const RestaurantsManagement = () => {
       if (!token) return;
 
       const response = await axios.get("http://localhost:3000/reservations", {
-        headers: { 
+        headers: {
           Authorization: `Bearer ${token}`,
         },
         timeout: 10000,
       });
-      
+
       const reservationsData = response.data?.data || [];
       setReservations(Array.isArray(reservationsData) ? reservationsData : []);
     } catch (error) {
@@ -174,19 +223,15 @@ const RestaurantsManagement = () => {
     e.preventDefault();
     try {
       setError("");
-      const response = await axios.post(
-        "http://localhost:3000/reservations", 
-        {
-          restaurantId: selectedRestaurant._id,
-          ...reservationForm
-        }
-      );
+      const response = await axios.post("http://localhost:3000/reservations", {
+        restaurantId: selectedRestaurant._id,
+        ...reservationForm,
+      });
 
       setSuccess("Reservation created successfully!");
       setShowReservationModal(false);
       resetReservationForm();
       fetchReservations();
-      
     } catch (error) {
       console.error("Error creating reservation:", error);
       setError(error.response?.data?.message || "Error creating reservation.");
@@ -200,7 +245,7 @@ const RestaurantsManagement = () => {
         `http://localhost:3000/reservations/${reservationId}/status`,
         { status: newStatus },
         {
-          headers: { 
+          headers: {
             Authorization: `Bearer ${token}`,
           },
         }
@@ -218,8 +263,8 @@ const RestaurantsManagement = () => {
     try {
       setImageUploading(true);
       const files = Array.from(e.target.files);
-      
-      const imagePromises = files.map(file => {
+
+      const imagePromises = files.map((file) => {
         return new Promise((resolve) => {
           const reader = new FileReader();
           reader.onload = (e) => resolve(e.target.result);
@@ -228,11 +273,10 @@ const RestaurantsManagement = () => {
       });
 
       const imageUrls = await Promise.all(imagePromises);
-      setFormData(prev => ({ 
-        ...prev, 
-        images: [...prev.images, ...imageUrls] 
+      setFormData((prev) => ({
+        ...prev,
+        images: [...prev.images, ...imageUrls],
       }));
-      
     } catch (error) {
       console.error("Error uploading images:", error);
       setError("Error uploading images. Please try again.");
@@ -243,9 +287,9 @@ const RestaurantsManagement = () => {
 
   // Remove Image Function
   const removeImage = (index) => {
-    setFormData(prev => ({ 
-      ...prev, 
-      images: prev.images.filter((_, i) => i !== index) 
+    setFormData((prev) => ({
+      ...prev,
+      images: prev.images.filter((_, i) => i !== index),
     }));
   };
 
@@ -256,84 +300,137 @@ const RestaurantsManagement = () => {
   };
 
   // Form Handlers
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    try {
-      setError("");
-      const token = getToken();
-      
-      if (!token) {
-        setError("Authentication required. Please login again.");
-        return;
+const handleSubmit = async (e) => {
+  e.preventDefault();
+  try {
+    setError("");
+    const token = getToken();
+    
+    console.log('🔐 SUBMIT DEBUG:', {
+      token: token ? `Present (${token.length} chars)` : 'Missing',
+      userAuth: userAuth,
+      adminUser: adminUser,
+      // Check all possible ID fields
+      userAuthAllIds: {
+        id: userAuth?.id,
+        _id: userAuth?._id,
+        userId: userAuth?.userId
+      },
+      adminUserAllIds: {
+        id: adminUser?.id,
+        _id: adminUser?._id,
+        userId: adminUser?.userId
       }
-
-      const currentUserId = userAuth?.id || adminUser?.id || userAuth?._id || adminUser?._id;
-      if (!currentUserId) {
-        setError("User information not found. Please login again.");
-        return;
-      }
-
-      const restaurantData = {
-        name: formData.name.trim(),
-        cuisine: formData.cuisine,
-        description: formData.description.trim(),
-        priceRange: formData.priceRange,
-        capacity: parseInt(formData.capacity) || 50,
-        location: formData.location.trim(),
-        status: formData.status,
-        images: formData.images,
-        tags: formData.tags.filter(tag => tag.trim() !== ""),
-        contact: formData.contact,
-        features: formData.features,
-        openingHours: formData.openingHours,
-        createdBy: currentUserId,
-      };
-
-      // Validation
-      if (!restaurantData.name.trim()) {
-        setError("Restaurant name is required");
-        return;
-      }
-      if (!restaurantData.description.trim()) {
-        setError("Description is required");
-        return;
-      }
-      if (!restaurantData.location.trim()) {
-        setError("Location is required");
-        return;
-      }
-
-      let response;
-      if (editingRestaurant) {
-        response = await axios.put(
-          `http://localhost:3000/restaurants/${editingRestaurant._id}`,
-          restaurantData,
-          { 
-            headers: { Authorization: `Bearer ${token}` },
-          }
-        );
-        setSuccess("Restaurant updated successfully!");
-      } else {
-        response = await axios.post(
-          "http://localhost:3000/restaurants", 
-          restaurantData,
-          { 
-            headers: { Authorization: `Bearer ${token}` },
-          }
-        );
-        setSuccess("Restaurant created successfully!");
-      }
-
-      setShowModal(false);
-      setEditingRestaurant(null);
-      resetForm();
-      fetchRestaurants();
-      
-    } catch (error) {
-      console.error("Error saving restaurant:", error);
-      setError(error.response?.data?.message || "Error saving restaurant. Please try again.");
+    });
+    
+    if (!token) {
+      setError("Authentication token not found. Please login again.");
+      return;
     }
-  };
+
+    // FIX: Get user ID from multiple possible sources
+    let currentUserId = null;
+    
+    // Try from userAuth first
+    if (userAuth) {
+      currentUserId = userAuth.id || userAuth._id || userAuth.userId;
+    }
+    
+    // If not found, try from adminUser
+    if (!currentUserId && adminUser) {
+      currentUserId = adminUser.id || adminUser._id || adminUser.userId;
+    }
+    
+    // If still not found, try to decode from token
+    if (!currentUserId && token) {
+      try {
+        const tokenPayload = JSON.parse(atob(token.split('.')[1]));
+        currentUserId = tokenPayload.userId || tokenPayload.id || tokenPayload._id;
+        console.log('🔓 Extracted from token:', currentUserId);
+      } catch (tokenError) {
+        console.error('Error decoding token:', tokenError);
+      }
+    }
+
+    console.log('🆔 Final current user ID:', currentUserId);
+    
+    if (!currentUserId) {
+      setError("User information not found. Please login again.");
+      return;
+    }
+
+    const restaurantData = {
+      name: formData.name.trim(),
+      cuisine: formData.cuisine,
+      description: formData.description.trim(),
+      priceRange: formData.priceRange,
+      capacity: parseInt(formData.capacity) || 50,
+      location: formData.location.trim(),
+      status: formData.status,
+      images: formData.images,
+      tags: formData.tags.filter(tag => tag.trim() !== ""),
+      contact: formData.contact,
+      features: formData.features,
+      openingHours: formData.openingHours,
+      createdBy: currentUserId,
+    };
+
+    // Validation
+    if (!restaurantData.name.trim()) {
+      setError("Restaurant name is required");
+      return;
+    }
+    if (!restaurantData.description.trim()) {
+      setError("Description is required");
+      return;
+    }
+    if (!restaurantData.location.trim()) {
+      setError("Location is required");
+      return;
+    }
+
+    console.log('🎯 Sending restaurant data:', restaurantData);
+
+    let response;
+    if (editingRestaurant) {
+      response = await axios.put(
+        `http://localhost:3000/restaurants/${editingRestaurant._id}`,
+        restaurantData,
+        { 
+          headers: { 
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          },
+        }
+      );
+      setSuccess("Restaurant updated successfully!");
+    } else {
+      response = await axios.post(
+        "http://localhost:3000/restaurants", 
+        restaurantData,
+        { 
+          headers: { 
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          },
+        }
+      );
+      setSuccess("Restaurant created successfully!");
+    }
+
+    console.log('✅ Restaurant API response:', response.data);
+    
+    setShowModal(false);
+    setEditingRestaurant(null);
+    resetForm();
+    fetchRestaurants();
+    
+  } catch (error) {
+    console.error('❌ Error saving restaurant:', error);
+    console.error('Error response:', error.response?.data);
+    setError(error.response?.data?.message || "Error saving restaurant. Please try again.");
+  }
+};
 
   const handleEdit = (restaurant) => {
     setEditingRestaurant(restaurant);
@@ -349,8 +446,11 @@ const RestaurantsManagement = () => {
       tags: restaurant.tags || [],
       contact: restaurant.contact || { phone: "", email: "", extension: "" },
       features: restaurant.features || {
-        hasOutdoorSeating: false, hasPrivateDining: false, hasWifi: true,
-        isWheelchairAccessible: true, hasParking: true,
+        hasOutdoorSeating: false,
+        hasPrivateDining: false,
+        hasWifi: true,
+        isWheelchairAccessible: true,
+        hasParking: true,
       },
       openingHours: restaurant.openingHours || {
         monday: { open: "09:00", close: "22:00", closed: false },
@@ -384,12 +484,22 @@ const RestaurantsManagement = () => {
 
   const resetForm = () => {
     setFormData({
-      name: "", cuisine: "French", description: "", priceRange: "$$", capacity: 50,
-      location: "", status: "active", images: [], tags: [],
+      name: "",
+      cuisine: "French",
+      description: "",
+      priceRange: "$$",
+      capacity: 50,
+      location: "",
+      status: "active",
+      images: [],
+      tags: [],
       contact: { phone: "", email: "", extension: "" },
       features: {
-        hasOutdoorSeating: false, hasPrivateDining: false, hasWifi: true,
-        isWheelchairAccessible: true, hasParking: true,
+        hasOutdoorSeating: false,
+        hasPrivateDining: false,
+        hasWifi: true,
+        isWheelchairAccessible: true,
+        hasParking: true,
       },
       openingHours: {
         monday: { open: "09:00", close: "22:00", closed: false },
@@ -414,7 +524,7 @@ const RestaurantsManagement = () => {
       reservationTime: "",
       partySize: 1,
       specialRequests: "",
-      occasion: "none"
+      occasion: "none",
     });
     setSelectedRestaurant(null);
     setError("");
@@ -427,10 +537,12 @@ const RestaurantsManagement = () => {
 
   // Utility Functions
   const filteredRestaurants = restaurants.filter((restaurant) => {
-    const matchesSearch = restaurant.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         restaurant.cuisine?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         restaurant.location?.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesFilter = filterStatus === "all" || restaurant.status === filterStatus;
+    const matchesSearch =
+      restaurant.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      restaurant.cuisine?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      restaurant.location?.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesFilter =
+      filterStatus === "all" || restaurant.status === filterStatus;
     return matchesSearch && matchesFilter;
   });
 
@@ -443,7 +555,8 @@ const RestaurantsManagement = () => {
     const colors = {
       active: "bg-green-100 text-green-800 border border-green-200",
       inactive: "bg-red-100 text-red-800 border border-red-200",
-      under_renovation: "bg-yellow-100 text-yellow-800 border border-yellow-200"
+      under_renovation:
+        "bg-yellow-100 text-yellow-800 border border-yellow-200",
     };
     return colors[status] || "bg-gray-100 text-gray-800 border border-gray-200";
   };
@@ -454,7 +567,7 @@ const RestaurantsManagement = () => {
       pending: "bg-yellow-100 text-yellow-800 border border-yellow-200",
       cancelled: "bg-red-100 text-red-800 border border-red-200",
       completed: "bg-blue-100 text-blue-800 border border-blue-200",
-      no_show: "bg-gray-100 text-gray-800 border border-gray-200"
+      no_show: "bg-gray-100 text-gray-800 border border-gray-200",
     };
     return colors[status] || "bg-gray-100 text-gray-800 border border-gray-200";
   };
@@ -465,7 +578,7 @@ const RestaurantsManagement = () => {
       pending: <ClockIcon size={16} className="text-yellow-600" />,
       cancelled: <XCircle size={16} className="text-red-600" />,
       completed: <CheckCircle size={16} className="text-blue-600" />,
-      no_show: <XCircle size={16} className="text-gray-600" />
+      no_show: <XCircle size={16} className="text-gray-600" />,
     };
     return icons[status] || <ClockIcon size={16} />;
   };
@@ -473,29 +586,31 @@ const RestaurantsManagement = () => {
   // Format Opening Hours
   const formatOpeningHours = (openingHours) => {
     if (!openingHours) return "Not available";
-    
+
     const days = Object.entries(openingHours);
-    return days.map(([day, hours]) => {
-      const dayName = day.charAt(0).toUpperCase() + day.slice(1);
-      if (hours.closed) return `${dayName}: Closed`;
-      return `${dayName}: ${hours.open} - ${hours.close}`;
-    }).join('\n');
+    return days
+      .map(([day, hours]) => {
+        const dayName = day.charAt(0).toUpperCase() + day.slice(1);
+        if (hours.closed) return `${dayName}: Closed`;
+        return `${dayName}: ${hours.open} - ${hours.close}`;
+      })
+      .join("\n");
   };
 
   // Stats
   const reservationStats = {
     total: reservations.length,
-    confirmed: reservations.filter(r => r.status === 'confirmed').length,
-    pending: reservations.filter(r => r.status === 'pending').length,
-    cancelled: reservations.filter(r => r.status === 'cancelled').length,
-    completed: reservations.filter(r => r.status === 'completed').length,
-    no_show: reservations.filter(r => r.status === 'no_show').length,
+    confirmed: reservations.filter((r) => r.status === "confirmed").length,
+    pending: reservations.filter((r) => r.status === "pending").length,
+    cancelled: reservations.filter((r) => r.status === "cancelled").length,
+    completed: reservations.filter((r) => r.status === "completed").length,
+    no_show: reservations.filter((r) => r.status === "no_show").length,
   };
 
   if (loading) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#D4AF37]"></div>
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#0A1F44]"></div>
       </div>
     );
   }
@@ -505,8 +620,12 @@ const RestaurantsManagement = () => {
       {/* Header */}
       <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4 mb-8">
         <div>
-          <h1 className="text-2xl lg:text-3xl font-bold text-gray-900">Restaurants Management</h1>
-          <p className="text-gray-600 mt-2">Manage your restaurants and reservations</p>
+          <h1 className="text-2xl lg:text-3xl font-bold text-gray-900">
+            Restaurants Management
+          </h1>
+          <p className="text-gray-600 mt-2">
+            Manage your restaurants and reservations
+          </p>
         </div>
         <div className="flex flex-wrap gap-3">
           <button
@@ -517,8 +636,12 @@ const RestaurantsManagement = () => {
             Reservations ({reservations.length})
           </button>
           <button
-            onClick={() => { setActiveTab("restaurants"); setShowModal(true); resetForm(); }}
-            className="bg-[#D4AF37] text-[#0A1F44] px-4 py-2.5 rounded-lg flex items-center gap-2 hover:bg-[#c19b2a] transition-colors text-sm font-medium shadow-sm"
+            onClick={() => {
+              setActiveTab("restaurants");
+              setShowModal(true);
+              resetForm();
+            }}
+            className="bg-[#0A1F44] text-[#ffff] px-4 py-2.5 rounded-lg flex items-center gap-2 hover:bg-[#00326f] transition-colors text-sm font-medium shadow-sm"
           >
             <Plus size={18} />
             Add Restaurant
@@ -531,8 +654,8 @@ const RestaurantsManagement = () => {
         <div className="bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-lg mb-6">
           <div className="flex justify-between items-center">
             <span className="text-sm">{success}</span>
-            <button 
-              onClick={() => setSuccess("")} 
+            <button
+              onClick={() => setSuccess("")}
               className="text-green-700 hover:text-green-900 ml-4"
             >
               <X size={16} />
@@ -546,8 +669,8 @@ const RestaurantsManagement = () => {
         <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg mb-6">
           <div className="flex justify-between items-center">
             <span className="text-sm">{error}</span>
-            <button 
-              onClick={() => setError("")} 
+            <button
+              onClick={() => setError("")}
               className="text-red-700 hover:text-red-900 ml-4"
             >
               <X size={16} />
@@ -562,7 +685,7 @@ const RestaurantsManagement = () => {
           onClick={() => setActiveTab("restaurants")}
           className={`px-6 py-3 font-medium border-b-2 transition-colors ${
             activeTab === "restaurants"
-              ? "border-[#D4AF37] text-[#D4AF37]"
+              ? "border-[#0A1F44] text-[#0A1F44]"
               : "border-transparent text-gray-500 hover:text-gray-700"
           }`}
         >
@@ -593,24 +716,28 @@ const RestaurantsManagement = () => {
           <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-200 mb-6">
             <div className="flex flex-col lg:flex-row gap-4">
               <div className="flex-1 relative">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
+                <Search
+                  className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"
+                  size={20}
+                />
                 <input
                   type="text"
                   placeholder="Search restaurants by name, cuisine, or location..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#D4AF37] focus:border-transparent"
+                  className="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#0A1F44] focus:border-transparent"
                 />
               </div>
               <select
                 value={filterStatus}
                 onChange={(e) => setFilterStatus(e.target.value)}
-                className="border border-gray-300 rounded-lg px-3 py-2.5 focus:ring-2 focus:ring-[#D4AF37] focus:border-transparent min-w-[180px]"
+                className="border border-gray-300 rounded-lg px-3 py-2.5 focus:ring-2 focus:ring-[#0A1F44] focus:border-transparent min-w-[180px]"
               >
                 <option value="all">All Status</option>
                 {statuses.map((status) => (
                   <option key={status} value={status}>
-                    {status.charAt(0).toUpperCase() + status.slice(1).replace("_", " ")}
+                    {status.charAt(0).toUpperCase() +
+                      status.slice(1).replace("_", " ")}
                   </option>
                 ))}
               </select>
@@ -619,7 +746,8 @@ const RestaurantsManagement = () => {
 
           {/* Restaurants Count */}
           <div className="mb-4 text-sm text-gray-600">
-            Showing {filteredRestaurants.length} of {restaurants.length} restaurants
+            Showing {filteredRestaurants.length} of {restaurants.length}{" "}
+            restaurants
           </div>
 
           {/* Restaurants Grid */}
@@ -630,8 +758,8 @@ const RestaurantsManagement = () => {
                   <Building size={64} className="mx-auto" />
                 </div>
                 <p className="text-gray-500 text-lg">
-                  {restaurants.length === 0 
-                    ? "No restaurants found. Add your first restaurant!" 
+                  {restaurants.length === 0
+                    ? "No restaurants found. Add your first restaurant!"
                     : "No restaurants match your search criteria."}
                 </p>
               </div>
@@ -658,18 +786,44 @@ const RestaurantsManagement = () => {
         <div className="space-y-6">
           {/* Reservation Stats */}
           <div className="grid grid-cols-2 lg:grid-cols-6 gap-4">
-            <StatCard title="Total" value={reservationStats.total} color="gray" />
-            <StatCard title="Confirmed" value={reservationStats.confirmed} color="green" />
-            <StatCard title="Pending" value={reservationStats.pending} color="yellow" />
-            <StatCard title="Cancelled" value={reservationStats.cancelled} color="red" />
-            <StatCard title="Completed" value={reservationStats.completed} color="blue" />
-            <StatCard title="No Show" value={reservationStats.no_show} color="gray" />
+            <StatCard
+              title="Total"
+              value={reservationStats.total}
+              color="gray"
+            />
+            <StatCard
+              title="Confirmed"
+              value={reservationStats.confirmed}
+              color="green"
+            />
+            <StatCard
+              title="Pending"
+              value={reservationStats.pending}
+              color="yellow"
+            />
+            <StatCard
+              title="Cancelled"
+              value={reservationStats.cancelled}
+              color="red"
+            />
+            <StatCard
+              title="Completed"
+              value={reservationStats.completed}
+              color="blue"
+            />
+            <StatCard
+              title="No Show"
+              value={reservationStats.no_show}
+              color="gray"
+            />
           </div>
 
           {/* Reservation Filter */}
           <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-200">
             <div className="flex flex-col lg:flex-row gap-4 items-start lg:items-center">
-              <span className="text-sm font-medium text-gray-700 whitespace-nowrap">Filter by Status:</span>
+              <span className="text-sm font-medium text-gray-700 whitespace-nowrap">
+                Filter by Status:
+              </span>
               <select
                 value={reservationFilter}
                 onChange={(e) => setReservationFilter(e.target.value)}
@@ -678,7 +832,8 @@ const RestaurantsManagement = () => {
                 <option value="all">All Reservations</option>
                 {reservationStatuses.map((status) => (
                   <option key={status} value={status}>
-                    {status.charAt(0).toUpperCase() + status.slice(1).replace("_", " ")}
+                    {status.charAt(0).toUpperCase() +
+                      status.slice(1).replace("_", " ")}
                   </option>
                 ))}
               </select>
@@ -688,16 +843,22 @@ const RestaurantsManagement = () => {
           {/* Reservations Table */}
           <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
             <div className="px-6 py-4 border-b border-gray-200 bg-gray-50">
-              <h2 className="text-xl font-semibold text-gray-900">Restaurant Reservations</h2>
-              <p className="text-gray-600 text-sm">Manage all restaurant bookings and reservations</p>
+              <h2 className="text-xl font-semibold text-gray-900">
+                Restaurant Reservations
+              </h2>
+              <p className="text-gray-600 text-sm">
+                Manage all restaurant bookings and reservations
+              </p>
             </div>
-            
+
             {filteredReservations.length === 0 ? (
               <div className="text-center py-12">
                 <Calendar size={64} className="mx-auto text-gray-400 mb-4" />
                 <p className="text-gray-500 text-lg">No reservations found</p>
                 <p className="text-gray-400 text-sm mt-2">
-                  {reservationFilter !== "all" ? `No ${reservationFilter} reservations` : "No reservations have been made yet"}
+                  {reservationFilter !== "all"
+                    ? `No ${reservationFilter} reservations`
+                    : "No reservations have been made yet"}
                 </p>
               </div>
             ) : (
@@ -785,7 +946,15 @@ const RestaurantsManagement = () => {
 };
 
 // Restaurant Card Component
-const RestaurantCard = ({ restaurant, index, onEdit, onDelete, onView, onReserve, getStatusColor }) => (
+const RestaurantCard = ({
+  restaurant,
+  index,
+  onEdit,
+  onDelete,
+  onView,
+  onReserve,
+  getStatusColor,
+}) => (
   <motion.div
     initial={{ opacity: 0, y: 20 }}
     animate={{ opacity: 1, y: 0 }}
@@ -805,12 +974,16 @@ const RestaurantCard = ({ restaurant, index, onEdit, onDelete, onView, onReserve
         </div>
       )}
       <div className="absolute top-3 right-3">
-        <span className={`px-2 py-1 text-xs font-semibold rounded-full ${getStatusColor(restaurant.status)}`}>
+        <span
+          className={`px-2 py-1 text-xs font-semibold rounded-full ${getStatusColor(
+            restaurant.status
+          )}`}
+        >
           {restaurant.status?.replace("_", " ") || "active"}
         </span>
       </div>
       <div className="absolute bottom-3 left-3">
-        <span className="bg-[#D4AF37] text-[#0A1F44] px-2 py-1 rounded-full text-xs font-semibold">
+        <span className="bg-[#0A1F44] text-[#ffff] px-2 py-1 rounded-full text-xs font-semibold">
           {restaurant.cuisine}
         </span>
       </div>
@@ -818,10 +991,14 @@ const RestaurantCard = ({ restaurant, index, onEdit, onDelete, onView, onReserve
 
     <div className="p-4">
       <div className="flex justify-between items-start mb-2">
-        <h3 className="text-lg font-semibold text-gray-900 truncate flex-1">{restaurant.name}</h3>
-        <div className="flex items-center gap-1 bg-[#D4AF37]/10 px-2 py-1 rounded-full ml-2">
-          <Star size={14} className="text-[#D4AF37] fill-[#D4AF37]" />
-          <span className="text-sm font-semibold text-gray-900">{restaurant.rating || "N/A"}</span>
+        <h3 className="text-lg font-semibold text-gray-900 truncate flex-1">
+          {restaurant.name}
+        </h3>
+        <div className="flex items-center gap-1 bg-[#0A1F44]/10 px-2 py-1 rounded-full ml-2">
+          <Star size={14} className="text-[#0A1F44] fill-[#0A1F44]" />
+          <span className="text-sm font-semibold text-gray-900">
+            {restaurant.rating || "N/A"}
+          </span>
         </div>
       </div>
 
@@ -861,7 +1038,7 @@ const RestaurantCard = ({ restaurant, index, onEdit, onDelete, onView, onReserve
           </button>
           <button
             onClick={() => onEdit(restaurant)}
-            className="text-gray-600 hover:text-[#D4AF37] transition-colors p-1.5 hover:bg-gray-100 rounded"
+            className="text-gray-600 hover:text-[#0A1F44] transition-colors p-1.5 hover:bg-gray-100 rounded"
             title="Edit restaurant"
           >
             <Edit size={16} />
@@ -880,7 +1057,13 @@ const RestaurantCard = ({ restaurant, index, onEdit, onDelete, onView, onReserve
 );
 
 // View Restaurant Modal Component
-const ViewRestaurantModal = ({ showModal, setShowModal, restaurant, getStatusColor, formatOpeningHours }) => {
+const ViewRestaurantModal = ({
+  showModal,
+  setShowModal,
+  restaurant,
+  getStatusColor,
+  formatOpeningHours,
+}) => {
   if (!showModal || !restaurant) return null;
 
   const handleClose = () => {
@@ -919,7 +1102,9 @@ const ViewRestaurantModal = ({ showModal, setShowModal, restaurant, getStatusCol
                 {/* Images */}
                 {restaurant.images && restaurant.images.length > 0 && (
                   <div>
-                    <h3 className="text-lg font-semibold text-gray-900 mb-3">Images</h3>
+                    <h3 className="text-lg font-semibold text-gray-900 mb-3">
+                      Images
+                    </h3>
                     <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
                       {restaurant.images.map((image, index) => (
                         <img
@@ -936,23 +1121,39 @@ const ViewRestaurantModal = ({ showModal, setShowModal, restaurant, getStatusCol
                 {/* Basic Information */}
                 <div className="grid md:grid-cols-2 gap-6">
                   <div>
-                    <h3 className="text-lg font-semibold text-gray-900 mb-3">Basic Information</h3>
+                    <h3 className="text-lg font-semibold text-gray-900 mb-3">
+                      Basic Information
+                    </h3>
                     <div className="space-y-3">
                       <div>
-                        <label className="block text-sm font-medium text-gray-700">Name</label>
-                        <p className="text-gray-900 font-semibold">{restaurant.name}</p>
+                        <label className="block text-sm font-medium text-gray-700">
+                          Name
+                        </label>
+                        <p className="text-gray-900 font-semibold">
+                          {restaurant.name}
+                        </p>
                       </div>
                       <div>
-                        <label className="block text-sm font-medium text-gray-700">Cuisine</label>
+                        <label className="block text-sm font-medium text-gray-700">
+                          Cuisine
+                        </label>
                         <p className="text-gray-900">{restaurant.cuisine}</p>
                       </div>
                       <div>
-                        <label className="block text-sm font-medium text-gray-700">Price Range</label>
+                        <label className="block text-sm font-medium text-gray-700">
+                          Price Range
+                        </label>
                         <p className="text-gray-900">{restaurant.priceRange}</p>
                       </div>
                       <div>
-                        <label className="block text-sm font-medium text-gray-700">Status</label>
-                        <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getStatusColor(restaurant.status)}`}>
+                        <label className="block text-sm font-medium text-gray-700">
+                          Status
+                        </label>
+                        <span
+                          className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getStatusColor(
+                            restaurant.status
+                          )}`}
+                        >
                           {restaurant.status?.replace("_", " ") || "active"}
                         </span>
                       </div>
@@ -960,28 +1161,44 @@ const ViewRestaurantModal = ({ showModal, setShowModal, restaurant, getStatusCol
                   </div>
 
                   <div>
-                    <h3 className="text-lg font-semibold text-gray-900 mb-3">Location & Capacity</h3>
+                    <h3 className="text-lg font-semibold text-gray-900 mb-3">
+                      Location & Capacity
+                    </h3>
                     <div className="space-y-3">
                       <div>
-                        <label className="block text-sm font-medium text-gray-700">Location</label>
+                        <label className="block text-sm font-medium text-gray-700">
+                          Location
+                        </label>
                         <p className="text-gray-900">{restaurant.location}</p>
                       </div>
                       <div>
-                        <label className="block text-sm font-medium text-gray-700">Capacity</label>
-                        <p className="text-gray-900">{restaurant.capacity} seats</p>
+                        <label className="block text-sm font-medium text-gray-700">
+                          Capacity
+                        </label>
+                        <p className="text-gray-900">
+                          {restaurant.capacity} seats
+                        </p>
                       </div>
                       {restaurant.contact && (
                         <>
                           {restaurant.contact.phone && (
                             <div>
-                              <label className="block text-sm font-medium text-gray-700">Phone</label>
-                              <p className="text-gray-900">{restaurant.contact.phone}</p>
+                              <label className="block text-sm font-medium text-gray-700">
+                                Phone
+                              </label>
+                              <p className="text-gray-900">
+                                {restaurant.contact.phone}
+                              </p>
                             </div>
                           )}
                           {restaurant.contact.email && (
                             <div>
-                              <label className="block text-sm font-medium text-gray-700">Email</label>
-                              <p className="text-gray-900">{restaurant.contact.email}</p>
+                              <label className="block text-sm font-medium text-gray-700">
+                                Email
+                              </label>
+                              <p className="text-gray-900">
+                                {restaurant.contact.email}
+                              </p>
                             </div>
                           )}
                         </>
@@ -993,30 +1210,46 @@ const ViewRestaurantModal = ({ showModal, setShowModal, restaurant, getStatusCol
                 {/* Description */}
                 {restaurant.description && (
                   <div>
-                    <h3 className="text-lg font-semibold text-gray-900 mb-3">Description</h3>
-                    <p className="text-gray-700 leading-relaxed">{restaurant.description}</p>
+                    <h3 className="text-lg font-semibold text-gray-900 mb-3">
+                      Description
+                    </h3>
+                    <p className="text-gray-700 leading-relaxed">
+                      {restaurant.description}
+                    </p>
                   </div>
                 )}
 
                 {/* Features */}
                 {restaurant.features && (
                   <div>
-                    <h3 className="text-lg font-semibold text-gray-900 mb-3">Features</h3>
+                    <h3 className="text-lg font-semibold text-gray-900 mb-3">
+                      Features
+                    </h3>
                     <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
                       {restaurant.features.hasOutdoorSeating && (
-                        <span className="bg-green-100 text-green-800 px-2 py-1 rounded text-sm">Outdoor Seating</span>
+                        <span className="bg-green-100 text-green-800 px-2 py-1 rounded text-sm">
+                          Outdoor Seating
+                        </span>
                       )}
                       {restaurant.features.hasPrivateDining && (
-                        <span className="bg-blue-100 text-blue-800 px-2 py-1 rounded text-sm">Private Dining</span>
+                        <span className="bg-blue-100 text-blue-800 px-2 py-1 rounded text-sm">
+                          Private Dining
+                        </span>
                       )}
                       {restaurant.features.hasWifi && (
-                        <span className="bg-purple-100 text-purple-800 px-2 py-1 rounded text-sm">WiFi</span>
+                        <span className="bg-purple-100 text-purple-800 px-2 py-1 rounded text-sm">
+                          WiFi
+                        </span>
                       )}
                       {restaurant.features.isWheelchairAccessible && (
-                        <span className="bg-orange-100 text-orange-800 px-2 py-1 rounded text-sm">Wheelchair Accessible</span>
+                        <span className="bg-orange-100 text-orange-800 px-2 py-1 rounded text-sm">
+                          Wheelchair Accessible
+                        </span>
                       )}
                       {restaurant.features.hasParking && (
-                        <span className="bg-indigo-100 text-indigo-800 px-2 py-1 rounded text-sm">Parking</span>
+                        <span className="bg-indigo-100 text-indigo-800 px-2 py-1 rounded text-sm">
+                          Parking
+                        </span>
                       )}
                     </div>
                   </div>
@@ -1025,7 +1258,9 @@ const ViewRestaurantModal = ({ showModal, setShowModal, restaurant, getStatusCol
                 {/* Opening Hours */}
                 {restaurant.openingHours && (
                   <div>
-                    <h3 className="text-lg font-semibold text-gray-900 mb-3">Opening Hours</h3>
+                    <h3 className="text-lg font-semibold text-gray-900 mb-3">
+                      Opening Hours
+                    </h3>
                     <div className="bg-gray-50 rounded-lg p-4">
                       <pre className="text-sm text-gray-700 whitespace-pre-wrap">
                         {formatOpeningHours(restaurant.openingHours)}
@@ -1037,10 +1272,15 @@ const ViewRestaurantModal = ({ showModal, setShowModal, restaurant, getStatusCol
                 {/* Tags */}
                 {restaurant.tags && restaurant.tags.length > 0 && (
                   <div>
-                    <h3 className="text-lg font-semibold text-gray-900 mb-3">Tags</h3>
+                    <h3 className="text-lg font-semibold text-gray-900 mb-3">
+                      Tags
+                    </h3>
                     <div className="flex flex-wrap gap-2">
                       {restaurant.tags.map((tag, index) => (
-                        <span key={index} className="bg-gray-100 text-gray-700 px-2 py-1 rounded text-sm">
+                        <span
+                          key={index}
+                          className="bg-gray-100 text-gray-700 px-2 py-1 rounded text-sm"
+                        >
                           {tag}
                         </span>
                       ))}
@@ -1066,7 +1306,12 @@ const ViewRestaurantModal = ({ showModal, setShowModal, restaurant, getStatusCol
 };
 
 // Reservation Row Component
-const ReservationRow = ({ reservation, onStatusUpdate, getStatusColor, getStatusIcon }) => {
+const ReservationRow = ({
+  reservation,
+  onStatusUpdate,
+  getStatusColor,
+  getStatusIcon,
+}) => {
   const [isUpdating, setIsUpdating] = useState(false);
 
   const handleStatusUpdate = async (newStatus) => {
@@ -1080,13 +1325,13 @@ const ReservationRow = ({ reservation, onStatusUpdate, getStatusColor, getStatus
       return {
         name: reservation.guest.name || "Unknown User",
         email: reservation.guest.email || "No email",
-        phone: reservation.guest.phone || "No phone"
+        phone: reservation.guest.phone || "No phone",
       };
     } else if (reservation.guestDetails) {
       return {
         name: reservation.guestDetails.name,
         email: reservation.guestDetails.email,
-        phone: reservation.guestDetails.phone
+        phone: reservation.guestDetails.phone,
       };
     }
     return { name: "Unknown", email: "No email", phone: "No phone" };
@@ -1105,12 +1350,8 @@ const ReservationRow = ({ reservation, onStatusUpdate, getStatusColor, getStatus
             <div className="text-sm font-medium text-gray-900">
               {guestInfo.name}
             </div>
-            <div className="text-sm text-gray-500">
-              {guestInfo.email}
-            </div>
-            <div className="text-xs text-gray-400">
-              {guestInfo.phone}
-            </div>
+            <div className="text-sm text-gray-500">{guestInfo.email}</div>
+            <div className="text-xs text-gray-400">{guestInfo.phone}</div>
           </div>
         </div>
       </td>
@@ -1124,7 +1365,9 @@ const ReservationRow = ({ reservation, onStatusUpdate, getStatusColor, getStatus
       </td>
       <td className="px-6 py-4 whitespace-nowrap">
         <div className="text-sm text-gray-900">
-          {reservation.reservationDate ? new Date(reservation.reservationDate).toLocaleDateString() : "No date"}
+          {reservation.reservationDate
+            ? new Date(reservation.reservationDate).toLocaleDateString()
+            : "No date"}
         </div>
         <div className="text-sm text-gray-500">
           {reservation.reservationTime || "No time"}
@@ -1138,24 +1381,28 @@ const ReservationRow = ({ reservation, onStatusUpdate, getStatusColor, getStatus
       <td className="px-6 py-4 whitespace-nowrap">
         <div className="flex items-center gap-2">
           {getStatusIcon(reservation.status)}
-          <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getStatusColor(reservation.status)}`}>
+          <span
+            className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getStatusColor(
+              reservation.status
+            )}`}
+          >
             {reservation.status?.replace("_", " ") || "unknown"}
           </span>
         </div>
       </td>
       <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
         <div className="flex gap-2">
-          {reservation.status === 'pending' && (
+          {reservation.status === "pending" && (
             <>
               <button
-                onClick={() => handleStatusUpdate('confirmed')}
+                onClick={() => handleStatusUpdate("confirmed")}
                 disabled={isUpdating}
                 className="text-green-600 hover:text-green-800 disabled:opacity-50 text-xs px-2 py-1 border border-green-600 rounded hover:bg-green-50 transition-colors"
               >
                 {isUpdating ? "..." : "Confirm"}
               </button>
               <button
-                onClick={() => handleStatusUpdate('cancelled')}
+                onClick={() => handleStatusUpdate("cancelled")}
                 disabled={isUpdating}
                 className="text-red-600 hover:text-red-800 disabled:opacity-50 text-xs px-2 py-1 border border-red-600 rounded hover:bg-red-50 transition-colors"
               >
@@ -1163,17 +1410,17 @@ const ReservationRow = ({ reservation, onStatusUpdate, getStatusColor, getStatus
               </button>
             </>
           )}
-          {reservation.status === 'confirmed' && (
+          {reservation.status === "confirmed" && (
             <>
               <button
-                onClick={() => handleStatusUpdate('completed')}
+                onClick={() => handleStatusUpdate("completed")}
                 disabled={isUpdating}
                 className="text-blue-600 hover:text-blue-800 disabled:opacity-50 text-xs px-2 py-1 border border-blue-600 rounded hover:bg-blue-50 transition-colors"
               >
                 {isUpdating ? "..." : "Complete"}
               </button>
               <button
-                onClick={() => handleStatusUpdate('cancelled')}
+                onClick={() => handleStatusUpdate("cancelled")}
                 disabled={isUpdating}
                 className="text-red-600 hover:text-red-800 disabled:opacity-50 text-xs px-2 py-1 border border-red-600 rounded hover:bg-red-50 transition-colors"
               >
@@ -1181,7 +1428,9 @@ const ReservationRow = ({ reservation, onStatusUpdate, getStatusColor, getStatus
               </button>
             </>
           )}
-          {(reservation.status === 'cancelled' || reservation.status === 'completed' || reservation.status === 'no_show') && (
+          {(reservation.status === "cancelled" ||
+            reservation.status === "completed" ||
+            reservation.status === "no_show") && (
             <span className="text-gray-400 text-xs">No actions</span>
           )}
         </div>
@@ -1203,7 +1452,9 @@ const StatCard = ({ title, value, color }) => {
   return (
     <div className="bg-white p-4 rounded-lg border border-gray-200 text-center shadow-sm">
       <div className="text-sm font-medium text-gray-600 mb-1">{title}</div>
-      <div className={`text-2xl font-bold rounded-lg w-12 h-12 flex items-center justify-center mx-auto ${colorClasses[color]}`}>
+      <div
+        className={`text-2xl font-bold rounded-lg w-12 h-12 flex items-center justify-center mx-auto ${colorClasses[color]}`}
+      >
         {value}
       </div>
     </div>
@@ -1212,9 +1463,19 @@ const StatCard = ({ title, value, color }) => {
 
 // Restaurant Modal Component (Add/Edit)
 const RestaurantModal = ({
-  showModal, setShowModal, editingRestaurant, formData, setFormData,
-  handleSubmit, resetForm, handleImageUpload, removeImage,
-  cuisines, statuses, error, imageUploading
+  showModal,
+  setShowModal,
+  editingRestaurant,
+  formData,
+  setFormData,
+  handleSubmit,
+  resetForm,
+  handleImageUpload,
+  removeImage,
+  cuisines,
+  statuses,
+  error,
+  imageUploading,
 }) => {
   if (!showModal) return null;
 
@@ -1280,13 +1541,15 @@ const RestaurantModal = ({
                         </button>
                       </div>
                     ))}
-                    <label className="border-2 border-dashed border-gray-300 rounded-lg h-24 flex flex-col items-center justify-center cursor-pointer hover:border-[#D4AF37] transition-colors bg-gray-50">
+                    <label className="border-2 border-dashed border-gray-300 rounded-lg h-24 flex flex-col items-center justify-center cursor-pointer hover:border-[#0A1F44] transition-colors bg-gray-50">
                       {imageUploading ? (
-                        <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-[#D4AF37]"></div>
+                        <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-[#0A1F44]"></div>
                       ) : (
                         <>
                           <Upload size={24} className="text-gray-400 mb-1" />
-                          <span className="text-sm text-gray-500">Add Image</span>
+                          <span className="text-sm text-gray-500">
+                            Add Image
+                          </span>
                         </>
                       )}
                       <input
@@ -1311,8 +1574,10 @@ const RestaurantModal = ({
                       type="text"
                       required
                       value={formData.name}
-                      onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                      className="w-full border border-gray-300 rounded-lg px-3 py-2.5 focus:ring-2 focus:ring-[#D4AF37] focus:border-transparent"
+                      onChange={(e) =>
+                        setFormData({ ...formData, name: e.target.value })
+                      }
+                      className="w-full border border-gray-300 rounded-lg px-3 py-2.5 focus:ring-2 focus:ring-[#0A1F44] focus:border-transparent"
                       placeholder="Enter restaurant name"
                     />
                   </div>
@@ -1323,11 +1588,15 @@ const RestaurantModal = ({
                     </label>
                     <select
                       value={formData.cuisine}
-                      onChange={(e) => setFormData({ ...formData, cuisine: e.target.value })}
-                      className="w-full border border-gray-300 rounded-lg px-3 py-2.5 focus:ring-2 focus:ring-[#D4AF37] focus:border-transparent"
+                      onChange={(e) =>
+                        setFormData({ ...formData, cuisine: e.target.value })
+                      }
+                      className="w-full border border-gray-300 rounded-lg px-3 py-2.5 focus:ring-2 focus:ring-[#0A1F44] focus:border-transparent"
                     >
                       {cuisines.map((cuisine) => (
-                        <option key={cuisine} value={cuisine}>{cuisine}</option>
+                        <option key={cuisine} value={cuisine}>
+                          {cuisine}
+                        </option>
                       ))}
                     </select>
                   </div>
@@ -1341,8 +1610,10 @@ const RestaurantModal = ({
                     required
                     rows={3}
                     value={formData.description}
-                    onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                    className="w-full border border-gray-300 rounded-lg px-3 py-2.5 focus:ring-2 focus:ring-[#D4AF37] focus:border-transparent"
+                    onChange={(e) =>
+                      setFormData({ ...formData, description: e.target.value })
+                    }
+                    className="w-full border border-gray-300 rounded-lg px-3 py-2.5 focus:ring-2 focus:ring-[#0A1F44] focus:border-transparent"
                     placeholder="Describe the restaurant..."
                   />
                 </div>
@@ -1357,8 +1628,13 @@ const RestaurantModal = ({
                       required
                       min="1"
                       value={formData.capacity}
-                      onChange={(e) => setFormData({ ...formData, capacity: parseInt(e.target.value) || 1 })}
-                      className="w-full border border-gray-300 rounded-lg px-3 py-2.5 focus:ring-2 focus:ring-[#D4AF37] focus:border-transparent"
+                      onChange={(e) =>
+                        setFormData({
+                          ...formData,
+                          capacity: parseInt(e.target.value) || 1,
+                        })
+                      }
+                      className="w-full border border-gray-300 rounded-lg px-3 py-2.5 focus:ring-2 focus:ring-[#0A1F44] focus:border-transparent"
                     />
                   </div>
 
@@ -1368,12 +1644,15 @@ const RestaurantModal = ({
                     </label>
                     <select
                       value={formData.status}
-                      onChange={(e) => setFormData({ ...formData, status: e.target.value })}
-                      className="w-full border border-gray-300 rounded-lg px-3 py-2.5 focus:ring-2 focus:ring-[#D4AF37] focus:border-transparent"
+                      onChange={(e) =>
+                        setFormData({ ...formData, status: e.target.value })
+                      }
+                      className="w-full border border-gray-300 rounded-lg px-3 py-2.5 focus:ring-2 focus:ring-[#0A1F44] focus:border-transparent"
                     >
                       {statuses.map((status) => (
                         <option key={status} value={status}>
-                          {status.charAt(0).toUpperCase() + status.slice(1).replace('_', ' ')}
+                          {status.charAt(0).toUpperCase() +
+                            status.slice(1).replace("_", " ")}
                         </option>
                       ))}
                     </select>
@@ -1388,8 +1667,10 @@ const RestaurantModal = ({
                     type="text"
                     required
                     value={formData.location}
-                    onChange={(e) => setFormData({ ...formData, location: e.target.value })}
-                    className="w-full border border-gray-300 rounded-lg px-3 py-2.5 focus:ring-2 focus:ring-[#D4AF37] focus:border-transparent"
+                    onChange={(e) =>
+                      setFormData({ ...formData, location: e.target.value })
+                    }
+                    className="w-full border border-gray-300 rounded-lg px-3 py-2.5 focus:ring-2 focus:ring-[#0A1F44] focus:border-transparent"
                     placeholder="e.g., Ground Floor, Main Building"
                   />
                 </div>
@@ -1397,7 +1678,7 @@ const RestaurantModal = ({
                 <div className="flex gap-3 pt-4">
                   <button
                     type="submit"
-                    className="bg-[#D4AF37] text-[#0A1F44] px-6 py-3 rounded-lg font-semibold hover:bg-[#c19b2a] transition-colors flex-1"
+                    className="bg-[#0A1F44] text-[#ffff] px-6 py-3 rounded-lg font-semibold hover:bg-[#00326f] transition-colors flex-1"
                   >
                     {editingRestaurant ? "Update Restaurant" : "Add Restaurant"}
                   </button>
@@ -1427,7 +1708,7 @@ const ReservationModal = ({
   setReservationForm,
   handleSubmit,
   resetForm,
-  error
+  error,
 }) => {
   if (!showModal) return null;
 
@@ -1439,11 +1720,11 @@ const ReservationModal = ({
   const occasions = [
     "none",
     "birthday",
-    "anniversary", 
+    "anniversary",
     "business",
     "celebration",
     "romantic",
-    "family"
+    "family",
   ];
 
   return (
@@ -1476,9 +1757,15 @@ const ReservationModal = ({
 
               {selectedRestaurant && (
                 <div className="mb-4 p-3 bg-blue-50 rounded-lg">
-                  <h3 className="font-semibold text-blue-900">{selectedRestaurant.name}</h3>
-                  <p className="text-sm text-blue-700">{selectedRestaurant.cuisine} • {selectedRestaurant.location}</p>
-                  <p className="text-sm text-blue-600">Capacity: {selectedRestaurant.capacity} seats</p>
+                  <h3 className="font-semibold text-blue-900">
+                    {selectedRestaurant.name}
+                  </h3>
+                  <p className="text-sm text-blue-700">
+                    {selectedRestaurant.cuisine} • {selectedRestaurant.location}
+                  </p>
+                  <p className="text-sm text-blue-600">
+                    Capacity: {selectedRestaurant.capacity} seats
+                  </p>
                 </div>
               )}
 
@@ -1497,12 +1784,17 @@ const ReservationModal = ({
                     type="text"
                     required
                     value={reservationForm.guestName}
-                    onChange={(e) => setReservationForm({...reservationForm, guestName: e.target.value})}
+                    onChange={(e) =>
+                      setReservationForm({
+                        ...reservationForm,
+                        guestName: e.target.value,
+                      })
+                    }
                     className="w-full border border-gray-300 rounded-lg px-3 py-2.5 focus:ring-2 focus:ring-blue-600 focus:border-transparent"
                     placeholder="Enter your full name"
                   />
                 </div>
-                
+
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
                     Email *
@@ -1511,7 +1803,12 @@ const ReservationModal = ({
                     type="email"
                     required
                     value={reservationForm.guestEmail}
-                    onChange={(e) => setReservationForm({...reservationForm, guestEmail: e.target.value})}
+                    onChange={(e) =>
+                      setReservationForm({
+                        ...reservationForm,
+                        guestEmail: e.target.value,
+                      })
+                    }
                     className="w-full border border-gray-300 rounded-lg px-3 py-2.5 focus:ring-2 focus:ring-blue-600 focus:border-transparent"
                     placeholder="Enter your email"
                   />
@@ -1525,7 +1822,12 @@ const ReservationModal = ({
                     type="tel"
                     required
                     value={reservationForm.guestPhone}
-                    onChange={(e) => setReservationForm({...reservationForm, guestPhone: e.target.value})}
+                    onChange={(e) =>
+                      setReservationForm({
+                        ...reservationForm,
+                        guestPhone: e.target.value,
+                      })
+                    }
                     className="w-full border border-gray-300 rounded-lg px-3 py-2.5 focus:ring-2 focus:ring-blue-600 focus:border-transparent"
                     placeholder="Enter your phone number"
                   />
@@ -1540,7 +1842,12 @@ const ReservationModal = ({
                       type="date"
                       required
                       value={reservationForm.reservationDate}
-                      onChange={(e) => setReservationForm({...reservationForm, reservationDate: e.target.value})}
+                      onChange={(e) =>
+                        setReservationForm({
+                          ...reservationForm,
+                          reservationDate: e.target.value,
+                        })
+                      }
                       className="w-full border border-gray-300 rounded-lg px-3 py-2.5 focus:ring-2 focus:ring-blue-600 focus:border-transparent"
                     />
                   </div>
@@ -1553,7 +1860,12 @@ const ReservationModal = ({
                       type="time"
                       required
                       value={reservationForm.reservationTime}
-                      onChange={(e) => setReservationForm({...reservationForm, reservationTime: e.target.value})}
+                      onChange={(e) =>
+                        setReservationForm({
+                          ...reservationForm,
+                          reservationTime: e.target.value,
+                        })
+                      }
                       className="w-full border border-gray-300 rounded-lg px-3 py-2.5 focus:ring-2 focus:ring-blue-600 focus:border-transparent"
                     />
                   </div>
@@ -1569,7 +1881,12 @@ const ReservationModal = ({
                     max="20"
                     required
                     value={reservationForm.partySize}
-                    onChange={(e) => setReservationForm({...reservationForm, partySize: parseInt(e.target.value)})}
+                    onChange={(e) =>
+                      setReservationForm({
+                        ...reservationForm,
+                        partySize: parseInt(e.target.value),
+                      })
+                    }
                     className="w-full border border-gray-300 rounded-lg px-3 py-2.5 focus:ring-2 focus:ring-blue-600 focus:border-transparent"
                   />
                 </div>
@@ -1580,7 +1897,12 @@ const ReservationModal = ({
                   </label>
                   <select
                     value={reservationForm.occasion}
-                    onChange={(e) => setReservationForm({...reservationForm, occasion: e.target.value})}
+                    onChange={(e) =>
+                      setReservationForm({
+                        ...reservationForm,
+                        occasion: e.target.value,
+                      })
+                    }
                     className="w-full border border-gray-300 rounded-lg px-3 py-2.5 focus:ring-2 focus:ring-blue-600 focus:border-transparent"
                   >
                     {occasions.map((occasion) => (
@@ -1598,7 +1920,12 @@ const ReservationModal = ({
                   <textarea
                     rows={3}
                     value={reservationForm.specialRequests}
-                    onChange={(e) => setReservationForm({...reservationForm, specialRequests: e.target.value})}
+                    onChange={(e) =>
+                      setReservationForm({
+                        ...reservationForm,
+                        specialRequests: e.target.value,
+                      })
+                    }
                     className="w-full border border-gray-300 rounded-lg px-3 py-2.5 focus:ring-2 focus:ring-blue-600 focus:border-transparent"
                     placeholder="Any special requirements or requests..."
                   />
@@ -1628,4 +1955,4 @@ const ReservationModal = ({
   );
 };
 
-export default RestaurantsManagement; 
+export default RestaurantsManagement;

@@ -4,7 +4,7 @@ import { useState, useEffect } from "react"
 import { Link, useParams } from "react-router-dom"
 import Navbar from "../components/Navbar"
 import Footer from "../components/Footer"
-import { Star, Users, MapPin, Wifi, Coffee, Wind, Tv, ChevronLeft, ChevronRight, Loader, Heart, Share2, Bed, Bath, Square } from "lucide-react"
+import { Star, Users, MapPin, Wifi, Coffee, Wind, Tv, ChevronLeft, ChevronRight, Loader, Heart, Share2, Bed, Bath, Square, DollarSign } from "lucide-react"
 import { Button } from "../components/UI/button"
 
 export default function RoomDetail() {
@@ -233,7 +233,7 @@ export default function RoomDetail() {
         <Navbar />
         <div className="pt-32 pb-12 px-4 text-center flex justify-center items-center min-h-96">
           <div className="flex flex-col items-center gap-4">
-            <Loader className="h-12 w-12 animate-spin text-teal-500" />
+            <Loader className="h-12 w-12 animate-spin text-[#1D293D]" />
             <p className="text-gray-600 text-lg font-medium">Loading room details...</p>
           </div>
         </div>
@@ -251,7 +251,7 @@ export default function RoomDetail() {
             <h1 className="text-4xl font-bold mb-4 text-gray-900">Room Not Found</h1>
             <p className="text-gray-600 mb-8 text-lg">{error || "The room you're looking for doesn't exist."}</p>
             <Link to="/rooms">
-              <Button className="bg-teal-500 hover:bg-teal-600 text-white px-8 py-3 rounded-xl text-lg font-semibold transition-all duration-300 transform hover:scale-105">
+              <Button className="bg-[#1D293D] hover:bg-[#2D3B5D] text-white px-8 py-3 rounded-xl text-lg font-semibold transition-all duration-300 transform hover:scale-105">
                 Back to Rooms
               </Button>
             </Link>
@@ -368,13 +368,13 @@ export default function RoomDetail() {
                 {/* Average Rating */}
                 <div className="flex items-center gap-6">
                   <div className="text-center">
-                    <div className="text-5xl font-bold text-teal-600">{room.rating || 0}</div>
+                    <div className="text-5xl font-bold text-[#1D293D]">{room.rating || 0}</div>
                     <div className="flex items-center justify-center gap-1 mt-2">
                       {[...Array(5)].map((_, i) => (
                         <Star
                           key={i}
                           size={20}
-                          className={i < Math.floor(room.rating || 0) ? "fill-yellow-400 text-yellow-400" : "text-gray-300"}
+                          className={i < Math.floor(room.rating || 0) ? "fill-[#E2BD3A] text-[#E2BD3A]" : "text-gray-300"}
                         />
                       ))}
                     </div>
@@ -390,10 +390,10 @@ export default function RoomDetail() {
                     {[5, 4, 3, 2, 1].map((star) => (
                       <div key={star} className="flex items-center gap-3">
                         <span className="text-sm text-gray-600 w-4">{star}</span>
-                        <Star size={16} className="fill-yellow-400 text-yellow-400" />
+                        <Star size={16} className="fill-[#E2BD3A] text-[#E2BD3A]" />
                         <div className="flex-1 bg-gray-200 rounded-full h-2">
                           <div 
-                            className="bg-yellow-400 h-2 rounded-full transition-all duration-500"
+                            className="bg-[#E2BD3A] h-2 rounded-full transition-all duration-500"
                             style={{ width: `${getPercentage(star)}%` }}
                           ></div>
                         </div>
@@ -426,7 +426,7 @@ export default function RoomDetail() {
                         >
                           <span className={
                             star <= (userRating || hoverRating) 
-                              ? "text-yellow-400" 
+                              ? "text-[#E2BD3A]" 
                               : "text-gray-300"
                           }>
                             ⭐
@@ -501,9 +501,9 @@ export default function RoomDetail() {
                   amenities.map((amenity) => {
                     const Icon = getAmenityIcon(amenity)
                     return (
-                      <div key={amenity} className="flex items-center gap-4 p-4 rounded-xl bg-gray-50 hover:bg-teal-50 transition-colors group">
+                      <div key={amenity} className="flex items-center gap-4 p-4 rounded-xl bg-gray-50 hover:bg-blue-50 transition-colors group">
                         <div className="p-3 bg-white rounded-lg shadow-sm group-hover:shadow-md transition-shadow">
-                          <Icon size={24} className="text-teal-600" />
+                          <Icon size={24} className="text-[#1B3788]" />
                         </div>
                         <span className="font-semibold text-gray-900 text-lg">{amenity}</span>
                       </div>
@@ -525,27 +525,27 @@ export default function RoomDetail() {
               <h3 className="text-2xl font-bold text-gray-900 mb-6">Room Features</h3>
               <div className="grid md:grid-cols-2 gap-4">
                 {amenities.map((amenity) => (
-                  <div key={amenity} className="flex items-center gap-3 p-4 rounded-lg bg-gradient-to-r from-gray-50 to-blue-50 hover:from-teal-50 hover:to-blue-100 transition-all duration-300 group border border-gray-200">
-                    <span className="text-teal-500 text-xl font-bold transition-transform group-hover:scale-110">✓</span>
+                  <div key={amenity} className="flex items-center gap-3 p-4 rounded-lg bg-gradient-to-r from-gray-50 to-blue-50 hover:from-blue-50 hover:to-blue-100 transition-all duration-300 group border border-gray-200">
+                    <span className="text-[#1B3788] text-xl font-bold transition-transform group-hover:scale-110">✓</span>
                     <span className="text-gray-700 group-hover:text-gray-900 font-medium">{amenity}</span>
                   </div>
                 ))}
                 {!room.description && (
                   <>
-                    <div className="flex items-center gap-3 p-4 rounded-lg bg-gradient-to-r from-gray-50 to-blue-50 hover:from-teal-50 hover:to-blue-100 transition-all duration-300 group border border-gray-200">
-                      <span className="text-teal-500 text-xl font-bold transition-transform group-hover:scale-110">✓</span>
+                    <div className="flex items-center gap-3 p-4 rounded-lg bg-gradient-to-r from-gray-50 to-blue-50 hover:from-blue-50 hover:to-blue-100 transition-all duration-300 group border border-gray-200">
+                      <span className="text-[#1B3788] text-xl font-bold transition-transform group-hover:scale-110">✓</span>
                       <span className="text-gray-700 group-hover:text-gray-900 font-medium">Comfortable {room.capacity > 2 ? 'multiple beds' : 'king-size bed'}</span>
                     </div>
-                    <div className="flex items-center gap-3 p-4 rounded-lg bg-gradient-to-r from-gray-50 to-blue-50 hover:from-teal-50 hover:to-blue-100 transition-all duration-300 group border border-gray-200">
-                      <span className="text-teal-500 text-xl font-bold transition-transform group-hover:scale-110">✓</span>
+                    <div className="flex items-center gap-3 p-4 rounded-lg bg-gradient-to-r from-gray-50 to-blue-50 hover:from-blue-50 hover:to-blue-100 transition-all duration-300 group border border-gray-200">
+                      <span className="text-[#1B3788] text-xl font-bold transition-transform group-hover:scale-110">✓</span>
                       <span className="text-gray-700 group-hover:text-gray-900 font-medium">Private bathroom with premium toiletries</span>
                     </div>
-                    <div className="flex items-center gap-3 p-4 rounded-lg bg-gradient-to-r from-gray-50 to-blue-50 hover:from-teal-50 hover:to-blue-100 transition-all duration-300 group border border-gray-200">
-                      <span className="text-teal-500 text-xl font-bold transition-transform group-hover:scale-110">✓</span>
+                    <div className="flex items-center gap-3 p-4 rounded-lg bg-gradient-to-r from-gray-50 to-blue-50 hover:from-blue-50 hover:to-blue-100 transition-all duration-300 group border border-gray-200">
+                      <span className="text-[#1B3788] text-xl font-bold transition-transform group-hover:scale-110">✓</span>
                       <span className="text-gray-700 group-hover:text-gray-900 font-medium">Daily housekeeping service</span>
                     </div>
-                    <div className="flex items-center gap-3 p-4 rounded-lg bg-gradient-to-r from-gray-50 to-blue-50 hover:from-teal-50 hover:to-blue-100 transition-all duration-300 group border border-gray-200">
-                      <span className="text-teal-500 text-xl font-bold transition-transform group-hover:scale-110">✓</span>
+                    <div className="flex items-center gap-3 p-4 rounded-lg bg-gradient-to-r from-gray-50 to-blue-50 hover:from-blue-50 hover:to-blue-100 transition-all duration-300 group border border-gray-200">
+                      <span className="text-[#1B3788] text-xl font-bold transition-transform group-hover:scale-110">✓</span>
                       <span className="text-gray-700 group-hover:text-gray-900 font-medium">24/7 room service available</span>
                     </div>
                   </>
@@ -559,12 +559,15 @@ export default function RoomDetail() {
             <div className="bg-white rounded-2xl p-8 sticky top-24 shadow-2xl border border-gray-100 transition-all duration-300 hover:shadow-xl">
               <div className="mb-8 text-center">
                 <p className="text-gray-600 text-sm mb-2">Starting from</p>
-                <p className="text-5xl font-bold text-teal-600 mb-2">Rs. {room.pricePerNight}</p>
+                <p className="text-5xl font-bold text-[#1D293D] flex items-center justify-center gap-1 mb-2">
+                  <DollarSign size={32} />
+                  {room.pricePerNight}
+                </p>
                 <p className="text-gray-500 text-sm">per night</p>
               </div>
 
               <div className="space-y-4 mb-6">
-                <div className="bg-gray-50 p-4 rounded-xl border border-gray-200 hover:border-teal-300 transition-colors">
+                <div className="bg-gray-50 p-4 rounded-xl border border-gray-200 hover:border-[#1D293D] transition-colors">
                   <p className="text-sm text-gray-600 mb-2 font-medium">Check-in</p>
                   <input 
                     type="date" 
@@ -573,7 +576,7 @@ export default function RoomDetail() {
                     className="w-full bg-transparent border-none focus:outline-none text-gray-900 font-medium" 
                   />
                 </div>
-                <div className="bg-gray-50 p-4 rounded-xl border border-gray-200 hover:border-teal-300 transition-colors">
+                <div className="bg-gray-50 p-4 rounded-xl border border-gray-200 hover:border-[#1D293D] transition-colors">
                   <p className="text-sm text-gray-600 mb-2 font-medium">Check-out</p>
                   <input 
                     type="date" 
@@ -582,7 +585,7 @@ export default function RoomDetail() {
                     className="w-full bg-transparent border-none focus:outline-none text-gray-900 font-medium" 
                   />
                 </div>
-                <div className="bg-gray-50 p-4 rounded-xl border border-gray-200 hover:border-teal-300 transition-colors">
+                <div className="bg-gray-50 p-4 rounded-xl border border-gray-200 hover:border-[#1D293D] transition-colors">
                   <p className="text-sm text-gray-600 mb-2 font-medium">Guests</p>
                   <select 
                     value={guests}
@@ -599,20 +602,32 @@ export default function RoomDetail() {
               </div>
 
               {/* Price Breakdown */}
-              <div className="bg-teal-50 rounded-xl p-4 mb-6">
+              <div className="bg-gray-50 rounded-xl p-4 mb-6">
                 <div className="space-y-2">
                   <div className="flex justify-between text-sm">
-                    <span className="text-gray-600">Rs. {room.pricePerNight} × {nights} night{nights > 1 ? 's' : ''}</span>
-                    <span className="font-medium">Rs. {room.pricePerNight * nights}</span>
+                    <span className="text-gray-600 flex items-center gap-1">
+                      <DollarSign size={12} />
+                      {room.pricePerNight} × {nights} night{nights > 1 ? 's' : ''}
+                    </span>
+                    <span className="font-medium flex items-center gap-1">
+                      <DollarSign size={12} />
+                      {room.pricePerNight * nights}
+                    </span>
                   </div>
                   <div className="flex justify-between text-sm">
                     <span className="text-gray-600">Service fee</span>
-                    <span className="font-medium">Rs. 0</span>
+                    <span className="font-medium flex items-center gap-1">
+                      <DollarSign size={12} />
+                      0
+                    </span>
                   </div>
-                  <div className="border-t border-teal-200 pt-2 mt-2">
+                  <div className="border-t border-gray-300 pt-2 mt-2">
                     <div className="flex justify-between font-semibold">
                       <span>Total</span>
-                      <span className="text-teal-600">Rs. {totalPrice}</span>
+                      <span className="text-[#1D293D] flex items-center gap-1">
+                        <DollarSign size={16} />
+                        {totalPrice}
+                      </span>
                     </div>
                   </div>
                 </div>
@@ -626,7 +641,7 @@ export default function RoomDetail() {
                   className={`w-full mb-4 py-4 text-lg font-semibold rounded-xl transition-all duration-300 transform hover:scale-105 ${
                     room.status !== 'Vacant' 
                       ? 'bg-gray-400 cursor-not-allowed' 
-                      : 'bg-gradient-to-r from-teal-500 to-teal-600 hover:from-teal-600 hover:to-teal-700'
+                      : 'bg-[#1D293D] hover:bg-[#2D3B5D] text-white'
                   }`}
                   disabled={room.status !== 'Vacant'}
                 >
@@ -636,7 +651,7 @@ export default function RoomDetail() {
               
               <Button 
                 variant="outline" 
-                className="w-full py-4 text-lg font-semibold rounded-xl border-2 border-gray-300 hover:border-teal-500 hover:bg-teal-50 text-gray-700 transition-all duration-300"
+                className="w-full py-4 text-lg font-semibold rounded-xl border-2 border-[#1D293D] hover:bg-[#1D293D] hover:text-white text-[#1D293D] transition-all duration-300"
               >
                 <Heart size={20} className="mr-2" />
                 Add to Wishlist
@@ -666,4 +681,4 @@ export default function RoomDetail() {
       <Footer />
     </main>
   )
-} 
+}

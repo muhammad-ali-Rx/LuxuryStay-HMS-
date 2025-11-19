@@ -76,7 +76,7 @@ const RestaurantDetailPage = () => {
   if (loading) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#D4AF37]"></div>
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#1D293D]"></div>
       </div>
     )
   }
@@ -88,7 +88,7 @@ const RestaurantDetailPage = () => {
           <h2 className="text-2xl font-bold text-gray-900 mb-4">Restaurant not found</h2>
           <button 
             onClick={() => navigate("/restaurants")}
-            className="bg-[#D4AF37] text-[#0A1F44] px-6 py-2 rounded-lg font-semibold hover:bg-[#c19b2a] transition-colors"
+            className="bg-[#1D293D] text-white px-6 py-2 rounded-lg font-semibold hover:bg-[#2D3B5D] transition-colors"
           >
             Back to Restaurants
           </button>
@@ -104,7 +104,7 @@ const RestaurantDetailPage = () => {
         <div className="container mx-auto px-4 py-4">
           <button 
             onClick={() => navigate("/restaurants")}
-            className="flex items-center gap-2 text-gray-600 hover:text-[#D4AF37] transition-colors"
+            className="flex items-center gap-2 text-gray-600 hover:text-[#1D293D] transition-colors"
           >
             <ArrowLeft size={20} />
             Back to Restaurants
@@ -123,11 +123,11 @@ const RestaurantDetailPage = () => {
         <div className="absolute bottom-6 left-6 text-white">
           <h1 className="text-4xl font-bold mb-2">{restaurant.name}</h1>
           <div className="flex items-center gap-4">
-            <span className="bg-[#D4AF37] text-[#0A1F44] px-3 py-1 rounded-full font-semibold">
+            <span className="bg-[#1D293D] text-white px-3 py-1 rounded-full font-semibold">
               {restaurant.cuisine}
             </span>
             <div className="flex items-center gap-1">
-              <Star size={20} className="fill-current" />
+              <Star size={20} className="fill-[#E2BD3A] text-[#E2BD3A]" />
               <span className="text-lg font-semibold">{restaurant.rating}</span>
               <span className="text-gray-300">({restaurant.totalRatings} reviews)</span>
             </div>
@@ -160,12 +160,12 @@ const RestaurantDetailPage = () => {
               >
                 <h2 className="text-2xl font-bold text-gray-900 mb-4">Meet Our Chef</h2>
                 <div className="flex items-center gap-4">
-                  <div className="w-16 h-16 bg-[#D4AF37] rounded-full flex items-center justify-center">
-                    <Utensils size={24} className="text-[#0A1F44]" />
+                  <div className="w-16 h-16 bg-[#1D293D] rounded-full flex items-center justify-center">
+                    <Utensils size={24} className="text-white" />
                   </div>
                   <div>
                     <h3 className="text-xl font-semibold text-gray-900">{restaurant.chef.name}</h3>
-                    <p className="text-[#D4AF37] font-medium">{restaurant.chef.specialty}</p>
+                    <p className="text-[#1D293D] font-medium">{restaurant.chef.specialty}</p>
                     <p className="text-gray-600 mt-1">{restaurant.chef.bio}</p>
                   </div>
                 </div>
@@ -204,20 +204,20 @@ const RestaurantDetailPage = () => {
                 <h3 className="text-xl font-bold text-gray-900 mb-4">Contact Information</h3>
                 
                 <div className="flex items-center gap-3 text-gray-700">
-                  <MapPin size={20} className="text-[#D4AF37]" />
+                  <MapPin size={20} className="text-[#1D293D]" />
                   <span>{restaurant.location}</span>
                 </div>
                 
                 {restaurant.contact?.phone && (
                   <div className="flex items-center gap-3 text-gray-700">
-                    <Phone size={20} className="text-[#D4AF37]" />
+                    <Phone size={20} className="text-[#1D293D]" />
                     <span>{restaurant.contact.phone}</span>
                   </div>
                 )}
                 
                 {restaurant.contact?.email && (
                   <div className="flex items-center gap-3 text-gray-700">
-                    <Mail size={20} className="text-[#D4AF37]" />
+                    <Mail size={20} className="text-[#1D293D]" />
                     <span>{restaurant.contact.email}</span>
                   </div>
                 )}
@@ -228,19 +228,19 @@ const RestaurantDetailPage = () => {
                 <h3 className="text-xl font-bold text-gray-900 mb-4">Features</h3>
                 {restaurant.features?.hasOutdoorSeating && (
                   <div className="flex items-center gap-2 text-gray-700">
-                    <div className="w-2 h-2 bg-[#D4AF37] rounded-full"></div>
+                    <div className="w-2 h-2 bg-[#1D293D] rounded-full"></div>
                     <span>Outdoor Seating</span>
                   </div>
                 )}
                 {restaurant.features?.hasPrivateDining && (
                   <div className="flex items-center gap-2 text-gray-700">
-                    <div className="w-2 h-2 bg-[#D4AF37] rounded-full"></div>
+                    <div className="w-2 h-2 bg-[#1D293D] rounded-full"></div>
                     <span>Private Dining</span>
                   </div>
                 )}
                 {restaurant.features?.hasWifi && (
                   <div className="flex items-center gap-2 text-gray-700">
-                    <div className="w-2 h-2 bg-[#D4AF37] rounded-full"></div>
+                    <div className="w-2 h-2 bg-[#1D293D] rounded-full"></div>
                     <span>Free WiFi</span>
                   </div>
                 )}
@@ -249,7 +249,7 @@ const RestaurantDetailPage = () => {
               {/* CTA Button */}
               <button
                 onClick={() => setShowReservationModal(true)}
-                className="w-full bg-[#D4AF37] text-[#0A1F44] py-3 rounded-lg font-semibold hover:bg-[#c19b2a] transition-colors flex items-center justify-center gap-2"
+                className="w-full bg-[#1D293D] text-white py-3 rounded-lg font-semibold hover:bg-[#2D3B5D] transition-colors flex items-center justify-center gap-2"
               >
                 <Calendar size={20} />
                 Make Reservation
@@ -278,7 +278,7 @@ const RestaurantDetailPage = () => {
                   value={reservationData.date}
                   onChange={(e) => setReservationData({...reservationData, date: e.target.value})}
                   min={new Date().toISOString().split('T')[0]}
-                  className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-[#D4AF37] focus:border-transparent"
+                  className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-[#1D293D] focus:border-transparent"
                 />
               </div>
 
@@ -289,7 +289,7 @@ const RestaurantDetailPage = () => {
                   required
                   value={reservationData.time}
                   onChange={(e) => setReservationData({...reservationData, time: e.target.value})}
-                  className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-[#D4AF37] focus:border-transparent"
+                  className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-[#1D293D] focus:border-transparent"
                 />
               </div>
 
@@ -298,7 +298,7 @@ const RestaurantDetailPage = () => {
                 <select
                   value={reservationData.partySize}
                   onChange={(e) => setReservationData({...reservationData, partySize: parseInt(e.target.value)})}
-                  className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-[#D4AF37] focus:border-transparent"
+                  className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-[#1D293D] focus:border-transparent"
                 >
                   {[1,2,3,4,5,6,7,8,9,10].map(size => (
                     <option key={size} value={size}>{size} {size === 1 ? 'person' : 'people'}</option>
@@ -311,7 +311,7 @@ const RestaurantDetailPage = () => {
                 <select
                   value={reservationData.occasion}
                   onChange={(e) => setReservationData({...reservationData, occasion: e.target.value})}
-                  className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-[#D4AF37] focus:border-transparent"
+                  className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-[#1D293D] focus:border-transparent"
                 >
                   <option value="none">No special occasion</option>
                   <option value="birthday">Birthday</option>
@@ -327,7 +327,7 @@ const RestaurantDetailPage = () => {
                   rows={3}
                   value={reservationData.specialRequests}
                   onChange={(e) => setReservationData({...reservationData, specialRequests: e.target.value})}
-                  className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-[#D4AF37] focus:border-transparent"
+                  className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-[#1D293D] focus:border-transparent"
                   placeholder="Any special requirements or requests..."
                 />
               </div>
@@ -335,7 +335,7 @@ const RestaurantDetailPage = () => {
               <div className="flex gap-3 pt-4">
                 <button
                   type="submit"
-                  className="flex-1 bg-[#D4AF37] text-[#0A1F44] py-2 rounded-lg font-semibold hover:bg-[#c19b2a] transition-colors"
+                  className="flex-1 bg-[#1D293D] text-white py-2 rounded-lg font-semibold hover:bg-[#2D3B5D] transition-colors"
                 >
                   Confirm Reservation
                 </button>

@@ -3,16 +3,21 @@ import Restaurant from "../Models/Restaurant.mjs";
 export const createRestaurant = async (req, res) => {
   try {
     console.log('🔐 User creating restaurant:', req.user);
+    console.log('📦 Request body:', JSON.stringify(req.body, null, 2));
     
-    if (!req.user || !req.user.userId) {
+    // FIX: Check all possible user ID fields
+    const currentUserId = req.user?.userId || req.user?._id || req.user?.id;
+    
+    if (!currentUserId) {
+      console.log('❌ No user ID found in req.user:', req.user);
       return res.status(401).json({
         success: false,
-        message: 'Authentication required'
+        message: 'Authentication required - User ID not found'
       });
     }
 
     // Validate required fields
-    const requiredFields = ['name', 'cuisine', 'description','capacity', 'location'];
+    const requiredFields = ['name', 'cuisine', 'description', 'capacity', 'location'];
     const missingFields = requiredFields.filter(field => !req.body[field]);
     
     if (missingFields.length > 0) {
@@ -24,12 +29,14 @@ export const createRestaurant = async (req, res) => {
 
     const restaurantData = {
       ...req.body,
-      createdBy: req.user.userId // Use userId from decoded token
+      createdBy: currentUserId
     };
 
-    console.log('📝 Creating restaurant with data:', restaurantData);
+    console.log('🎯 Final restaurant data for creation:', restaurantData);
 
     const restaurant = await Restaurant.create(restaurantData);
+    
+    console.log('✅ Restaurant created successfully:', restaurant._id);
     
     res.status(201).json({
       success: true,
@@ -100,7 +107,11 @@ export const updateRestaurant = async (req, res) => {
 
 export const getAllRestaurants = async (req, res) => {
   try {
+    console.log('📋 Fetching all restaurants...');
     const restaurants = await Restaurant.find().populate('createdBy', 'name email');
+    
+    console.log(`✅ Found ${restaurants.length} restaurants`);
+    
     res.json({
       success: true,
       data: restaurants

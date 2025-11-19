@@ -151,10 +151,10 @@ const RestaurantDetailsPage = () => {
             <motion.div
               animate={{ rotate: 360 }}
               transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
-              className="w-20 h-20 border-4 border-[#D4AF37] border-t-transparent rounded-full mx-auto"
+              className="w-20 h-20 border-4 border-[#1D293D] border-t-transparent rounded-full mx-auto"
             />
             <div className="absolute inset-0 flex items-center justify-center">
-              <Utensils className="text-[#D4AF37]" size={24} />
+              <Utensils className="text-[#1D293D]" size={24} />
             </div>
           </div>
 
@@ -186,7 +186,7 @@ const RestaurantDetailsPage = () => {
                   repeat: Infinity,
                   delay: index * 0.2
                 }}
-                className="w-2 h-2 bg-[#D4AF37] rounded-full"
+                className="w-2 h-2 bg-[#1D293D] rounded-full"
               />
             ))}
           </div>
@@ -211,7 +211,7 @@ const RestaurantDetailsPage = () => {
             <h2 className="text-xl font-semibold text-gray-800 mb-2">Restaurant Not Found</h2>
             <button 
               onClick={() => navigate('/dining')}
-              className="text-[#D4AF37] hover:underline font-medium"
+              className="text-[#1D293D] hover:underline font-medium"
             >
               Back to Restaurants
             </button>
@@ -483,11 +483,11 @@ const RestaurantDetailsPage = () => {
                       Trending
                     </span>
                   )}
-                  <span className="bg-[#D4AF37] text-[#0A1F44] px-4 py-2 rounded-full text-sm font-bold">
+                  <span className="bg-[#1D293D] text-white px-4 py-2 rounded-full text-sm font-bold">
                     {restaurant.cuisine}
                   </span>
-                  <div className="flex items-center gap-1 bg-[#D4AF37]/10 px-3 py-2 rounded-full">
-                    <Star size={18} className="text-[#D4AF37] fill-[#D4AF37]" />
+                  <div className="flex items-center gap-1 bg-[#E2BD3A]/10 px-3 py-2 rounded-full">
+                    <Star size={18} className="text-[#E2BD3A] fill-[#E2BD3A]" />
                     <span className="text-sm font-bold text-gray-900">
                       {restaurant.rating || "N/A"}
                     </span>
@@ -499,7 +499,7 @@ const RestaurantDetailsPage = () => {
                 </h1>
                 
                 <div className="flex items-center gap-2 text-gray-600 mb-4">
-                  <MapPin size={20} className="text-[#D4AF37]" />
+                  <MapPin size={20} className="text-[#1D293D]" />
                   <span className="text-lg">{restaurant.location}</span>
                 </div>
               </div>
@@ -508,7 +508,7 @@ const RestaurantDetailsPage = () => {
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
                 onClick={openReservationModal}
-                className="bg-gradient-to-r from-[#D4AF37] to-[#F4D03F] text-[#0A1F44] px-8 py-4 rounded-xl font-bold hover:shadow-xl transition-all duration-300 flex items-center gap-3 shadow-lg"
+                className="bg-[#1D293D] text-white px-8 py-4 rounded-xl font-bold hover:bg-[#2D3B5D] shadow-lg transition-all duration-300 flex items-center gap-3"
               >
                 <Calendar size={22} />
                 Reserve Now
@@ -569,7 +569,7 @@ const RestaurantDetailsPage = () => {
                 onClick={() => setActiveTab(tab.id)}
                 className={`flex items-center gap-2 px-6 py-4 border-b-2 transition-all duration-300 whitespace-nowrap ${
                   activeTab === tab.id
-                    ? 'border-[#D4AF37] text-[#D4AF37] font-semibold'
+                    ? 'border-[#1D293D] text-[#1D293D] font-semibold'
                     : 'border-transparent text-gray-600 hover:text-gray-900'
                 }`}
               >
@@ -593,7 +593,7 @@ const RestaurantDetailsPage = () => {
                 {restaurant.features && (
                   <div className="bg-white rounded-2xl shadow-lg p-8 border border-gray-100">
                     <h2 className="text-2xl font-bold text-gray-900 mb-6 flex items-center gap-3">
-                      <Award className="text-[#D4AF37]" size={28} />
+                      <Award className="text-[#1D293D]" size={28} />
                       Premium Amenities
                     </h2>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -648,7 +648,7 @@ const RestaurantDetailsPage = () => {
                 {/* Opening Hours */}
                 <div className="bg-white rounded-2xl shadow-lg p-8 border border-gray-100">
                   <h2 className="text-2xl font-bold text-gray-900 mb-6 flex items-center gap-3">
-                    <Clock className="text-[#D4AF37]" size={28} />
+                    <Clock className="text-[#1D293D]" size={28} />
                     Opening Hours
                   </h2>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -690,7 +690,7 @@ const RestaurantDetailsPage = () => {
                     className="bg-white rounded-2xl shadow-lg p-8 border border-gray-100"
                   >
                     <h2 className="text-2xl font-bold text-gray-900 mb-6 flex items-center gap-3">
-                      <ChefHat className="text-[#D4AF37]" size={28} />
+                      <ChefHat className="text-[#1D293D]" size={28} />
                       {section.title}
                     </h2>
                     <div className="space-y-4">
@@ -700,12 +700,12 @@ const RestaurantDetailsPage = () => {
                           initial={{ opacity: 0, x: -20 }}
                           animate={{ opacity: 1, x: 0 }}
                           transition={{ delay: (sectionIndex * 0.1) + (itemIndex * 0.05) }}
-                          className="flex justify-between items-start p-4 bg-gray-50 rounded-xl border border-gray-200 hover:border-[#D4AF37] transition-all duration-300 group"
+                          className="flex justify-between items-start p-4 bg-gray-50 rounded-xl border border-gray-200 hover:border-[#1D293D] transition-all duration-300 group"
                         >
                           <div className="flex-1">
                             <div className="flex justify-between items-start mb-2">
                               <h3 className="font-bold text-gray-900 text-lg">{item.name}</h3>
-                              <span className="text-[#D4AF37] font-bold text-lg">{item.price}</span>
+                              <span className="text-[#1D293D] font-bold text-lg">{item.price}</span>
                             </div>
                             <p className="text-gray-600">{item.description}</p>
                           </div>
@@ -746,12 +746,12 @@ const RestaurantDetailsPage = () => {
           {/* Sidebar */}
           <div className="space-y-6">
             {/* Enhanced Reserve Card */}
-            <div className="bg-gradient-to-br from-[#0A1F44] to-[#1a365d] text-white rounded-2xl shadow-xl p-6 relative overflow-hidden">
-              <div className="absolute top-0 right-0 w-32 h-32 bg-[#D4AF37]/10 rounded-full -translate-y-16 translate-x-16"></div>
+            <div className="bg-gradient-to-br from-[#1D293D] to-[#2D3B5D] text-white rounded-2xl shadow-xl p-6 relative overflow-hidden">
+              <div className="absolute top-0 right-0 w-32 h-32 bg-[#E2BD3A]/10 rounded-full -translate-y-16 translate-x-16"></div>
               
               <div className="relative z-10">
                 <div className="flex items-center gap-2 mb-4">
-                  <Crown size={20} className="text-[#D4AF37]" />
+                  <Crown size={20} className="text-[#E2BD3A]" />
                   <h3 className="text-xl font-bold">Premium Experience</h3>
                 </div>
                 
@@ -781,7 +781,7 @@ const RestaurantDetailsPage = () => {
                   whileHover={{ scale: 1.02 }}
                   whileTap={{ scale: 0.98 }}
                   onClick={openReservationModal}
-                  className="w-full bg-gradient-to-r from-[#D4AF37] to-[#F4D03F] text-[#0A1F44] py-4 rounded-xl font-bold hover:shadow-xl transition-all duration-300 flex items-center justify-center gap-3 shadow-lg"
+                  className="w-full bg-[#E2BD3A] text-[#1D293D] py-4 rounded-xl font-bold hover:bg-[#d4ab2a] shadow-lg transition-all duration-300 flex items-center justify-center gap-3"
                 >
                   <Calendar size={22} />
                   Reserve Instantly
@@ -827,7 +827,7 @@ const RestaurantDetailsPage = () => {
                   {restaurant.tags.map((tag, index) => (
                     <span
                       key={index}
-                      className="px-3 py-2 bg-gray-100 text-gray-700 rounded-lg text-sm font-semibold border border-gray-300 hover:border-[#D4AF37] transition-all duration-300"
+                      className="px-3 py-2 bg-gray-100 text-gray-700 rounded-lg text-sm font-semibold border border-gray-300 hover:border-[#1D293D] transition-all duration-300"
                     >
                       {tag}
                     </span>

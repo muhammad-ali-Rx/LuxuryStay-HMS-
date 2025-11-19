@@ -71,7 +71,7 @@ export default function Contact() {
     setSubmitStatus("idle")
 
     try {
-      const response = await fetch('http://localhost:5000/form/contact', {
+      const response = await fetch('http://localhost:3000/form/contact', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

@@ -10,6 +10,7 @@ import restaurants from "./Routers/restaurants.mjs" // Make sure this path is co
 import reservations from "./Routers/reservations.mjs"
 import contect from "./Routers/contactRoutes.mjs"
 import Booking from "./Routers/bookingRoutes.mjs";
+import payment from './Routers/paymentRoutes.mjs';
 import path from 'path';
 import { fileURLToPath } from 'url';
 
@@ -39,7 +40,7 @@ app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 // Test route
 app.get("/api/test-cors", (req, res) => {
-  res.json({ message: "CORS is working!", timestamp: new Date().toISOString() });
+  res.json({ message: "CORS is working!", timestamp: new Date().toISOString() });   
 });
 
 // Routes
@@ -50,6 +51,7 @@ app.use("/room", roomRating)
 app.use("/restaurants", restaurants) // This should point to your fixed routes file
 app.use("/reservations", reservations)
 app.use("/booking", Booking)
+app.use("/payment", payment)
 app.use('/form', contect)
 
 // Global error handler
@@ -61,7 +63,7 @@ app.use((err, req, res, next) => {
             success: false,
             message: "File too large",
             error: "The image file size is too large. Please use smaller images."
-        });
+        }); 
     }
     
     res.status(500).json({

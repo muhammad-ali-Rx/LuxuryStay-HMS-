@@ -1,9 +1,14 @@
 import Reservation from "../Models/Reservation.js";
 import Restaurant from "../Models/Restaurant.mjs";
 
-// ✅ Create new reservation (for both authenticated and non-authenticated users)
+
 export const createReservation = async (req, res) => {
   try {
+    console.log("=== DEBUG RESERVATION CREATION ===");
+    console.log("Request user:", req.user);
+    console.log("User ID:", req.user?._id);
+    console.log("Request body:", req.body);
+
     const {
       restaurantId,
       reservationDate,
@@ -52,18 +57,33 @@ export const createReservation = async (req, res) => {
       status: 'confirmed'
     };
 
-    // Add guest information based on authentication
-    if (req.user && req.user.userId) {
+    // ✅ FIX: Handle both authenticated and non-authenticated users
+    if (req.user && req.user._id) {
       // Authenticated user
-      reservationData.guest = req.user.userId;
+      reservationData.guest = req.user._id;
+      reservationData.guestDetails = {
+        name: req.user.name || guestName,
+        email: req.user.email || guestEmail,
+        phone: req.user.phone || guestPhone
+      };
+      console.log("✅ Creating reservation for authenticated user:", req.user._id);
     } else {
-      // Non-authenticated guest
+      // Non-authenticated user - guestDetails is required
+      if (!guestName || !guestEmail || !guestPhone) {
+        return res.status(400).json({
+          success: false,
+          message: 'Guest details (name, email, phone) are required'
+        });
+      }
       reservationData.guestDetails = {
         name: guestName,
         email: guestEmail,
         phone: guestPhone
       };
+      console.log("✅ Creating reservation for non-authenticated guest");
     }
+
+    console.log("🎯 Final reservation data:", reservationData);
 
     // Create reservation
     const reservation = await Reservation.create(reservationData);
@@ -79,7 +99,20 @@ export const createReservation = async (req, res) => {
       data: reservation
     });
   } catch (error) {
-    console.error('Error creating reservation:', error);
+    console.error('❌ Error creating reservation:', error);
+    
+    if (error.name === 'ValidationError') {
+      const errors = Object.values(error.errors).map(err => ({
+        field: err.path,
+        message: err.message
+      }));
+      return res.status(400).json({
+        success: false,
+        message: 'Reservation validation failed',
+        errors: errors
+      });
+    }
+    
     res.status(400).json({
       success: false,
       message: 'Error creating reservation',
@@ -310,6 +343,42 @@ export const checkAvailability = async (req, res) => {
     res.status(500).json({
       success: false,
       message: 'Server error',
+      error: error.message
+    });
+  }
+};
+
+// ✅ Cancel reservation
+export const cancelReservation = async (req, res) => {
+  try {
+    const reservation = await Reservation.findByIdAndUpdate(
+      req.params.id,
+      { 
+        status: 'cancelled',
+        cancelledAt: new Date()
+      },
+      { new: true }
+    )
+    .populate('guest', 'name email phone')
+    .populate('restaurant', 'name');
+
+    if (!reservation) {
+      return res.status(404).json({
+        success: false,
+        message: 'Reservation not found'
+      });
+    }
+
+    res.json({
+      success: true,
+      message: 'Reservation cancelled successfully',
+      data: reservation
+    });
+  } catch (error) {
+    console.error('Error cancelling reservation:', error);
+    res.status(400).json({
+      success: false,
+      message: 'Error cancelling reservation',
       error: error.message
     });
   }

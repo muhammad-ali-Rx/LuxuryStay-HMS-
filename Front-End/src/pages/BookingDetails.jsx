@@ -94,25 +94,40 @@ export default function BookingDetails() {
     window.print()
   }
 
-  const handleDownload = () => {
-    // Create a printable version of the booking details
-    const printContent = document.getElementById('booking-details-content').innerHTML
+  const handleDownloadAll = () => {
+    // Create a printable version of ALL booking details
+    const allContent = document.getElementById('booking-details-container').innerHTML
     const windowContent = `
       <!DOCTYPE html>
       <html>
       <head>
-        <title>Booking Confirmation - ${booking?._id}</title>
+        <title>Complete Booking Details - ${booking?._id}</title>
         <style>
-          body { font-family: Arial, sans-serif; margin: 20px; }
-          .header { text-align: center; margin-bottom: 30px; }
-          .section { margin-bottom: 20px; }
-          .section-title { font-weight: bold; border-bottom: 2px solid #333; padding-bottom: 5px; margin-bottom: 10px; }
-          .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
-          .footer { margin-top: 30px; text-align: center; font-size: 12px; color: #666; }
+          body { font-family: Arial, sans-serif; margin: 20px; line-height: 1.6; }
+          .header { text-align: center; margin-bottom: 30px; border-bottom: 2px solid #333; padding-bottom: 20px; }
+          .section { margin-bottom: 25px; border: 1px solid #ddd; padding: 15px; border-radius: 8px; }
+          .section-title { font-weight: bold; border-bottom: 1px solid #333; padding-bottom: 8px; margin-bottom: 12px; font-size: 18px; }
+          .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+          .info-row { display: flex; justify-content: space-between; margin-bottom: 8px; }
+          .footer { margin-top: 30px; text-align: center; font-size: 12px; color: #666; border-top: 1px solid #ddd; padding-top: 15px; }
+          .status-badge { display: inline-block; padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: bold; }
+          .timeline-item { margin-bottom: 20px; padding-left: 20px; border-left: 2px solid #1D293D; }
+          .no-print { display: none !important; }
+          @media print {
+            .no-print { display: none !important; }
+          }
         </style>
       </head>
       <body>
-        ${printContent}
+        <div class="header">
+          <h1>Complete Booking Details</h1>
+          <p>Booking ID: ${booking?._id}</p>
+          <p>Generated on: ${new Date().toLocaleDateString()}</p>
+        </div>
+        ${allContent}
+        <div class="footer">
+          <p>Thank you for choosing our service. For any queries, contact support.</p>
+        </div>
       </body>
       </html>
     `
@@ -121,6 +136,58 @@ export default function BookingDetails() {
     printWindow.document.write(windowContent)
     printWindow.document.close()
     printWindow.print()
+  }
+
+  const handleDownloadCurrent = (tabName = activeTab) => {
+    // Create a printable version of ONLY the current active tab content
+    const currentTabContent = document.getElementById(`tab-content-${tabName}`)?.innerHTML || ''
+    const tabTitle = getTabTitle(tabName)
+    
+    const windowContent = `
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <title>${tabTitle} - Booking ${booking?._id}</title>
+        <style>
+          body { font-family: Arial, sans-serif; margin: 20px; line-height: 1.6; }
+          .header { text-align: center; margin-bottom: 30px; border-bottom: 2px solid #333; padding-bottom: 20px; }
+          .section { margin-bottom: 20px; }
+          .section-title { font-weight: bold; border-bottom: 1px solid #333; padding-bottom: 8px; margin-bottom: 12px; }
+          .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+          .info-row { display: flex; justify-content: space-between; margin-bottom: 8px; }
+          .footer { margin-top: 30px; text-align: center; font-size: 12px; color: #666; }
+          .status-badge { display: inline-block; padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: bold; }
+          .no-print { display: none !important; }
+        </style>
+      </head>
+      <body>
+        <div class="header">
+          <h1>${tabTitle} - Booking Details</h1>
+          <p>Booking ID: ${booking?._id}</p>
+          <p>Generated on: ${new Date().toLocaleDateString()}</p>
+        </div>
+        ${currentTabContent}
+        <div class="footer">
+          <p>This document contains only the ${tabTitle.toLowerCase()} section of the booking.</p>
+        </div>
+      </body>
+      </html>
+    `
+    
+    const printWindow = window.open('', '_blank')
+    printWindow.document.write(windowContent)
+    printWindow.document.close()
+    printWindow.print()
+  }
+
+  const getTabTitle = (tabName) => {
+    switch(tabName) {
+      case 'overview': return 'Booking Overview'
+      case 'guest': return 'Guest Details'
+      case 'payment': return 'Payment Information'
+      case 'timeline': return 'Booking Timeline'
+      default: return 'Booking Details'
+    }
   }
 
   const formatDate = (dateString) => {
@@ -224,7 +291,7 @@ export default function BookingDetails() {
         <FrontendNavbar />
         <div className="pt-32 pb-12 px-4">
           <div className="max-w-4xl mx-auto text-center">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#D4AF37] mx-auto mb-4"></div>
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#1D293D] mx-auto mb-4"></div>
             <p className="text-gray-600">Loading booking details...</p>
           </div>
         </div>
@@ -287,11 +354,11 @@ export default function BookingDetails() {
               </Button>
               <Button
                 variant="outline"
-                onClick={handleDownload}
-                className="flex items-center gap-2"
+                onClick={handleDownloadAll}
+                className="flex items-center gap-2 bg-[#1D293D] text-white hover:bg-[#2D3B5D]"
               >
                 <Download size={18} />
-                Download
+                Download All
               </Button>
             </div>
           </div>
@@ -299,14 +366,14 @@ export default function BookingDetails() {
       </div>
 
       {/* Main Content */}
-      <div className="max-w-6xl mx-auto px-4 py-8">
+      <div id="booking-details-container" className="max-w-6xl mx-auto px-4 py-8">
         <div className="grid lg:grid-cols-4 gap-8">
           
           {/* Sidebar */}
           <div className="lg:col-span-1">
             <div className="bg-white rounded-lg shadow-sm border p-6 sticky top-24">
               <div className="text-center mb-6">
-                <div className="w-16 h-16 bg-[#D4AF37] rounded-full flex items-center justify-center mx-auto mb-3">
+                <div className="w-16 h-16 bg-[#FEF9C2] rounded-full flex items-center justify-center mx-auto mb-3">
                   {getStatusIcon(booking.bookingStatus || booking.status)}
                 </div>
                 <span className={`px-3 py-1 rounded-full text-sm font-semibold capitalize ${getStatusColor(booking.bookingStatus || booking.status)}`}>
@@ -319,7 +386,7 @@ export default function BookingDetails() {
                   onClick={() => setActiveTab("overview")}
                   className={`w-full text-left px-4 py-3 rounded-lg transition-all ${
                     activeTab === "overview" 
-                      ? "bg-[#0A1F44] text-white" 
+                      ? "bg-[#1D293D] text-white" 
                       : "text-gray-600 hover:bg-gray-100"
                   }`}
                 >
@@ -329,7 +396,7 @@ export default function BookingDetails() {
                   onClick={() => setActiveTab("guest")}
                   className={`w-full text-left px-4 py-3 rounded-lg transition-all ${
                     activeTab === "guest" 
-                      ? "bg-[#0A1F44] text-white" 
+                      ? "bg-[#1D293D] text-white" 
                       : "text-gray-600 hover:bg-gray-100"
                   }`}
                 >
@@ -339,7 +406,7 @@ export default function BookingDetails() {
                   onClick={() => setActiveTab("payment")}
                   className={`w-full text-left px-4 py-3 rounded-lg transition-all ${
                     activeTab === "payment" 
-                      ? "bg-[#0A1F44] text-white" 
+                      ? "bg-[#1D293D] text-white" 
                       : "text-gray-600 hover:bg-gray-100"
                   }`}
                 >
@@ -349,7 +416,7 @@ export default function BookingDetails() {
                   onClick={() => setActiveTab("timeline")}
                   className={`w-full text-left px-4 py-3 rounded-lg transition-all ${
                     activeTab === "timeline" 
-                      ? "bg-[#0A1F44] text-white" 
+                      ? "bg-[#1D293D] text-white" 
                       : "text-gray-600 hover:bg-gray-100"
                   }`}
                 >
@@ -361,19 +428,29 @@ export default function BookingDetails() {
 
           {/* Main Content Area */}
           <div className="lg:col-span-3">
-            <div id="booking-details-content" className="bg-white rounded-lg shadow-sm border">
+            <div className="bg-white rounded-lg shadow-sm border">
               
               {/* Overview Tab */}
               {activeTab === "overview" && (
-                <div className="p-6">
-                  <h2 className="text-2xl font-bold text-gray-900 mb-6">Booking Overview</h2>
+                <div id="tab-content-overview" className="p-6">
+                  <div className="flex justify-between items-center mb-6">
+                    <h2 className="text-2xl font-bold text-gray-900">Booking Overview</h2>
+                    <Button
+                      variant="outline"
+                      onClick={() => handleDownloadCurrent('overview')}
+                      className="flex items-center gap-2 no-print"
+                    >
+                      <Download size={16} />
+                      Download  Now
+                    </Button>
+                  </div>
                   
                   <div className="grid md:grid-cols-2 gap-8">
                     {/* Room Information */}
                     <div className="space-y-6">
                       <div>
                         <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
-                          <MapPin className="w-5 h-5 text-[#D4AF37]" />
+                          <MapPin className="w-5 h-5 text-[#1D293D]" />
                           Room Information
                         </h3>
                         <div className="space-y-3">
@@ -395,7 +472,7 @@ export default function BookingDetails() {
                       {/* Dates */}
                       <div>
                         <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
-                          <Calendar className="w-5 h-5 text-[#D4AF37]" />
+                          <Calendar className="w-5 h-5 text-[#1D293D]" />
                           Dates & Duration
                         </h3>
                         <div className="space-y-3">
@@ -418,7 +495,7 @@ export default function BookingDetails() {
                     {/* Price Summary */}
                     <div>
                       <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
-                        <CreditCard className="w-5 h-5 text-[#D4AF37]" />
+                        <CreditCard className="w-5 h-5 text-[#1D293D]" />
                         Price Summary
                       </h3>
                       <div className="bg-gray-50 rounded-lg p-4 space-y-3">
@@ -445,7 +522,7 @@ export default function BookingDetails() {
                         </div>
                         <div className="border-t pt-3 flex justify-between text-lg font-bold">
                           <span>Total Amount</span>
-                          <span className="text-[#D4AF37] flex items-center gap-1">
+                          <span className="text-[#1D293D] flex items-center gap-1">
                             <DollarSign size={18} />
                             {booking.totalAmount}
                           </span>
@@ -470,7 +547,7 @@ export default function BookingDetails() {
                   {booking.specialRequests && (
                     <div className="mt-8 pt-6 border-t">
                       <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
-                        <FileText className="w-5 h-5 text-[#D4AF37]" />
+                        <FileText className="w-5 h-5 text-[#1D293D]" />
                         Special Requests
                       </h3>
                       <p className="text-gray-700 bg-gray-50 p-4 rounded-lg">
@@ -483,8 +560,18 @@ export default function BookingDetails() {
 
               {/* Guest Details Tab */}
               {activeTab === "guest" && (
-                <div className="p-6">
-                  <h2 className="text-2xl font-bold text-gray-900 mb-6">Guest Details</h2>
+                <div id="tab-content-guest" className="p-6">
+                  <div className="flex justify-between items-center mb-6">
+                    <h2 className="text-2xl font-bold text-gray-900">Guest Details</h2>
+                    <Button
+                      variant="outline"
+                      onClick={() => handleDownloadCurrent('guest')}
+                      className="flex items-center gap-2 no-print"
+                    >
+                      <Download size={16} />
+                      Download  Now
+                    </Button>
+                  </div>
                   
                   <div className="grid md:grid-cols-2 gap-8">
                     <div className="space-y-6">
@@ -526,8 +613,18 @@ export default function BookingDetails() {
 
               {/* Payment Info Tab */}
               {activeTab === "payment" && (
-                <div className="p-6">
-                  <h2 className="text-2xl font-bold text-gray-900 mb-6">Payment Information</h2>
+                <div id="tab-content-payment" className="p-6">
+                  <div className="flex justify-between items-center mb-6">
+                    <h2 className="text-2xl font-bold text-gray-900">Payment Information</h2>
+                    <Button
+                      variant="outline"
+                      onClick={() => handleDownloadCurrent('payment')}
+                      className="flex items-center gap-2 no-print"
+                    >
+                      <Download size={16} />
+                       Download  Now
+                    </Button>
+                  </div>
                   
                   <div className="grid md:grid-cols-2 gap-8">
                     <div className="space-y-6">
@@ -583,13 +680,23 @@ export default function BookingDetails() {
 
               {/* Timeline Tab */}
               {activeTab === "timeline" && (
-                <div className="p-6">
-                  <h2 className="text-2xl font-bold text-gray-900 mb-6">Booking Timeline</h2>
+                <div id="tab-content-timeline" className="p-6">
+                  <div className="flex justify-between items-center mb-6">
+                    <h2 className="text-2xl font-bold text-gray-900">Booking Timeline</h2>
+                    <Button
+                      variant="outline"
+                      onClick={() => handleDownloadCurrent('timeline')}
+                      className="flex items-center gap-2 no-print"
+                    >
+                      <Download size={16} />
+                       Download  Now
+                    </Button>
+                  </div>
                   
                   <div className="space-y-6">
                     <div className="flex gap-4">
                       <div className="flex flex-col items-center">
-                        <div className="w-3 h-3 bg-[#D4AF37] rounded-full"></div>
+                        <div className="w-3 h-3 bg-[#1D293D] rounded-full"></div>
                         <div className="w-0.5 h-16 bg-gray-300"></div>
                       </div>
                       <div className="flex-1">
@@ -658,4 +765,4 @@ export default function BookingDetails() {
       </div>
     </div>
   )
-}
+} 

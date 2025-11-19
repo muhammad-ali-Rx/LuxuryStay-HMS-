@@ -240,7 +240,7 @@ export default function StaffManagement() {
 
   const getStatusColor = (status) => {
     return status === "active"
-      ? "bg-teal-100 text-teal-700"
+      ? "bg-green-100 text-green-700"
       : "bg-red-100 text-red-700";
   };
 
@@ -269,7 +269,7 @@ export default function StaffManagement() {
   if (loading) {
     return (
       <div className="p-6 text-center text-gray-600">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-teal-600 mx-auto"></div>
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#0A1F44] mx-auto"></div>
         <p className="mt-4">Loading users...</p>
       </div>
     );
@@ -282,7 +282,7 @@ export default function StaffManagement() {
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0, y: -20 }}
-          className="bg-teal-100 border border-teal-400 text-teal-700 px-4 py-3 rounded-lg flex items-center gap-2 mb-6"
+          className="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded-lg flex items-center gap-2 mb-6"
         >
           <span>✓</span>
           {successMessage}
@@ -300,86 +300,86 @@ export default function StaffManagement() {
       )}
 
       <div>
-        <h2 className="text-3xl font-bold text-teal-700 mb-2">User Management</h2>
+        <h2 className="text-3xl font-bold text-[#0A1F44] mb-2">User Management</h2>
         <p className="text-gray-600 mb-6">Manage all users and staff members in your system</p>
 
         <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-4 mb-8">
           <motion.div
             whileHover={{ y: -2 }}
-            className="bg-white rounded-xl p-4 shadow-sm border-l-4 border-teal-500"
+            className="bg-white rounded-xl p-4 shadow-sm border-l-4 border-[#0A1F44]"
           >
             <p className="text-gray-600 text-sm font-medium">Total Users</p>
-            <p className="text-2xl font-bold text-teal-700 mt-2">
+            <p className="text-2xl font-bold text-[#0A1F44] mt-2">
               {stats.totalUsers}
             </p>
           </motion.div>
 
           <motion.div
             whileHover={{ y: -2 }}
-            className="bg-white rounded-xl p-4 shadow-sm border-l-4 border-purple-500"
+            className="bg-white rounded-xl p-4 shadow-sm border-l-4 border-[#0A1F44]"
           >
             <p className="text-gray-600 text-sm font-medium">Staff Members</p>
-            <p className="text-2xl font-bold text-purple-700 mt-2">
+            <p className="text-2xl font-bold text-[#0A1F44] mt-2">
               {stats.totalStaff}
             </p>
           </motion.div>
 
           <motion.div
             whileHover={{ y: -2 }}
-            className="bg-white rounded-xl p-4 shadow-sm border-l-4 border-blue-500"
+            className="bg-white rounded-xl p-4 shadow-sm border-l-4 border-[#0A1F44]"
           >
             <p className="text-gray-600 text-sm font-medium">Regular Users</p>
-            <p className="text-2xl font-bold text-blue-700 mt-2">
+            <p className="text-2xl font-bold text-[#0A1F44] mt-2">
               {stats.regularUsers}
             </p>
           </motion.div>
 
           <motion.div
             whileHover={{ y: -2 }}
-            className="bg-white rounded-xl p-4 shadow-sm border-l-4 border-green-500"
+            className="bg-white rounded-xl p-4 shadow-sm border-l-4 border-[#0A1F44]"
           >
             <p className="text-gray-600 text-sm font-medium">Active</p>
-            <p className="text-2xl font-bold text-green-700 mt-2">
+            <p className="text-2xl font-bold text-[#0A1F44] mt-2">
               {stats.active}
             </p>
           </motion.div>
 
           <motion.div
             whileHover={{ y: -2 }}
-            className="bg-white rounded-xl p-4 shadow-sm border-l-4 border-orange-500"
+            className="bg-white rounded-xl p-4 shadow-sm border-l-4 border-[#0A1F44]"
           >
             <p className="text-gray-600 text-sm font-medium">Verified</p>
-            <p className="text-2xl font-bold text-orange-700 mt-2">
+            <p className="text-2xl font-bold text-[#0A1F44] mt-2">
               {stats.verified}
             </p>
           </motion.div>
 
           <motion.div
             whileHover={{ y: -2 }}
-            className="bg-white rounded-xl p-4 shadow-sm border-l-4 border-indigo-500"
+            className="bg-white rounded-xl p-4 shadow-sm border-l-4 border-[#0A1F44]"
           >
             <p className="text-gray-600 text-sm font-medium">Admins</p>
-            <p className="text-2xl font-bold text-indigo-700 mt-2">
+            <p className="text-2xl font-bold text-[#0A1F44] mt-2">
               {stats.admins}
             </p>
           </motion.div>
 
           <motion.div
             whileHover={{ y: -2 }}
-            className="bg-white rounded-xl p-4 shadow-sm border-l-4 border-pink-500"
+            className="bg-white rounded-xl p-4 shadow-sm border-l-4 border-[#0A1F44]"
           >
             <p className="text-gray-600 text-sm font-medium">Managers</p>
-            <p className="text-2xl font-bold text-pink-700 mt-2">
+            <p className="text-2xl font-bold text-[#0A1F44] mt-2">
               {stats.managers}
             </p>
           </motion.div>
 
           <motion.div
             whileHover={{ y: -2 }}
-            className="bg-white rounded-xl p-4 shadow-sm border-l-4 border-yellow-500"
+            className="bg-white rounded-xl p-4 shadow-sm border-l-4 border-[#0A1F44]"
           >
             <p className="text-gray-600 text-sm font-medium">Receptionists</p>
-            <p className="text-2xl font-bold text-yellow-700 mt-2">
+            <p className="text-2xl font-bold text-[#0A1F44] mt-2">
               {stats.receptionists}
             </p>
           </motion.div>
@@ -390,43 +390,43 @@ export default function StaffManagement() {
         <div className="flex space-x-2">
           <button
             onClick={() => setActiveTab("all")}
-            className={`flex items-center gap-2 px-4 py-3 rounded-lg font-semibold transition-colors ${
+            className={`flex items-center gap-2 px-4 py-3 rounded-xl font-semibold transition-colors ${
               activeTab === "all"
-                ? "bg-teal-600 text-white shadow-md"
+                ? "bg-[#0A1F44] text-white shadow-md"
                 : "bg-white text-gray-700 hover:bg-gray-100 border border-gray-200"
             }`}
           >
             <Users size={18} />
             All Users
-            <span className="bg-teal-100 text-teal-800 text-xs px-2 py-1 rounded-full">
+            <span className="bg-[#0A1F44] text-white text-xs px-2 py-1 rounded-full">
               {stats.totalUsers}
             </span>
           </button>
           <button
             onClick={() => setActiveTab("staff")}
-            className={`flex items-center gap-2 px-4 py-3 rounded-lg font-semibold transition-colors ${
+            className={`flex items-center gap-2 px-4 py-3 rounded-xl font-semibold transition-colors ${
               activeTab === "staff"
-                ? "bg-teal-600 text-white shadow-md"
+                ? "bg-[#0A1F44] text-white shadow-md"
                 : "bg-white text-gray-700 hover:bg-gray-100 border border-gray-200"
             }`}
           >
             <UserCheck size={18} />
             Staff Members
-            <span className="bg-purple-100 text-purple-800 text-xs px-2 py-1 rounded-full">
+            <span className="bg-[#0A1F44] text-white text-xs px-2 py-1 rounded-full">
               {stats.totalStaff}
             </span>
           </button>
           <button
             onClick={() => setActiveTab("regular")}
-            className={`flex items-center gap-2 px-4 py-3 rounded-lg font-semibold transition-colors ${
+            className={`flex items-center gap-2 px-4 py-3 rounded-xl font-semibold transition-colors ${
               activeTab === "regular"
-                ? "bg-teal-600 text-white shadow-md"
+                ? "bg-[#0A1F44] text-white shadow-md"
                 : "bg-white text-gray-700 hover:bg-gray-100 border border-gray-200"
             }`}
           >
             <Users size={18} />
             Regular Users
-            <span className="bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded-full">
+            <span className="bg-[#0A1F44] text-white text-xs px-2 py-1 rounded-full">
               {stats.regularUsers}
             </span>
           </button>
@@ -449,7 +449,7 @@ export default function StaffManagement() {
             });
             setShowAddModal(true);
           }}
-          className="flex items-center gap-2 bg-teal-600 text-white px-5 py-3 rounded-lg font-semibold hover:bg-teal-700 transition-colors shadow-md"
+          className="flex items-center gap-2 bg-[#0A1F44] text-white px-5 py-3 rounded-xl font-semibold hover:bg-[#00326f] transition-colors shadow-md"
         >
           <Plus size={20} />
           Add Staff
@@ -511,7 +511,7 @@ export default function StaffManagement() {
                     </td>
                     <td className="px-6 py-4">
                       <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-full bg-gradient-to-r from-teal-500 to-teal-600 flex items-center justify-center text-white font-semibold text-sm shadow-sm">
+                        <div className="w-10 h-10 rounded-full bg-[#0A1F44] flex items-center justify-center text-white font-semibold text-sm shadow-sm">
                           {getAvatarInitials(user.name)}
                         </div>
                         <div>
@@ -572,7 +572,7 @@ export default function StaffManagement() {
                             setSelectedStaff(user);
                             setShowDetailView(true);
                           }}
-                          className="text-teal-600 hover:text-teal-700 font-semibold flex items-center gap-1 text-sm px-3 py-2 rounded-lg hover:bg-teal-50 transition-colors"
+                          className="text-[#0A1F44] hover:text-[#00326f] font-semibold flex items-center gap-1 text-sm px-3 py-2 rounded-lg hover:bg-blue-50 transition-colors"
                         >
                           View
                           <ChevronRight size={16} />
@@ -606,15 +606,15 @@ export default function StaffManagement() {
             animate={{ opacity: 1, scale: 1 }}
             className="bg-white rounded-2xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto"
           >
-            <div className="bg-gradient-to-r from-teal-600 to-teal-700 text-white px-8 py-6 flex justify-between items-start">
+            <div className="bg-gradient-to-r from-[#0A1F44] to-[#00326f] text-white px-8 py-6 flex justify-between items-start">
               <div className="flex gap-4 items-start flex-1">
-                <div className="w-16 h-16 rounded-full bg-teal-500 flex items-center justify-center text-2xl font-bold shadow-lg">
+                <div className="w-16 h-16 rounded-full bg-[#0A1F44] flex items-center justify-center text-2xl font-bold shadow-lg">
                   {getAvatarInitials(selectedStaff.name)}
                 </div>
                 <div>
                   <h2 className="text-2xl font-bold">{selectedStaff.name}</h2>
                   <div className="flex items-center gap-2 mt-1">
-                    <span className="text-teal-100 text-sm capitalize">
+                    <span className="text-blue-100 text-sm capitalize">
                       {selectedStaff.role}
                     </span>
                     <span className={`px-2 py-1 rounded-full text-xs font-semibold ${getStatusColor(selectedStaff.status)}`}>
@@ -634,7 +634,7 @@ export default function StaffManagement() {
             <div className="p-8">
               <div className="mb-8 pb-8 border-b border-gray-200">
                 <h3 className="text-lg font-bold text-gray-800 mb-4 flex items-center gap-2">
-                  <Mail size={18} className="text-teal-600" />
+                  <Mail size={18} className="text-[#0A1F44]" />
                   Contact Information
                 </h3>
                 <div className="grid grid-cols-2 gap-4 text-sm">
@@ -748,7 +748,7 @@ export default function StaffManagement() {
                     openEditModal(selectedStaff);
                     setShowDetailView(false);
                   }}
-                  className="flex-1 flex items-center justify-center gap-2 bg-teal-600 text-white py-3 rounded-lg font-semibold hover:bg-teal-700 transition-colors"
+                  className="flex-1 flex items-center justify-center gap-2 bg-[#0A1F44] text-white py-3 rounded-xl font-semibold hover:bg-[#00326f] transition-colors"
                 >
                   <Edit size={18} />
                   Edit Profile
@@ -759,7 +759,7 @@ export default function StaffManagement() {
                   onClick={() => {
                     handleDelete(selectedStaff._id || selectedStaff.id);
                   }}
-                  className="flex-1 flex items-center justify-center gap-2 bg-red-500 text-white py-3 rounded-lg font-semibold hover:bg-red-600 transition-colors"
+                  className="flex-1 flex items-center justify-center gap-2 bg-red-500 text-white py-3 rounded-xl font-semibold hover:bg-red-600 transition-colors"
                 >
                   <Trash2 size={18} />
                   Delete Account
@@ -798,7 +798,7 @@ export default function StaffManagement() {
                   onChange={(e) =>
                     setEditFormData({ ...editFormData, name: e.target.value })
                   }
-                  className="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-teal-500 focus:ring-2 focus:ring-teal-200 outline-none transition-colors bg-white"
+                  className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-[#0A1F44] focus:ring-2 focus:ring-blue-200 outline-none transition-colors bg-white"
                   placeholder="Enter full name"
                 />
               </div>
@@ -813,7 +813,7 @@ export default function StaffManagement() {
                   onChange={(e) =>
                     setEditFormData({ ...editFormData, email: e.target.value })
                   }
-                  className="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-teal-500 focus:ring-2 focus:ring-teal-200 outline-none transition-colors bg-white"
+                  className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-[#0A1F44] focus:ring-2 focus:ring-blue-200 outline-none transition-colors bg-white"
                   placeholder="Enter email address"
                 />
               </div>
@@ -831,7 +831,7 @@ export default function StaffManagement() {
                       password: e.target.value,
                     })
                   }
-                  className="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-teal-500 focus:ring-2 focus:ring-teal-200 outline-none transition-colors bg-white"
+                  className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-[#0A1F44] focus:ring-2 focus:ring-blue-200 outline-none transition-colors bg-white"
                   placeholder="Leave blank to keep current password"
                 />
               </div>
@@ -846,7 +846,7 @@ export default function StaffManagement() {
                   onChange={(e) =>
                     setEditFormData({ ...editFormData, phone: e.target.value })
                   }
-                  className="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-teal-500 focus:ring-2 focus:ring-teal-200 outline-none transition-colors bg-white"
+                  className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-[#0A1F44] focus:ring-2 focus:ring-blue-200 outline-none transition-colors bg-white"
                   placeholder="Enter phone number"
                 />
               </div>
@@ -860,7 +860,7 @@ export default function StaffManagement() {
                   onChange={(e) =>
                     setEditFormData({ ...editFormData, role: e.target.value })
                   }
-                  className="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-teal-500 focus:ring-2 focus:ring-teal-200 outline-none transition-colors bg-white"
+                  className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-[#0A1F44] focus:ring-2 focus:ring-blue-200 outline-none transition-colors bg-white"
                 >
                   <option value="">Select Role</option>
                   <option value="admin">Administrator</option>
@@ -883,7 +883,7 @@ export default function StaffManagement() {
                       onChange={(e) =>
                         setEditFormData({ ...editFormData, shift: e.target.value })
                       }
-                      className="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-teal-500 focus:ring-2 focus:ring-teal-200 outline-none transition-colors bg-white"
+                      className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-[#0A1F44] focus:ring-2 focus:ring-blue-200 outline-none transition-colors bg-white"
                     >
                       <option value="morning">Morning Shift</option>
                       <option value="afternoon">Afternoon Shift</option>
@@ -902,7 +902,7 @@ export default function StaffManagement() {
                       onChange={(e) =>
                         setEditFormData({ ...editFormData, salary: e.target.value })
                       }
-                      className="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-teal-500 focus:ring-2 focus:ring-teal-200 outline-none transition-colors bg-white"
+                      className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-[#0A1F44] focus:ring-2 focus:ring-blue-200 outline-none transition-colors bg-white"
                       placeholder="Enter salary amount"
                     />
                   </div>
@@ -918,14 +918,14 @@ export default function StaffManagement() {
                   onChange={(e) =>
                     setEditFormData({ ...editFormData, status: e.target.value })
                   }
-                  className="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-teal-500 focus:ring-2 focus:ring-teal-200 outline-none transition-colors bg-white"
+                  className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-[#0A1F44] focus:ring-2 focus:ring-blue-200 outline-none transition-colors bg-white"
                 >
                   <option value="active">Active</option>
                   <option value="inactive">Inactive</option>
                 </select>
               </div>
 
-              <label className="flex items-center gap-3 cursor-pointer p-3 rounded-lg border border-gray-200 hover:bg-gray-50 transition-colors">
+              <label className="flex items-center gap-3 cursor-pointer p-3 rounded-xl border border-gray-200 hover:bg-gray-50 transition-colors">
                 <input
                   type="checkbox"
                   checked={editFormData.verified}
@@ -935,7 +935,7 @@ export default function StaffManagement() {
                       verified: e.target.checked,
                     })
                   }
-                  className="w-5 h-5 rounded accent-teal-500"
+                  className="w-5 h-5 rounded accent-[#0A1F44]"
                 />
                 <div>
                   <span className="text-sm font-medium text-gray-800 block">
@@ -951,7 +951,7 @@ export default function StaffManagement() {
             <div className="flex gap-3 p-6 border-t border-gray-200 flex-shrink-0">
               <button
                 onClick={() => setShowEditModal(false)}
-                className="flex-1 px-4 py-3 border-2 border-gray-300 rounded-lg font-semibold hover:bg-gray-50 transition-colors"
+                className="flex-1 px-4 py-3 border-2 border-gray-300 rounded-xl font-semibold hover:bg-gray-50 transition-colors"
               >
                 Cancel
               </button>
@@ -959,7 +959,7 @@ export default function StaffManagement() {
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
                 onClick={handleEditSubmit}
-                className="flex-1 px-4 py-3 bg-teal-600 text-white rounded-lg font-semibold hover:bg-teal-700 transition-colors"
+                className="flex-1 px-4 py-3 bg-[#0A1F44] text-white rounded-xl font-semibold hover:bg-[#00326f] transition-colors"
               >
                 Save Changes
               </motion.button>
@@ -998,7 +998,7 @@ export default function StaffManagement() {
                   onChange={(e) =>
                     setEditFormData({ ...editFormData, name: e.target.value })
                   }
-                  className="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-teal-500 focus:ring-2 focus:ring-teal-200 outline-none transition-colors bg-white"
+                  className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-[#0A1F44] focus:ring-2 focus:ring-blue-200 outline-none transition-colors bg-white"
                   placeholder="Enter full name"
                   required
                 />
@@ -1014,7 +1014,7 @@ export default function StaffManagement() {
                   onChange={(e) =>
                     setEditFormData({ ...editFormData, email: e.target.value })
                   }
-                  className="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-teal-500 focus:ring-2 focus:ring-teal-200 outline-none transition-colors bg-white"
+                  className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-[#0A1F44] focus:ring-2 focus:ring-blue-200 outline-none transition-colors bg-white"
                   placeholder="Enter email address"
                   required
                 />
@@ -1030,7 +1030,7 @@ export default function StaffManagement() {
                   onChange={(e) =>
                     setEditFormData({ ...editFormData, phone: e.target.value })
                   }
-                  className="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-teal-500 focus:ring-2 focus:ring-teal-200 outline-none transition-colors bg-white"
+                  className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-[#0A1F44] focus:ring-2 focus:ring-blue-200 outline-none transition-colors bg-white"
                   placeholder="Enter phone number"
                 />
               </div>
@@ -1048,7 +1048,7 @@ export default function StaffManagement() {
                       password: e.target.value,
                     })
                   }
-                  className="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-teal-500 focus:ring-2 focus:ring-teal-200 outline-none transition-colors bg-white"
+                  className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-[#0A1F44] focus:ring-2 focus:ring-blue-200 outline-none transition-colors bg-white"
                   placeholder="Enter password"
                   required
                 />
@@ -1063,7 +1063,7 @@ export default function StaffManagement() {
                   onChange={(e) =>
                     setEditFormData({ ...editFormData, role: e.target.value })
                   }
-                  className="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-teal-500 focus:ring-2 focus:ring-teal-200 outline-none transition-colors bg-white"
+                  className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-[#0A1F44] focus:ring-2 focus:ring-blue-200 outline-none transition-colors bg-white"
                   required
                 >
                   <option value="">Select Staff Role</option>
@@ -1083,7 +1083,7 @@ export default function StaffManagement() {
                   onChange={(e) =>
                     setEditFormData({ ...editFormData, shift: e.target.value })
                   }
-                  className="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-teal-500 focus:ring-2 focus:ring-teal-200 outline-none transition-colors bg-white"
+                  className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-[#0A1F44] focus:ring-2 focus:ring-blue-200 outline-none transition-colors bg-white"
                 >
                   <option value="morning">Morning Shift</option>
                   <option value="afternoon">Afternoon Shift</option>
@@ -1102,7 +1102,7 @@ export default function StaffManagement() {
                   onChange={(e) =>
                     setEditFormData({ ...editFormData, salary: e.target.value })
                   }
-                  className="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-teal-500 focus:ring-2 focus:ring-teal-200 outline-none transition-colors bg-white"
+                  className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-[#0A1F44] focus:ring-2 focus:ring-blue-200 outline-none transition-colors bg-white"
                   placeholder="Enter salary amount"
                 />
               </div>
@@ -1116,7 +1116,7 @@ export default function StaffManagement() {
                   onChange={(e) =>
                     setEditFormData({ ...editFormData, status: e.target.value })
                   }
-                  className="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-teal-500 focus:ring-2 focus:ring-teal-200 outline-none transition-colors bg-white"
+                  className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-[#0A1F44] focus:ring-2 focus:ring-blue-200 outline-none transition-colors bg-white"
                 >
                   <option value="active">Active</option>
                   <option value="inactive">Inactive</option>
@@ -1127,7 +1127,7 @@ export default function StaffManagement() {
             <div className="flex gap-3 p-6 border-t border-gray-200 flex-shrink-0">
               <button
                 onClick={() => setShowAddModal(false)}
-                className="flex-1 px-4 py-3 border-2 border-gray-300 rounded-lg font-semibold hover:bg-gray-50 transition-colors"
+                className="flex-1 px-4 py-3 border-2 border-gray-300 rounded-xl font-semibold hover:bg-gray-50 transition-colors"
               >
                 Cancel
               </button>
@@ -1135,7 +1135,7 @@ export default function StaffManagement() {
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
                 onClick={handleAddStaff}
-                className="flex-1 px-4 py-3 bg-teal-600 text-white rounded-lg font-semibold hover:bg-teal-700 transition-colors"
+                className="flex-1 px-4 py-3 bg-[#0A1F44] text-white rounded-xl font-semibold hover:bg-[#00326f] transition-colors"
               >
                 Create Staff Account
               </motion.button>

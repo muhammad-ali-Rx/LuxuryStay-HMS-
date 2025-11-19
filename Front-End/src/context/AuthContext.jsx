@@ -95,22 +95,32 @@ export function AuthProvider({ children }) {
       email: userData.email,
       role: userData.role,
       phone: userData.phone,
+      address: userData.address || null,
+      profileImage: userData.profileImage || null,
     };
-
+  
     // Validate token before storing
     if (!apiResponse.token || !isValidToken(apiResponse.token)) {
       throw new Error("Invalid token received from server");
     }
-
+  
     localStorage.setItem("authToken", apiResponse.token);
-    localStorage.setItem("userAuth", JSON.stringify(user));
-
-    setUserAuth(user);
-    setIsAuthenticated(true);
-
+    
+    // Check if the user is an admin
+    if (["admin", "manager", "receptionist", "housekeeping"].includes(user.role)) {
+      localStorage.setItem("adminAuth", JSON.stringify(user)); // Store admin data
+      localStorage.setItem("userAuth", JSON.stringify(user)); // Store user data
+      setAdminUser(user);  // Set admin data in context
+    } else {
+      localStorage.setItem("userAuth", JSON.stringify(user)); // Store user data
+      setUserAuth(user);  // Set user data in context
+    }
+  
+    setIsAuthenticated(true);  // Mark as authenticated
+  
     return user;
-  };
-
+  }
+  
   const registerUser = async (userData) => {
     try {
       const response = await fetch(`${API_BASE_URL}/users/add`, {

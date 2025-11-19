@@ -6,6 +6,7 @@ import { Calendar, Users, Clock, Trash2, Eye, Loader, AlertCircle, Hotel, Dollar
 import FrontendNavbar from "../components/Navbar"
 import { useAuth } from "../context/AuthContext"
 import { useNavigate } from "react-router-dom"
+import Footer from "../components/Footer"
 
 const API_BASE_URL = "http://localhost:3000/booking"
 
@@ -248,16 +249,17 @@ export default function Reservations() {
         <div className="pt-32 pb-12 px-4">
           <div className="max-w-6xl mx-auto text-center">
             <AlertCircle className="mx-auto mb-4 text-yellow-500" size={48} />
-            <h1 className="text-3xl font-bold text-gray-900 mb-4">Authentication Required</h1>
+            <h1 className="text-3xl font-bold text-[#1D293D] mb-4">Authentication Required</h1>
             <p className="text-gray-600 mb-6">Please login to view your reservations</p>
             <button
               onClick={() => navigate('/login')}
-              className="bg-[#D4AF37] text-[#0A1F44] px-6 py-3 rounded-lg font-semibold hover:shadow-lg transition-all"
+              className="bg-[#1D293D] text-white px-6 py-3 rounded-lg font-semibold hover:bg-[#2D3B5D] transition-all"
             >
               Login Now
             </button>
           </div>
         </div>
+        <Footer/>
       </div>
     )
   }
@@ -267,11 +269,11 @@ export default function Reservations() {
       <FrontendNavbar />
 
       {/* Header Section */}
-      <div className="pt-32 pb-12 px-4 bg-gradient-to-br from-[#0A1F44]/5 to-[#D4AF37]/5">
+      <div className="pt-32 pb-12 px-4 bg-gradient-to-br from-[#1D293D]/5 to-[#E2BD3A]/5">
         <div className="max-w-6xl mx-auto">
-          <h1 className="text-4xl md:text-5xl font-bold text-[#0A1F44] mb-2">My Reservations</h1>
+          <h1 className="text-4xl md:text-5xl font-bold text-[#1D293D] mb-2">My Reservations</h1>
           <p className="text-lg text-gray-600">
-            Welcome, <span className="font-semibold text-[#D4AF37]">{userAuth?.name}</span>
+            Welcome, <span className="font-semibold text-[#1D293D]">{userAuth?.name}</span>
           </p>
           {reservations.length > 0 && (
             <p className="text-sm text-gray-500 mt-2">
@@ -285,7 +287,7 @@ export default function Reservations() {
       <div className="max-w-6xl mx-auto px-4 py-12">
         {loading ? (
           <div className="text-center py-16">
-            <Loader className="animate-spin mx-auto mb-4 text-[#D4AF37]" size={48} />
+            <Loader className="animate-spin mx-auto mb-4 text-[#1D293D]" size={48} />
             <p className="text-gray-600">Loading your reservations...</p>
           </div>
         ) : error ? (
@@ -306,7 +308,7 @@ export default function Reservations() {
               </button>
               <button
                 onClick={() => navigate('/booking')}
-                className="bg-[#D4AF37] text-[#0A1F44] px-6 py-3 rounded-lg font-semibold hover:shadow-lg transition-all"
+                className="bg-[#1D293D] text-white px-6 py-3 rounded-lg font-semibold hover:bg-[#2D3B5D] transition-all"
               >
                 Book Now
               </button>
@@ -323,7 +325,7 @@ export default function Reservations() {
             <p className="text-gray-600 mb-6">Start your luxury getaway by booking a room today!</p>
             <button
               onClick={() => navigate('/booking')}
-              className="bg-[#D4AF37] text-[#0A1F44] px-6 py-3 rounded-lg font-semibold hover:shadow-lg transition-all duration-300"
+              className="bg-[#1D293D] text-white px-6 py-3 rounded-lg font-semibold hover:bg-[#2D3B5D] transition-all duration-300"
             >
               Make a Reservation
             </button>
@@ -349,13 +351,13 @@ export default function Reservations() {
                       <p className="text-sm text-gray-500 font-semibold mb-2 flex items-center gap-2">
                         <Hotel size={16} /> ROOM
                       </p>
-                      <p className="text-lg font-bold text-[#0A1F44] mb-1">
+                      <p className="text-lg font-bold text-[#1D293D] mb-1">
                         {reservation.roomType || "Deluxe Room"}
                       </p>
                       <p className="text-sm text-gray-600">
                         Room #{reservation.roomNumber || "N/A"}
                       </p>
-                      <p className="text-sm text-[#D4AF37] font-semibold flex items-center gap-1">
+                      <p className="text-sm text-[#1D293D] font-semibold flex items-center gap-1">
                         <DollarSign size={14} />
                         {pricePerNight}/night
                       </p>
@@ -366,7 +368,7 @@ export default function Reservations() {
                       <p className="text-sm text-gray-500 font-semibold mb-2 flex items-center gap-2">
                         <Calendar size={16} /> CHECK-IN
                       </p>
-                      <p className="text-lg font-bold text-[#0A1F44]">
+                      <p className="text-lg font-bold text-[#1D293D]">
                         {formatDate(reservation.checkInDate)}
                       </p>
                     </div>
@@ -376,7 +378,7 @@ export default function Reservations() {
                       <p className="text-sm text-gray-500 font-semibold mb-2 flex items-center gap-2">
                         <Clock size={16} /> CHECK-OUT
                       </p>
-                      <p className="text-lg font-bold text-[#0A1F44]">
+                      <p className="text-lg font-bold text-[#1D293D]">
                         {formatDate(reservation.checkOutDate)}
                       </p>
                     </div>
@@ -386,7 +388,7 @@ export default function Reservations() {
                       <p className="text-sm text-gray-500 font-semibold mb-2 flex items-center gap-2">
                         <Users size={16} /> GUESTS & NIGHTS
                       </p>
-                      <p className="text-lg font-bold text-[#0A1F44]">
+                      <p className="text-lg font-bold text-[#1D293D]">
                         {reservation.numberOfGuests} guests
                       </p>
                       <p className="text-sm text-gray-600">
@@ -405,7 +407,7 @@ export default function Reservations() {
                       </span>
                       <div>
                         <p className="text-sm text-gray-500">Total Price</p>
-                        <p className="text-2xl font-bold text-[#D4AF37] flex items-center gap-1">
+                        <p className="text-2xl font-bold text-[#1D293D] flex items-center gap-1">
                           <DollarSign size={20} />
                           {totalPrice}
                         </p>
@@ -418,7 +420,7 @@ export default function Reservations() {
                         whileHover={{ scale: 1.05 }}
                         whileTap={{ scale: 0.95 }}
                         onClick={() => handleViewDetails(reservation)}
-                        className="flex items-center gap-2 bg-[#0A1F44] text-white px-6 py-3 rounded-lg font-semibold hover:shadow-lg transition-all duration-300"
+                        className="flex items-center gap-2 bg-[#1D293D] text-white px-6 py-3 rounded-lg font-semibold hover:bg-[#2D3B5D] transition-all duration-300"
                       >
                         <Eye size={18} />
                         <span>View Details</span>
@@ -467,6 +469,7 @@ export default function Reservations() {
           </motion.div>
         )}
       </div>
+      <Footer />
     </div>
   )
 }
