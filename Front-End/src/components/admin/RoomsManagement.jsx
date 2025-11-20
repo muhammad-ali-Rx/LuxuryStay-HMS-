@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import toast, { Toaster } from "react-hot-toast";
 import { 
   Edit, 
   Trash2, 
@@ -22,7 +23,10 @@ import {
   Dumbbell,
   Waves,
   Utensils,
-  Snowflake
+  Snowflake,
+  CheckCircle,
+  AlertCircle,
+  Info
 } from "lucide-react";
 
 export default function RoomsManagement() {
@@ -64,6 +68,7 @@ export default function RoomsManagement() {
       setRooms(roomsArray);
     } catch (error) {
       console.error("[v0] Error fetching rooms:", error);
+      toast.error("Failed to load rooms");
     } finally {
       setLoading(false);
     }
@@ -206,8 +211,13 @@ export default function RoomsManagement() {
 
     if (!formData.roomNumber.trim()) {
       setError("Room number is required");
+      toast.error("Room number is required");
       return;
     }
+
+    const loadingToast = toast.loading(
+      modalType === "add" ? "Creating room..." : "Updating room..."
+    );
 
     try {
       const formDataToSend = new FormData();
@@ -259,7 +269,11 @@ export default function RoomsManagement() {
       }
 
       if (response.ok) {
-        setSuccess(`Room ${modalType === "add" ? "created" : "updated"} successfully!`);
+        toast.dismiss(loadingToast);
+        toast.success(`Room ${modalType === "add" ? "created" : "updated"} successfully!`, {
+          duration: 3000,
+          icon: <CheckCircle className="text-emerald-500" />,
+        });
         setTimeout(() => {
           fetchRooms();
           setShowModal(false);
@@ -267,18 +281,34 @@ export default function RoomsManagement() {
       } else {
         const errorData = await response.json().catch(() => ({}));
         const errorMsg = errorData.error || errorData.message || "Failed to save room";
+        toast.dismiss(loadingToast);
         if (errorMsg.includes("E11000") || errorMsg.includes("duplicate")) {
-          setError(`Room number ${formData.roomNumber} already exists. Please use a different room number.`);
+          const errorText = `Room number ${formData.roomNumber} already exists. Please use a different room number.`;
+          setError(errorText);
+          toast.error(errorText, {
+            duration: 5000,
+            icon: <AlertCircle className="text-rose-500" />,
+          });
         } else {
           setError(`Error: ${errorMsg}`);
+          toast.error(`Error: ${errorMsg}`, {
+            duration: 5000,
+            icon: <AlertCircle className="text-rose-500" />,
+          });
         }
       }
     } catch (error) {
+      toast.dismiss(loadingToast);
       setError(`Error: ${error.message}`);
+      toast.error(`Error: ${error.message}`, {
+        duration: 5000,
+        icon: <AlertCircle className="text-rose-500" />,
+      });
     }
   };
 
   const handleStatusChange = async (roomId, newStatus) => {
+    const loadingToast = toast.loading("Updating room status...");
     try {
       const response = await fetch(`http://localhost:3000/room/status/${roomId}`, {
         method: "PUT",
@@ -286,54 +316,137 @@ export default function RoomsManagement() {
         body: JSON.stringify({ status: newStatus }),
       });
       if (response.ok) {
+        toast.dismiss(loadingToast);
+        toast.success(`Room status updated to ${newStatus}`, {
+          duration: 3000,
+          icon: <CheckCircle className="text-emerald-500" />,
+        });
         fetchRooms();
+      } else {
+        toast.dismiss(loadingToast);
+        toast.error("Failed to update room status", {
+          duration: 3000,
+          icon: <AlertCircle className="text-rose-500" />,
+        });
       }
     } catch (error) {
+      toast.dismiss(loadingToast);
       console.error("[v0] Error updating status:", error);
+      toast.error("Error updating room status", {
+        duration: 3000,
+        icon: <AlertCircle className="text-rose-500" />,
+      });
     }
   };
 
   const handleDelete = async (roomId) => {
     if (confirm("Are you sure you want to delete this room?")) {
+      const loadingToast = toast.loading("Deleting room...");
       try {
         const response = await fetch(`http://localhost:3000/room/delete/${roomId}`, {
           method: "DELETE",
         });
         if (response.ok) {
+          toast.dismiss(loadingToast);
+          toast.success("Room deleted successfully", {
+            duration: 3000,
+            icon: <CheckCircle className="text-emerald-500" />,
+          });
           fetchRooms();
+        } else {
+          toast.dismiss(loadingToast);
+          toast.error("Failed to delete room", {
+            duration: 3000,
+            icon: <AlertCircle className="text-rose-500" />,
+          });
         }
       } catch (error) {
+        toast.dismiss(loadingToast);
         console.error("[v0] Error deleting room:", error);
+        toast.error("Error deleting room", {
+          duration: 3000,
+          icon: <AlertCircle className="text-rose-500" />,
+        });
       }
     }
   };
 
   const handleImageUpload = (e) => {
     const files = Array.from(e.target.files);
-    const newImages = files.map((file) => ({
-      file,
-      preview: URL.createObjectURL(file),
-    }));
-    setFormData({
-      ...formData,
-      imageFiles: [...formData.imageFiles, ...newImages],
-    });
+    if (files.length > 0) {
+      const newImages = files.map((file) => ({
+        file,
+        preview: URL.createObjectURL(file),
+      }));
+      setFormData({
+        ...formData,
+        imageFiles: [...formData.imageFiles, ...newImages],
+      });
+      toast.success(`${files.length} image(s) added`, {
+        duration: 3000,
+        icon: <CheckCircle className="text-emerald-500" />,
+      });
+    }
   };
 
   const removeImageFile = (index) => {
     const newImageFiles = formData.imageFiles.filter((_, i) => i !== index);
     setFormData({ ...formData, imageFiles: newImageFiles });
+    toast.success("Image removed", {
+      duration: 2000,
+      icon: <Info className="text-blue-500" />,
+    });
   };
 
   const removeExistingImage = (index) => {
     const newImages = formData.images.filter((_, i) => i !== index);
     setFormData({ ...formData, images: newImages });
+    toast.success("Image removed", {
+      duration: 2000,
+      icon: <Info className="text-blue-500" />,
+    });
   };
 
   const filteredRooms = getFilteredRooms();
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-slate-100 p-6">
+      {/* Toast Container */}
+      <Toaster
+        position="top-right"
+        toastOptions={{
+          duration: 4000,
+          style: {
+            background: '#fff',
+            color: '#374151',
+            borderRadius: '12px',
+            border: '1px solid #e5e7eb',
+            boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)',
+            padding: '12px 16px',
+            fontSize: '14px',
+            fontWeight: '500',
+          },
+          success: {
+            style: {
+              border: '1px solid #10b981',
+              background: '#f0fdf4',
+            },
+          },
+          error: {
+            style: {
+              border: '1px solid #ef4444',
+              background: '#fef2f2',
+            },
+          },
+          loading: {
+            style: {
+              border: '1px solid #f59e0b',
+              background: '#fffbeb',
+            },
+          },
+        }}
+      />
+
       {/* Header Section */}
       <div className="max-w-7xl mx-auto">
         <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-6 mb-8">

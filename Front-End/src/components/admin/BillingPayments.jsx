@@ -487,7 +487,7 @@ const BillingPayments = () => {
         <motion.div
           initial={{ opacity: 0, scale: 0.9 }}
           animate={{ opacity: 1, scale: 1 }}
-          className="bg-white rounded-2xl shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-y-auto"
+          className="bg-white rounded-2xl shadow-2xl w-full w-full max-h-[90vh] "
         >
           <div className="p-8">
             {/* Header */}
@@ -711,7 +711,7 @@ const BillingPayments = () => {
       )}
 
       {/* Stats Cards */}
-      <div className="container mx-auto px-6 py-8">
+      <div className="container  px-6 py-8">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
           {[
             {
@@ -824,7 +824,7 @@ const BillingPayments = () => {
 
         {/* Invoices Table */}
         <div className="bg-white rounded-2xl shadow-lg overflow-hidden border border-gray-100">
-          <div className="overflow-x-auto">
+          <div className="">
             <table className="w-full">
               <thead className="bg-gradient-to-r from-[#0A1F44] to-[#1a365d]">
                 <tr>

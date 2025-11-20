@@ -11,6 +11,7 @@ import reservations from "./Routers/reservations.mjs"
 import contect from "./Routers/contactRoutes.mjs"
 import Booking from "./Routers/bookingRoutes.mjs";
 import payment from './Routers/paymentRoutes.mjs';
+import reportRoutes from './Routers/reportRoutes.mjs';
 import path from 'path';
 import { fileURLToPath } from 'url';
 
@@ -52,6 +53,7 @@ app.use("/restaurants", restaurants) // This should point to your fixed routes f
 app.use("/reservations", reservations)
 app.use("/booking", Booking)
 app.use("/payment", payment)
+app.use('/reports', reportRoutes);
 app.use('/form', contect)
 
 // Global error handler
