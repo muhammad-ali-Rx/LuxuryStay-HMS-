@@ -46,7 +46,7 @@ app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 // -----------------------------------------------------------------
 const httpServer = createServer(app); // 👈 Create HTTP server using Express app
 
-const io = new Server(httpServer, {
+export const io = new Server(httpServer, {
     cors: {
         origin: 'http://localhost:5173', // Must match your frontend URL
         methods: ["GET", "POST"]

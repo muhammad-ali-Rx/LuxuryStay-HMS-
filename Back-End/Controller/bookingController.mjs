@@ -1,6 +1,7 @@
 import Booking from "../Models/Booking.mjs";
 import Room from "../Models/Room.mjs";
 import User from "../Models/users.mjs";
+import { io } from "../app.mjs";
 
 // ✅ Create new booking (User)
 export const createBooking = async (req, res) => {
@@ -537,7 +538,7 @@ export const addTaskToBooking = async (req, res) => {
 
         // 💡 Socket.IO logic placeholder (To be implemented next)
         // This notifies the admin/staff that a new task is waiting.
-        // io.to('admin_room').emit('new_task_request', { bookingId: id, task: addedTask, requestedBy: req.user.name });
+        io.to('admin_room').emit('new_task_request', { bookingId: id, task: addedTask, requestedBy: req.user.name });
         console.log(`TASK ADDED: Booking ${id}, Task ${addedTask._id}. Notify staff!`);
 
         res.status(201).json({

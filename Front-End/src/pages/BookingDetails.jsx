@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { useParams, useNavigate, useLocation } from "react-router-dom";
 import { motion } from "framer-motion";
+import toast, { Toaster } from "react-hot-toast";
 import {
   Calendar,
   Users,
@@ -23,6 +24,7 @@ import {
   ListChecks,
   ChevronRight,
   X,
+  CheckCircle,
 } from "lucide-react";
 import FrontendNavbar from "../components/Navbar";
 import { useAuth } from "../context/AuthContext";
@@ -42,8 +44,67 @@ export default function BookingDetails() {
   const [activeTab, setActiveTab] = useState("overview");
 
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [newTaskForm, setNewTaskForm] = useState({ title: '', description: '' });
+  const [isLoading, setIsLoading] = useState(false); // For button loading state
+
   const handleCloseModal = () => setIsModalOpen(false);
-  const handleSubmitTask = () => { /* Logic to add newTaskForm to tasks and close modal */ };
+
+  const handleChange = (e) => {
+    setNewTaskForm({ ...newTaskForm, [e.target.name]: e.target.value });
+  };
+
+  const handleSubmitTask = async (e) => {
+    e.preventDefault();
+    setIsLoading(true);
+
+    // API Endpoint (Adjust BASE_URL as necessary)
+    const URL = `${API_BASE_URL}/${booking._id}/tasks`;
+
+    try {
+      const token = getToken();
+      if (!token) {
+        throw new Error("Authentication token not found");
+      }
+
+      const response = await fetch(URL, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(newTaskForm), // Pass the data in the request body
+        credentials: 'include', // Ensure cookies are sent (equivalent to `withCredentials: true` in axios)
+      });
+
+      const data = await response.json();
+
+      // Handle Success
+      const addedTask = await data.task;
+
+      console.log({addedTask, booking});
+
+      // Update local booking state with the new task
+      setBooking(prevBooking => ({
+        ...prevBooking,
+        tasks: [...prevBooking.tasks, addedTask],
+      }));
+
+      // Success Toast (You'll need a toast library for this)
+      // toast.success("Task created and staff notified!");
+      toast.success(`Task created and staff notified!`, {
+        duration: 3000,
+        icon: <CheckCircle className="text-emerald-500" />,
+      });
+
+      handleCloseModal(); // Close and reset form
+    } catch (error) {
+      console.error("Task submission failed:", error);
+      // Error Toast
+      // toast.error(error.response?.data?.message || "Failed to create task.");
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   useEffect(() => {
     console.log("Booking: ", booking);
@@ -436,51 +497,46 @@ export default function BookingDetails() {
               <nav className="space-y-2">
                 <button
                   onClick={() => setActiveTab("overview")}
-                  className={`w-full text-left px-4 py-3 rounded-lg transition-all ${
-                    activeTab === "overview"
-                      ? "bg-[#1D293D] text-white"
-                      : "text-gray-600 hover:bg-gray-100"
-                  }`}
+                  className={`w-full text-left px-4 py-3 rounded-lg transition-all ${activeTab === "overview"
+                    ? "bg-[#1D293D] text-white"
+                    : "text-gray-600 hover:bg-gray-100"
+                    }`}
                 >
                   Overview
                 </button>
                 <button
                   onClick={() => setActiveTab("guest")}
-                  className={`w-full text-left px-4 py-3 rounded-lg transition-all ${
-                    activeTab === "guest"
-                      ? "bg-[#1D293D] text-white"
-                      : "text-gray-600 hover:bg-gray-100"
-                  }`}
+                  className={`w-full text-left px-4 py-3 rounded-lg transition-all ${activeTab === "guest"
+                    ? "bg-[#1D293D] text-white"
+                    : "text-gray-600 hover:bg-gray-100"
+                    }`}
                 >
                   Guest Details
                 </button>
                 <button
                   onClick={() => setActiveTab("payment")}
-                  className={`w-full text-left px-4 py-3 rounded-lg transition-all ${
-                    activeTab === "payment"
-                      ? "bg-[#1D293D] text-white"
-                      : "text-gray-600 hover:bg-gray-100"
-                  }`}
+                  className={`w-full text-left px-4 py-3 rounded-lg transition-all ${activeTab === "payment"
+                    ? "bg-[#1D293D] text-white"
+                    : "text-gray-600 hover:bg-gray-100"
+                    }`}
                 >
                   Payment Info
                 </button>
                 <button
                   onClick={() => setActiveTab("timeline")}
-                  className={`w-full text-left px-4 py-3 rounded-lg transition-all ${
-                    activeTab === "timeline"
-                      ? "bg-[#1D293D] text-white"
-                      : "text-gray-600 hover:bg-gray-100"
-                  }`}
+                  className={`w-full text-left px-4 py-3 rounded-lg transition-all ${activeTab === "timeline"
+                    ? "bg-[#1D293D] text-white"
+                    : "text-gray-600 hover:bg-gray-100"
+                    }`}
                 >
                   Timeline
                 </button>
                 <button
                   onClick={() => setActiveTab("tasks")}
-                  className={`w-full text-left px-4 py-3 rounded-lg transition-all ${
-                    activeTab === "tasks"
-                      ? "bg-[#1D293D] text-white"
-                      : "text-gray-600 hover:bg-gray-100"
-                  }`}
+                  className={`w-full text-left px-4 py-3 rounded-lg transition-all ${activeTab === "tasks"
+                    ? "bg-[#1D293D] text-white"
+                    : "text-gray-600 hover:bg-gray-100"
+                    }`}
                 >
                   Tasks
                 </button>
@@ -610,11 +666,10 @@ export default function BookingDetails() {
                           Payment Status
                         </h4>
                         <span
-                          className={`px-3 py-1 rounded-full text-sm font-semibold capitalize ${
-                            booking.paymentStatus === "paid"
-                              ? "bg-green-100 text-green-800"
-                              : "bg-yellow-100 text-yellow-800"
-                          }`}
+                          className={`px-3 py-1 rounded-full text-sm font-semibold capitalize ${booking.paymentStatus === "paid"
+                            ? "bg-green-100 text-green-800"
+                            : "bg-yellow-100 text-yellow-800"
+                            }`}
                         >
                           {booking.paymentStatus || "pending"}
                         </span>
@@ -736,11 +791,10 @@ export default function BookingDetails() {
                               Payment Status
                             </span>
                             <span
-                              className={`px-2 py-1 rounded text-sm font-semibold ${
-                                booking.paymentStatus === "paid"
-                                  ? "bg-green-100 text-green-800"
-                                  : "bg-yellow-100 text-yellow-800"
-                              }`}
+                              className={`px-2 py-1 rounded text-sm font-semibold ${booking.paymentStatus === "paid"
+                                ? "bg-green-100 text-green-800"
+                                : "bg-yellow-100 text-yellow-800"
+                                }`}
                             >
                               {booking.paymentStatus || "pending"}
                             </span>
@@ -822,11 +876,10 @@ export default function BookingDetails() {
                     <div className="flex gap-4">
                       <div className="flex flex-col items-center">
                         <div
-                          className={`w-3 h-3 rounded-full ${
-                            booking.bookingStatus === "confirmed"
-                              ? "bg-green-500"
-                              : "bg-gray-300"
-                          }`}
+                          className={`w-3 h-3 rounded-full ${booking.bookingStatus === "confirmed"
+                            ? "bg-green-500"
+                            : "bg-gray-300"
+                            }`}
                         ></div>
                         <div className="w-0.5 h-16 bg-gray-300"></div>
                       </div>
@@ -850,11 +903,10 @@ export default function BookingDetails() {
                     <div className="flex gap-4">
                       <div className="flex flex-col items-center">
                         <div
-                          className={`w-3 h-3 rounded-full ${
-                            booking.bookingStatus === "checked-in"
-                              ? "bg-blue-500"
-                              : "bg-gray-300"
-                          }`}
+                          className={`w-3 h-3 rounded-full ${booking.bookingStatus === "checked-in"
+                            ? "bg-blue-500"
+                            : "bg-gray-300"
+                            }`}
                         ></div>
                         <div className="w-0.5 h-16 bg-gray-300"></div>
                       </div>
@@ -874,11 +926,10 @@ export default function BookingDetails() {
                     <div className="flex gap-4">
                       <div className="flex flex-col items-center">
                         <div
-                          className={`w-3 h-3 rounded-full ${
-                            booking.bookingStatus === "checked-out"
-                              ? "bg-purple-500"
-                              : "bg-gray-300"
-                          }`}
+                          className={`w-3 h-3 rounded-full ${booking.bookingStatus === "checked-out"
+                            ? "bg-purple-500"
+                            : "bg-gray-300"
+                            }`}
                         ></div>
                       </div>
                       <div className="flex-1">
@@ -936,13 +987,12 @@ export default function BookingDetails() {
                                 </span>
                               )}
                               <span
-                                className={`px-2 py-0.5 rounded-full text-xs font-medium ${
-                                  task.status === "completed"
-                                    ? "bg-green-100 text-green-800"
-                                    : task.status === "in-progress"
+                                className={`px-2 py-0.5 rounded-full text-xs font-medium ${task.status === "completed"
+                                  ? "bg-green-100 text-green-800"
+                                  : task.status === "in-progress"
                                     ? "bg-yellow-100 text-yellow-800"
                                     : "bg-red-100 text-red-800"
-                                }`}
+                                  }`}
                               >
                                 {task.status.charAt(0).toUpperCase() +
                                   task.status.slice(1).replace("-", " ")}
@@ -953,7 +1003,7 @@ export default function BookingDetails() {
                             variant="ghost"
                             size="icon"
                             className="flex-shrink-0 ml-4"
-                            // Optional: Add onClick={() => handleViewTask(task.id)}
+                          // Optional: Add onClick={() => handleViewTask(task.id)}
                           >
                             <ChevronRight size={18} />
                           </Button>
@@ -1009,7 +1059,10 @@ export default function BookingDetails() {
                           type="text"
                           required
                           placeholder="E.g., Extra Towels, Dinner Booking"
-                          // value={newTaskForm.title} onChange={handleChange}
+                          // 👇 INTEGRATION
+                          value={newTaskForm.title}
+                          onChange={handleChange}
+                          // 👆 INTEGRATION
                           className="w-full p-2 border border-gray-300 rounded-md focus:ring-[#1D293D] focus:border-[#1D293D]"
                         />
                       </div>
@@ -1027,7 +1080,10 @@ export default function BookingDetails() {
                           rows="3"
                           required
                           placeholder="Please specify details like quantity, time, or location."
-                          // value={newTaskForm.description} onChange={handleChange}
+                          // 👇 INTEGRATION
+                          value={newTaskForm.description}
+                          onChange={handleChange}
+                          // 👆 INTEGRATION
                           className="w-full p-2 border border-gray-300 rounded-md focus:ring-[#1D293D] focus:border-[#1D293D]"
                         ></textarea>
                       </div>
@@ -1037,14 +1093,16 @@ export default function BookingDetails() {
                           variant="outline"
                           onClick={handleCloseModal}
                           type="button"
+                          disabled={isLoading} // Disable while loading
                         >
                           Cancel
                         </Button>
                         <Button
                           type="submit"
                           className="bg-[#1D293D] text-white hover:bg-[#2D3B5D]"
+                          disabled={isLoading} // Disable while loading
                         >
-                          Submit Request
+                          {isLoading ? 'Submitting...' : 'Submit Request'}
                         </Button>
                       </div>
                     </form>

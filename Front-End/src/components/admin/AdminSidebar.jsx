@@ -14,6 +14,7 @@ import {
   Utensils,
   BookOpen,
   WalletCards,
+  List,
 } from "lucide-react"
 import { useAuth } from "../../context/AuthContext"
 import { useNavigate } from "react-router-dom"
@@ -23,6 +24,7 @@ const menuItems = [
   { id: "rooms", label: "Rooms", icon: DoorOpen },
   { id: "dining", label: "Dining", icon: Utensils },
   { id: "bookings", label: "Bookings", icon: Calendar },  
+  { id: "tasks", label: "Tasks", icon: List },
   { id: "guests", label: "Guests", icon: Users },
   { id: "staff", label: "Staff", icon: UserCheck },
   {id:  "Biling", label : "Billing" , icon: WalletCards},

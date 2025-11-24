@@ -32,6 +32,7 @@ import BookingDetails from "./pages/BookingDetails";
 import AdminPanel from "./pages/admin/AdminPanel";
 
 import socket from "./utils/socket.mjs"; // 👈 NEW: Import the socket instance
+import { Toaster } from "react-hot-toast";
 
 // Protected Route Component for User Booking
 function ProtectedBookingRoute() {
@@ -139,6 +140,40 @@ function AppRoutes() {
 
   return (
     <AnimatePresence mode="wait">
+      <Toaster
+        position="top-right"
+        toastOptions={{
+          duration: 4000,
+          style: {
+            background: '#fff',
+            color: '#374151',
+            borderRadius: '12px',
+            border: '1px solid #e5e7eb',
+            boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)',
+            padding: '12px 16px',
+            fontSize: '14px',
+            fontWeight: '500',
+          },
+          success: {
+            style: {
+              border: '1px solid #10b981',
+              background: '#f0fdf4',
+            },
+          },
+          error: {
+            style: {
+              border: '1px solid #ef4444',
+              background: '#fef2f2',
+            },
+          },
+          loading: {
+            style: {
+              border: '1px solid #f59e0b',
+              background: '#fffbeb',
+            },
+          },
+        }}
+      />
       <Routes>
         <Route path="/" element={<Navigate to="/splash" replace />} />
 

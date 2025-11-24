@@ -12,6 +12,7 @@ import ReportsPage from "../../components/admin/ReportsPage"
 import SettingsPage from "../../components/admin/SettingsPage"
 import RestaurantsManagement from "../../components/admin/RestaurantsManagement"
 import BillingPayments from "../../components/admin/BillingPayments"
+import TasksManagement from "../../components/admin/TasksManagement"
 
 export default function AdminPanel() {
   const [activeTab, setActiveTab] = useState("dashboard")
@@ -39,6 +40,8 @@ export default function AdminPanel() {
         return <RestaurantsManagement />
       case "bookings":
         return <BookingsManagement />
+        case "tasks":
+          return <TasksManagement />
       case "guests":
         return <GuestsManagement />
       case "staff":
