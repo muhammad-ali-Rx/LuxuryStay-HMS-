@@ -148,6 +148,32 @@ const bookingSchema = new mongoose.Schema(
       },
     },
 
+    tasks: [
+      {
+        title: {
+          type: String,
+          required: true,
+          trim: true,
+        },
+        description: {
+          type: String,
+          default: "",
+        },
+        status: {
+          type: String,
+          enum: ["pending", "in-progress", "completed", "cancelled"],
+          default: "pending",
+        },
+        assignedTo: {
+          type: mongoose.Schema.Types.ObjectId,
+          ref: "User",
+        },
+        date: {
+          type: Date,
+        },
+      },
+    ],
+
     // Booking notes and history
     notes: {
       type: String,

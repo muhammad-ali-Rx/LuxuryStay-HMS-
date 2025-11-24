@@ -1,87 +1,141 @@
-"use client"
+"use client";
 
-import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom"
-import { AnimatePresence } from "framer-motion"
-import { useState, useEffect } from "react"
-import { AuthProvider, useAuth } from "./context/AuthContext"
+import {
+  BrowserRouter as Router,
+  Routes,
+  Route,
+  Navigate,
+} from "react-router-dom";
+import { AnimatePresence } from "framer-motion";
+import { useState, useEffect } from "react";
+import { AuthProvider, useAuth } from "./context/AuthContext";
 
 // Splash Screen
-import SplashScreen from "./pages/SplashScreen"
+import SplashScreen from "./pages/SplashScreen";
 
 // User Pages
-import Home from "./pages/Home"
-import Rooms from "./pages/Rooms"
-import RoomDetail from "./pages/RoomDetail"
-import Booking from "./pages/Booking"
-import Contact from "./pages/Contact"
-import Dining from "./pages/Dining"
-import Facilities from "./pages/Facilities"
-import Gallery from "./pages/Gallery"
-import ConfirmationPage from "./pages/BookingConfirmation"
-import UserLogin from "./pages/UserLogin"
-import UserRegister from "./pages/UserRegister"
-import Reservations from "./pages/Reservations"
-import RestaurantDetailsPage from "./pages/RestaurantDetailsPage"
-import BookingDetails from "./pages/BookingDetails"
+import Home from "./pages/Home";
+import Rooms from "./pages/Rooms";
+import RoomDetail from "./pages/RoomDetail";
+import Booking from "./pages/Booking";
+import Contact from "./pages/Contact";
+import Dining from "./pages/Dining";
+import Facilities from "./pages/Facilities";
+import Gallery from "./pages/Gallery";
+import ConfirmationPage from "./pages/BookingConfirmation";
+import UserLogin from "./pages/UserLogin";
+import UserRegister from "./pages/UserRegister";
+import Reservations from "./pages/Reservations";
+import RestaurantDetailsPage from "./pages/RestaurantDetailsPage";
+import BookingDetails from "./pages/BookingDetails";
 // Admin Pages
-import AdminPanel from "./pages/admin/AdminPanel"
+import AdminPanel from "./pages/admin/AdminPanel";
+
+import socket from "./utils/socket.mjs"; // 👈 NEW: Import the socket instance
 
 // Protected Route Component for User Booking
 function ProtectedBookingRoute() {
-  const { isAuthenticated, loading } = useAuth()
+  const { isAuthenticated, loading } = useAuth();
 
   if (loading) {
-    return <div className="h-screen flex items-center justify-center">Loading...</div>
+    return (
+      <div className="h-screen flex items-center justify-center">
+        Loading...
+      </div>
+    );
   }
 
   if (!isAuthenticated) {
-    return <Navigate to="/login" state={{ from: "booking" }} replace />
+    return <Navigate to="/login" state={{ from: "booking" }} replace />;
   }
 
-  return <Booking />
+  return <Booking />;
 }
 
 function ProtectedReservationsRoute() {
-  const { isAuthenticated, loading } = useAuth()
+  const { isAuthenticated, loading } = useAuth();
 
   if (loading) {
-    return <div className="h-screen flex items-center justify-center">Loading...</div>
+    return (
+      <div className="h-screen flex items-center justify-center">
+        Loading...
+      </div>
+    );
   }
 
   if (!isAuthenticated) {
-    return <Navigate to="/login" state={{ from: "reservations" }} replace />
+    return <Navigate to="/login" state={{ from: "reservations" }} replace />;
   }
 
-  return <Reservations />
+  return <Reservations />;
 }
 
 function ProtectedAdminRoute() {
-  const { adminUser, loading } = useAuth()
+  const { adminUser, loading } = useAuth();
 
   if (loading) {
-    return <div className="h-screen flex items-center justify-center">Loading...</div>
+    return (
+      <div className="h-screen flex items-center justify-center">
+        Loading...
+      </div>
+    );
   }
 
   console.log(adminUser);
 
-  const adminRoles = ["admin", "manager", "receptionist", "housekeeping"]
+  const adminRoles = ["admin", "manager", "receptionist", "housekeeping"];
   if (!adminUser || !adminRoles.includes(adminUser.role)) {
-    return <Navigate to="/admin" replace />
+    return <Navigate to="/admin" replace />;
   }
 
-  return <AdminPanel />
+  return <AdminPanel />;
 }
 
 function AppRoutes() {
   const [splashShown, setSplashShown] = useState(() => {
-    return localStorage.getItem("splashShown") === "true"
-  })
+    return localStorage.getItem("splashShown") === "true";
+  });
+
+  // 💡 SOCKET.IO CONNECTION LOGIC
+  useEffect(() => {
+    // 1. Connect the socket
+    socket.connect();
+    console.log("Attempting to connect to socket server...");
+
+    // 2. Listen for the simple test event from the server
+    socket.on("test_connection", (data) => {
+      console.log("Socket Connection Success:", data.message);
+    });
+
+    // 3. Optional: Log connection status changes
+    socket.on("connect", () => {
+      console.log(`Socket connected: ${socket.id}`);
+    });
+
+    socket.on("disconnect", (reason) => {
+      console.log(`Socket disconnected. Reason: ${reason}`);
+    });
+
+    socket.on("connect_error", (error) => {
+      console.error("Socket connection error:", error.message);
+    });
+
+    // 4. Cleanup function: Disconnect the socket when the component unmounts
+    return () => {
+      socket.off("test_connection");
+      socket.off("connect");
+      socket.off("disconnect");
+      socket.off("connect_error");
+      socket.disconnect();
+      console.log("Socket disconnected.");
+    };
+  }, []); // Empty dependency array ensures this runs once on mount
 
   useEffect(() => {
     if (splashShown) {
-      localStorage.setItem("splashShown", "true")
+      localStorage.setItem("splashShown", "true");
     }
-  }, [splashShown])
+  }, [splashShown]);
 
   return (
     <AnimatePresence mode="wait">
@@ -94,8 +148,8 @@ function AppRoutes() {
           element={
             <SplashScreen
               onSplashComplete={() => {
-                setSplashShown(true)
-                localStorage.setItem("splashShown", "true")
+                setSplashShown(true);
+                localStorage.setItem("splashShown", "true");
               }}
             />
           }
@@ -126,7 +180,7 @@ function AppRoutes() {
         <Route path="/admin" element={<ProtectedAdminRoute />} />
       </Routes>
     </AnimatePresence>
-  )
+  );
 }
 
 export default function App() {
@@ -136,5 +190,5 @@ export default function App() {
         <AppRoutes />
       </AuthProvider>
     </Router>
-  )
+  );
 }

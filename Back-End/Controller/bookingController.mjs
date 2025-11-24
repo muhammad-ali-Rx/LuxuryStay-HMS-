@@ -505,3 +505,49 @@ export const getBookingStats = async (req, res) => {
     });
   }
 };
+
+export const addTaskToBooking = async (req, res) => {
+    const { id } = req.params; // Booking ID
+    // 💡 Only destructure the fields from your simplified schema
+    const { title, description } = req.body;
+
+    if (!title || !description) {
+        return res.status(400).json({ success: false, message: "Task title and description are required." });
+    }
+
+    try {
+        const booking = await Booking.findById(id);
+
+        if (!booking) {
+            return res.status(404).json({ success: false, message: "Booking not found." });
+        }
+        
+        // Define the new task object with simplified fields
+        const newTask = {
+            title,
+            description,
+            date: new Date(),
+        };
+
+        booking.tasks.push(newTask);
+        
+        await booking.save(); 
+
+        const addedTask = booking.tasks[booking.tasks.length - 1];
+
+        // 💡 Socket.IO logic placeholder (To be implemented next)
+        // This notifies the admin/staff that a new task is waiting.
+        // io.to('admin_room').emit('new_task_request', { bookingId: id, task: addedTask, requestedBy: req.user.name });
+        console.log(`TASK ADDED: Booking ${id}, Task ${addedTask._id}. Notify staff!`);
+
+        res.status(201).json({
+            success: true,
+            message: "Task successfully added to booking.",
+            task: addedTask,
+        });
+
+    } catch (error) {
+        console.error("Error adding task to booking:", error);
+        res.status(500).json({ success: false, message: "Server error while adding task.", error: error.message });
+    }
+};

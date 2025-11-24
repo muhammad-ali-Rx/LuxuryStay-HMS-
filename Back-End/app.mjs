@@ -1,6 +1,8 @@
 import express from "express";
 import dotenv from "dotenv";
 import cors from "cors";
+import { createServer } from 'http'; // 👈 NEW: Import createServer
+import { Server } from 'socket.io'; // 👈 NEW: Import Socket.IO Server
 import connectDB from "./DB/db.mjs"
 import User from "./Routers/UserRoute.mjs"
 import Register from "./Routers/RegistrationRoute.mjs"
@@ -39,6 +41,30 @@ app.use(express.urlencoded({ limit: '100mb', extended: true }));
 // Serve static files
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
+// -----------------------------------------------------------------
+// 💡 SOCKET.IO SETUP
+// -----------------------------------------------------------------
+const httpServer = createServer(app); // 👈 Create HTTP server using Express app
+
+const io = new Server(httpServer, {
+    cors: {
+        origin: 'http://localhost:5173', // Must match your frontend URL
+        methods: ["GET", "POST"]
+    }
+});
+
+io.on('connection', (socket) => {
+    console.log(`👤 User connected: ${socket.id}`);
+
+    // Simple test event for client to listen to
+    socket.emit('test_connection', { message: 'Successfully connected to server sockets!' });
+
+    socket.on('disconnect', () => {
+        console.log(`🚪 User disconnected: ${socket.id}`);
+    });
+});
+// -----------------------------------------------------------------
+
 // Test route
 app.get("/api/test-cors", (req, res) => {
   res.json({ message: "CORS is working!", timestamp: new Date().toISOString() });   
@@ -75,6 +101,7 @@ app.use((err, req, res, next) => {
     });
 });
 
-app.listen(PORT, () => {
+httpServer.listen(PORT, () => { // 👈 Use httpServer.listen instead of app.listen
     console.log(`🚀 App is running on http://localhost:${PORT}`);
+    console.log(`📡 Socket.IO running on http://localhost:${PORT}`);
 });

@@ -9,7 +9,8 @@ import {
   checkOutBooking,
   cancelBooking,
   getAvailableRooms,
-  getBookingStats
+  getBookingStats,
+  addTaskToBooking
 } from "../Controller/bookingController.mjs";
 import { auth, authorize } from "../middleware/auth.mjs";
 
@@ -30,5 +31,7 @@ router.get("/stats/dashboard", auth, authorize(["admin", "manager", "receptionis
 router.put("/:id/status", auth, authorize(["admin", "manager", "receptionist"]), updateBookingStatus);
 router.put("/:id/check-in", auth, authorize(["admin", "manager", "receptionist"]), checkInBooking);
 router.put("/:id/check-out", auth, authorize(["admin", "manager", "receptionist"]), checkOutBooking);
+
+router.post("/:id/tasks", auth, addTaskToBooking);
 
 export default router;

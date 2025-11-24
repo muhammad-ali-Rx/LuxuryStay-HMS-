@@ -1,15 +1,15 @@
-"use client"
+"use client";
 
-import { useState, useEffect } from "react"
-import { useParams, useNavigate, useLocation } from "react-router-dom"
-import { motion } from "framer-motion"
-import { 
-  Calendar, 
-  Users, 
-  Clock, 
-  MapPin, 
-  CreditCard, 
-  FileText, 
+import { useState, useEffect } from "react";
+import { useParams, useNavigate, useLocation } from "react-router-dom";
+import { motion } from "framer-motion";
+import {
+  Calendar,
+  Users,
+  Clock,
+  MapPin,
+  CreditCard,
+  FileText,
   ArrowLeft,
   Printer,
   Download,
@@ -18,85 +18,119 @@ import {
   User,
   Shield,
   Star,
-  DollarSign
-} from "lucide-react"
-import FrontendNavbar from "../components/Navbar"
-import { useAuth } from "../context/AuthContext"
-import { Button } from "../components/UI/button"
+  DollarSign,
+  Plus,
+  ListChecks,
+  ChevronRight,
+  X,
+} from "lucide-react";
+import FrontendNavbar from "../components/Navbar";
+import { useAuth } from "../context/AuthContext";
+import { Button } from "../components/UI/button";
 
-const API_BASE_URL = "http://localhost:3000/booking"
+const API_BASE_URL = "http://localhost:3000/booking";
 
 export default function BookingDetails() {
-  const { id } = useParams()
-  const navigate = useNavigate()
-  const location = useLocation()
-  const { userAuth, isAuthenticated, getToken } = useAuth()
-  
-  const [booking, setBooking] = useState(null)
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState("")
-  const [activeTab, setActiveTab] = useState("overview")
+  const { id } = useParams();
+  const navigate = useNavigate();
+  const location = useLocation();
+  const { userAuth, isAuthenticated, getToken } = useAuth();
+
+  const [booking, setBooking] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+  const [activeTab, setActiveTab] = useState("overview");
+
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const handleCloseModal = () => setIsModalOpen(false);
+  const handleSubmitTask = () => { /* Logic to add newTaskForm to tasks and close modal */ };
+
+  useEffect(() => {
+    console.log("Booking: ", booking);
+
+    // add some mock tasks to booking for demo purposes
+    if (booking && !booking.tasks) {
+      setBooking((prev) => ({
+        ...prev,
+        tasks: [
+          {
+            id: 1,
+            title: "Room Preparation",
+            status: "completed",
+            date: "2024-07-20",
+          },
+          {
+            id: 2,
+            title: "Welcome Kit Arrangement",
+            status: "pending",
+            date: "2024-07-21",
+          },
+        ],
+      }));
+    }
+  }, [booking]);
 
   // Check if booking data was passed via navigation state
   useEffect(() => {
     if (location.state?.booking) {
-      setBooking(location.state.booking)
-      setLoading(false)
+      setBooking(location.state.booking);
+      setLoading(false);
     } else {
-      fetchBookingDetails()
+      fetchBookingDetails();
     }
-  }, [id, location.state])
+  }, [id, location.state]);
 
   const fetchBookingDetails = async () => {
     try {
-      setLoading(true)
-      setError("")
-      
-      const token = getToken()
+      setLoading(true);
+      setError("");
+
+      const token = getToken();
       if (!token) {
-        throw new Error("Authentication token not found")
+        throw new Error("Authentication token not found");
       }
 
       const response = await fetch(`${API_BASE_URL}/${id}`, {
-        method: 'GET',
+        method: "GET",
         headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        }
-      })
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+      });
 
       if (response.status === 401) {
-        throw new Error("Session expired. Please login again.")
+        throw new Error("Session expired. Please login again.");
       }
 
       if (!response.ok) {
-        const errorData = await response.json()
-        throw new Error(errorData.message || 'Failed to fetch booking details')
+        const errorData = await response.json();
+        throw new Error(errorData.message || "Failed to fetch booking details");
       }
 
-      const result = await response.json()
-      
+      const result = await response.json();
+
       if (result.success) {
-        setBooking(result.data)
+        setBooking(result.data);
       } else {
-        throw new Error(result.message || "Failed to load booking details")
+        throw new Error(result.message || "Failed to load booking details");
       }
-      
     } catch (error) {
-      console.error("❌ Error fetching booking details:", error)
-      setError(error.message || "Failed to load booking details")
+      console.error("❌ Error fetching booking details:", error);
+      setError(error.message || "Failed to load booking details");
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
 
   const handlePrint = () => {
-    window.print()
-  }
+    window.print();
+  };
 
   const handleDownloadAll = () => {
     // Create a printable version of ALL booking details
-    const allContent = document.getElementById('booking-details-container').innerHTML
+    const allContent = document.getElementById(
+      "booking-details-container"
+    ).innerHTML;
     const windowContent = `
       <!DOCTYPE html>
       <html>
@@ -130,19 +164,20 @@ export default function BookingDetails() {
         </div>
       </body>
       </html>
-    `
-    
-    const printWindow = window.open('', '_blank')
-    printWindow.document.write(windowContent)
-    printWindow.document.close()
-    printWindow.print()
-  }
+    `;
+
+    const printWindow = window.open("", "_blank");
+    printWindow.document.write(windowContent);
+    printWindow.document.close();
+    printWindow.print();
+  };
 
   const handleDownloadCurrent = (tabName = activeTab) => {
     // Create a printable version of ONLY the current active tab content
-    const currentTabContent = document.getElementById(`tab-content-${tabName}`)?.innerHTML || ''
-    const tabTitle = getTabTitle(tabName)
-    
+    const currentTabContent =
+      document.getElementById(`tab-content-${tabName}`)?.innerHTML || "";
+    const tabTitle = getTabTitle(tabName);
+
     const windowContent = `
       <!DOCTYPE html>
       <html>
@@ -172,101 +207,108 @@ export default function BookingDetails() {
         </div>
       </body>
       </html>
-    `
-    
-    const printWindow = window.open('', '_blank')
-    printWindow.document.write(windowContent)
-    printWindow.document.close()
-    printWindow.print()
-  }
+    `;
+
+    const printWindow = window.open("", "_blank");
+    printWindow.document.write(windowContent);
+    printWindow.document.close();
+    printWindow.print();
+  };
 
   const getTabTitle = (tabName) => {
-    switch(tabName) {
-      case 'overview': return 'Booking Overview'
-      case 'guest': return 'Guest Details'
-      case 'payment': return 'Payment Information'
-      case 'timeline': return 'Booking Timeline'
-      default: return 'Booking Details'
+    switch (tabName) {
+      case "overview":
+        return "Booking Overview";
+      case "guest":
+        return "Guest Details";
+      case "payment":
+        return "Payment Information";
+      case "timeline":
+        return "Booking Timeline";
+      default:
+        return "Booking Details";
     }
-  }
+  };
 
   const formatDate = (dateString) => {
-    if (!dateString) return "N/A"
+    if (!dateString) return "N/A";
     try {
-      const date = new Date(dateString)
-      return date.toLocaleDateString('en-US', {
-        weekday: 'long',
-        year: 'numeric',
-        month: 'long',
-        day: 'numeric'
-      })
+      const date = new Date(dateString);
+      return date.toLocaleDateString("en-US", {
+        weekday: "long",
+        year: "numeric",
+        month: "long",
+        day: "numeric",
+      });
     } catch (error) {
-      return "Invalid Date"
+      return "Invalid Date";
     }
-  }
+  };
 
   const formatDateTime = (dateString) => {
-    if (!dateString) return "N/A"
+    if (!dateString) return "N/A";
     try {
-      const date = new Date(dateString)
-      return date.toLocaleString('en-US', {
-        year: 'numeric',
-        month: 'short',
-        day: 'numeric',
-        hour: '2-digit',
-        minute: '2-digit'
-      })
+      const date = new Date(dateString);
+      return date.toLocaleString("en-US", {
+        year: "numeric",
+        month: "short",
+        day: "numeric",
+        hour: "2-digit",
+        minute: "2-digit",
+      });
     } catch (error) {
-      return "Invalid Date"
+      return "Invalid Date";
     }
-  }
+  };
 
   const calculateNights = (checkIn, checkOut) => {
-    if (!checkIn || !checkOut) return 0
+    if (!checkIn || !checkOut) return 0;
     try {
-      const checkInDate = new Date(checkIn)
-      const checkOutDate = new Date(checkOut)
-      const nights = Math.ceil((checkOutDate - checkInDate) / (1000 * 60 * 60 * 24))
-      return nights > 0 ? nights : 0
+      const checkInDate = new Date(checkIn);
+      const checkOutDate = new Date(checkOut);
+      const nights = Math.ceil(
+        (checkOutDate - checkInDate) / (1000 * 60 * 60 * 24)
+      );
+      return nights > 0 ? nights : 0;
     } catch (error) {
-      return 0
+      return 0;
     }
-  }
+  };
 
   const getStatusColor = (status) => {
     switch (status?.toLowerCase()) {
       case "confirmed":
       case "approved":
-        return "bg-green-100 text-green-800 border border-green-300"
+        return "bg-green-100 text-green-800 border border-green-300";
       case "pending":
-        return "bg-yellow-100 text-yellow-800 border border-yellow-300"
+        return "bg-yellow-100 text-yellow-800 border border-yellow-300";
       case "cancelled":
       case "rejected":
-        return "bg-red-100 text-red-800 border border-red-300"
+        return "bg-red-100 text-red-800 border border-red-300";
       case "checked-in":
-        return "bg-blue-100 text-blue-800 border border-blue-300"
+        return "bg-blue-100 text-blue-800 border border-blue-300";
       case "checked-out":
       case "completed":
-        return "bg-purple-100 text-purple-800 border border-purple-300"
+        return "bg-purple-100 text-purple-800 border border-purple-300";
       default:
-        return "bg-gray-100 text-gray-800 border border-gray-300"
+        return "bg-gray-100 text-gray-800 border border-gray-300";
     }
-  }
+  };
 
   const getStatusIcon = (status) => {
     switch (status?.toLowerCase()) {
       case "confirmed":
-        return <Shield className="w-5 h-5 text-green-600" />
+        return <Shield className="w-5 h-5 text-green-600" />;
       case "pending":
-        return <Clock className="w-5 h-5 text-yellow-600" />
+        return <Clock className="w-5 h-5 text-yellow-600" />;
       case "cancelled":
-        return <Shield className="w-5 h-5 text-red-600" />
+        return <Shield className="w-5 h-5 text-red-600" />;
       case "checked-in":
-        return <User className="w-5 h-5 text-blue-600" />
+        return <User className="w-5 h-5 text-blue-600" />;
       default:
-        return <Shield className="w-5 h-5 text-gray-600" />
+        return <Shield className="w-5 h-5 text-gray-600" />;
     }
-  }
+  };
 
   if (!isAuthenticated) {
     return (
@@ -274,15 +316,17 @@ export default function BookingDetails() {
         <FrontendNavbar />
         <div className="pt-32 pb-12 px-4">
           <div className="max-w-4xl mx-auto text-center">
-            <h1 className="text-3xl font-bold text-gray-900 mb-4">Authentication Required</h1>
-            <p className="text-gray-600 mb-6">Please login to view booking details</p>
-            <Button onClick={() => navigate('/login')}>
-              Login Now
-            </Button>
+            <h1 className="text-3xl font-bold text-gray-900 mb-4">
+              Authentication Required
+            </h1>
+            <p className="text-gray-600 mb-6">
+              Please login to view booking details
+            </p>
+            <Button onClick={() => navigate("/login")}>Login Now</Button>
           </div>
         </div>
       </div>
-    )
+    );
   }
 
   if (loading) {
@@ -296,7 +340,7 @@ export default function BookingDetails() {
           </div>
         </div>
       </div>
-    )
+    );
   }
 
   if (error || !booking) {
@@ -309,16 +353,16 @@ export default function BookingDetails() {
               <h2 className="text-2xl font-bold text-red-700 mb-2">Error</h2>
               <p className="text-red-600">{error || "Booking not found"}</p>
             </div>
-            <Button onClick={() => navigate('/reservations')}>
+            <Button onClick={() => navigate("/reservations")}>
               Back to My Bookings
             </Button>
           </div>
         </div>
       </div>
-    )
+    );
   }
 
-  const nights = calculateNights(booking.checkInDate, booking.checkOutDate)
+  const nights = calculateNights(booking.checkInDate, booking.checkOutDate);
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -331,18 +375,20 @@ export default function BookingDetails() {
             <div className="flex items-center gap-4">
               <Button
                 variant="outline"
-                onClick={() => navigate('/reservations')}
+                onClick={() => navigate("/reservations")}
                 className="flex items-center gap-2"
               >
                 <ArrowLeft size={20} />
                 Back to Bookings
               </Button>
               <div>
-                <h1 className="text-3xl font-bold text-gray-900">Booking Details</h1>
+                <h1 className="text-3xl font-bold text-gray-900">
+                  Booking Details
+                </h1>
                 <p className="text-gray-600">Booking ID: {booking._id}</p>
               </div>
             </div>
-            
+
             <div className="flex gap-3">
               <Button
                 variant="outline"
@@ -366,9 +412,11 @@ export default function BookingDetails() {
       </div>
 
       {/* Main Content */}
-      <div id="booking-details-container" className="max-w-6xl mx-auto px-4 py-8">
+      <div
+        id="booking-details-container"
+        className="max-w-6xl mx-auto px-4 py-8"
+      >
         <div className="grid lg:grid-cols-4 gap-8">
-          
           {/* Sidebar */}
           <div className="lg:col-span-1">
             <div className="bg-white rounded-lg shadow-sm border p-6 sticky top-24">
@@ -376,7 +424,11 @@ export default function BookingDetails() {
                 <div className="w-16 h-16 bg-[#FEF9C2] rounded-full flex items-center justify-center mx-auto mb-3">
                   {getStatusIcon(booking.bookingStatus || booking.status)}
                 </div>
-                <span className={`px-3 py-1 rounded-full text-sm font-semibold capitalize ${getStatusColor(booking.bookingStatus || booking.status)}`}>
+                <span
+                  className={`px-3 py-1 rounded-full text-sm font-semibold capitalize ${getStatusColor(
+                    booking.bookingStatus || booking.status
+                  )}`}
+                >
                   {booking.bookingStatus || booking.status}
                 </span>
               </div>
@@ -385,8 +437,8 @@ export default function BookingDetails() {
                 <button
                   onClick={() => setActiveTab("overview")}
                   className={`w-full text-left px-4 py-3 rounded-lg transition-all ${
-                    activeTab === "overview" 
-                      ? "bg-[#1D293D] text-white" 
+                    activeTab === "overview"
+                      ? "bg-[#1D293D] text-white"
                       : "text-gray-600 hover:bg-gray-100"
                   }`}
                 >
@@ -395,8 +447,8 @@ export default function BookingDetails() {
                 <button
                   onClick={() => setActiveTab("guest")}
                   className={`w-full text-left px-4 py-3 rounded-lg transition-all ${
-                    activeTab === "guest" 
-                      ? "bg-[#1D293D] text-white" 
+                    activeTab === "guest"
+                      ? "bg-[#1D293D] text-white"
                       : "text-gray-600 hover:bg-gray-100"
                   }`}
                 >
@@ -405,8 +457,8 @@ export default function BookingDetails() {
                 <button
                   onClick={() => setActiveTab("payment")}
                   className={`w-full text-left px-4 py-3 rounded-lg transition-all ${
-                    activeTab === "payment" 
-                      ? "bg-[#1D293D] text-white" 
+                    activeTab === "payment"
+                      ? "bg-[#1D293D] text-white"
                       : "text-gray-600 hover:bg-gray-100"
                   }`}
                 >
@@ -415,12 +467,22 @@ export default function BookingDetails() {
                 <button
                   onClick={() => setActiveTab("timeline")}
                   className={`w-full text-left px-4 py-3 rounded-lg transition-all ${
-                    activeTab === "timeline" 
-                      ? "bg-[#1D293D] text-white" 
+                    activeTab === "timeline"
+                      ? "bg-[#1D293D] text-white"
                       : "text-gray-600 hover:bg-gray-100"
                   }`}
                 >
                   Timeline
+                </button>
+                <button
+                  onClick={() => setActiveTab("tasks")}
+                  className={`w-full text-left px-4 py-3 rounded-lg transition-all ${
+                    activeTab === "tasks"
+                      ? "bg-[#1D293D] text-white"
+                      : "text-gray-600 hover:bg-gray-100"
+                  }`}
+                >
+                  Tasks
                 </button>
               </nav>
             </div>
@@ -429,22 +491,23 @@ export default function BookingDetails() {
           {/* Main Content Area */}
           <div className="lg:col-span-3">
             <div className="bg-white rounded-lg shadow-sm border">
-              
               {/* Overview Tab */}
               {activeTab === "overview" && (
                 <div id="tab-content-overview" className="p-6">
                   <div className="flex justify-between items-center mb-6">
-                    <h2 className="text-2xl font-bold text-gray-900">Booking Overview</h2>
+                    <h2 className="text-2xl font-bold text-gray-900">
+                      Booking Overview
+                    </h2>
                     <Button
                       variant="outline"
-                      onClick={() => handleDownloadCurrent('overview')}
+                      onClick={() => handleDownloadCurrent("overview")}
                       className="flex items-center gap-2 no-print"
                     >
                       <Download size={16} />
-                      Download  Now
+                      Download Now
                     </Button>
                   </div>
-                  
+
                   <div className="grid md:grid-cols-2 gap-8">
                     {/* Room Information */}
                     <div className="space-y-6">
@@ -456,15 +519,21 @@ export default function BookingDetails() {
                         <div className="space-y-3">
                           <div className="flex justify-between">
                             <span className="text-gray-600">Room Type</span>
-                            <span className="font-semibold">{booking.roomType || "Deluxe Room"}</span>
+                            <span className="font-semibold">
+                              {booking.roomType || "Deluxe Room"}
+                            </span>
                           </div>
                           <div className="flex justify-between">
                             <span className="text-gray-600">Room Number</span>
-                            <span className="font-semibold">{booking.roomNumber || "N/A"}</span>
+                            <span className="font-semibold">
+                              {booking.roomNumber || "N/A"}
+                            </span>
                           </div>
                           <div className="flex justify-between">
                             <span className="text-gray-600">Guests</span>
-                            <span className="font-semibold">{booking.numberOfGuests} Guests</span>
+                            <span className="font-semibold">
+                              {booking.numberOfGuests} Guests
+                            </span>
                           </div>
                         </div>
                       </div>
@@ -478,15 +547,21 @@ export default function BookingDetails() {
                         <div className="space-y-3">
                           <div className="flex justify-between">
                             <span className="text-gray-600">Check-in</span>
-                            <span className="font-semibold">{formatDate(booking.checkInDate)}</span>
+                            <span className="font-semibold">
+                              {formatDate(booking.checkInDate)}
+                            </span>
                           </div>
                           <div className="flex justify-between">
                             <span className="text-gray-600">Check-out</span>
-                            <span className="font-semibold">{formatDate(booking.checkOutDate)}</span>
+                            <span className="font-semibold">
+                              {formatDate(booking.checkOutDate)}
+                            </span>
                           </div>
                           <div className="flex justify-between">
                             <span className="text-gray-600">Duration</span>
-                            <span className="font-semibold">{nights} Nights</span>
+                            <span className="font-semibold">
+                              {nights} Nights
+                            </span>
                           </div>
                         </div>
                       </div>
@@ -531,13 +606,17 @@ export default function BookingDetails() {
 
                       {/* Payment Status */}
                       <div className="mt-6">
-                        <h4 className="font-semibold text-gray-900 mb-2">Payment Status</h4>
-                        <span className={`px-3 py-1 rounded-full text-sm font-semibold capitalize ${
-                          booking.paymentStatus === 'paid' 
-                            ? 'bg-green-100 text-green-800' 
-                            : 'bg-yellow-100 text-yellow-800'
-                        }`}>
-                          {booking.paymentStatus || 'pending'}
+                        <h4 className="font-semibold text-gray-900 mb-2">
+                          Payment Status
+                        </h4>
+                        <span
+                          className={`px-3 py-1 rounded-full text-sm font-semibold capitalize ${
+                            booking.paymentStatus === "paid"
+                              ? "bg-green-100 text-green-800"
+                              : "bg-yellow-100 text-yellow-800"
+                          }`}
+                        >
+                          {booking.paymentStatus || "pending"}
                         </span>
                       </div>
                     </div>
@@ -557,45 +636,56 @@ export default function BookingDetails() {
                   )}
                 </div>
               )}
-
               {/* Guest Details Tab */}
               {activeTab === "guest" && (
                 <div id="tab-content-guest" className="p-6">
                   <div className="flex justify-between items-center mb-6">
-                    <h2 className="text-2xl font-bold text-gray-900">Guest Details</h2>
+                    <h2 className="text-2xl font-bold text-gray-900">
+                      Guest Details
+                    </h2>
                     <Button
                       variant="outline"
-                      onClick={() => handleDownloadCurrent('guest')}
+                      onClick={() => handleDownloadCurrent("guest")}
                       className="flex items-center gap-2 no-print"
                     >
                       <Download size={16} />
-                      Download  Now
+                      Download Now
                     </Button>
                   </div>
-                  
+
                   <div className="grid md:grid-cols-2 gap-8">
                     <div className="space-y-6">
                       <div>
-                        <h3 className="text-lg font-semibold text-gray-900 mb-4">Primary Guest</h3>
+                        <h3 className="text-lg font-semibold text-gray-900 mb-4">
+                          Primary Guest
+                        </h3>
                         <div className="space-y-3">
                           <div className="flex justify-between">
                             <span className="text-gray-600">Name</span>
-                            <span className="font-semibold">{userAuth?.name || "N/A"}</span>
+                            <span className="font-semibold">
+                              {userAuth?.name || "N/A"}
+                            </span>
                           </div>
                           <div className="flex justify-between">
                             <span className="text-gray-600">Email</span>
-                            <span className="font-semibold">{userAuth?.email || "N/A"}</span>
+                            <span className="font-semibold">
+                              {userAuth?.email || "N/A"}
+                            </span>
                           </div>
                           <div className="flex justify-between">
                             <span className="text-gray-600">Phone</span>
-                            <span className="font-semibold">{userAuth?.phone || "N/A"}</span>
+                            <span className="font-semibold">
+                              {userAuth?.phone || "N/A"}
+                            </span>
                           </div>
                         </div>
                       </div>
                     </div>
 
                     <div>
-                      <h3 className="text-lg font-semibold text-gray-900 mb-4">Contact Information</h3>
+                      <h3 className="text-lg font-semibold text-gray-900 mb-4">
+                        Contact Information
+                      </h3>
                       <div className="space-y-4">
                         <div className="flex items-center gap-3 text-gray-600">
                           <Mail className="w-5 h-5" />
@@ -610,26 +700,29 @@ export default function BookingDetails() {
                   </div>
                 </div>
               )}
-
               {/* Payment Info Tab */}
               {activeTab === "payment" && (
                 <div id="tab-content-payment" className="p-6">
                   <div className="flex justify-between items-center mb-6">
-                    <h2 className="text-2xl font-bold text-gray-900">Payment Information</h2>
+                    <h2 className="text-2xl font-bold text-gray-900">
+                      Payment Information
+                    </h2>
                     <Button
                       variant="outline"
-                      onClick={() => handleDownloadCurrent('payment')}
+                      onClick={() => handleDownloadCurrent("payment")}
                       className="flex items-center gap-2 no-print"
                     >
                       <Download size={16} />
-                       Download  Now
+                      Download Now
                     </Button>
                   </div>
-                  
+
                   <div className="grid md:grid-cols-2 gap-8">
                     <div className="space-y-6">
                       <div>
-                        <h3 className="text-lg font-semibold text-gray-900 mb-4">Payment Details</h3>
+                        <h3 className="text-lg font-semibold text-gray-900 mb-4">
+                          Payment Details
+                        </h3>
                         <div className="space-y-3">
                           <div className="flex justify-between">
                             <span className="text-gray-600">Total Amount</span>
@@ -639,28 +732,39 @@ export default function BookingDetails() {
                             </span>
                           </div>
                           <div className="flex justify-between">
-                            <span className="text-gray-600">Payment Status</span>
-                            <span className={`px-2 py-1 rounded text-sm font-semibold ${
-                              booking.paymentStatus === 'paid' 
-                                ? 'bg-green-100 text-green-800' 
-                                : 'bg-yellow-100 text-yellow-800'
-                            }`}>
-                              {booking.paymentStatus || 'pending'}
+                            <span className="text-gray-600">
+                              Payment Status
+                            </span>
+                            <span
+                              className={`px-2 py-1 rounded text-sm font-semibold ${
+                                booking.paymentStatus === "paid"
+                                  ? "bg-green-100 text-green-800"
+                                  : "bg-yellow-100 text-yellow-800"
+                              }`}
+                            >
+                              {booking.paymentStatus || "pending"}
                             </span>
                           </div>
                           <div className="flex justify-between">
-                            <span className="text-gray-600">Payment Method</span>
-                            <span className="font-semibold">{booking.payment?.method || 'Credit Card'}</span>
+                            <span className="text-gray-600">
+                              Payment Method
+                            </span>
+                            <span className="font-semibold">
+                              {booking.payment?.method || "Credit Card"}
+                            </span>
                           </div>
                         </div>
                       </div>
                     </div>
 
                     <div>
-                      <h3 className="text-lg font-semibold text-gray-900 mb-4">Need Help?</h3>
+                      <h3 className="text-lg font-semibold text-gray-900 mb-4">
+                        Need Help?
+                      </h3>
                       <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
                         <p className="text-blue-800 text-sm">
-                          For any payment-related queries, please contact our support team.
+                          For any payment-related queries, please contact our
+                          support team.
                         </p>
                         <div className="mt-3 space-y-2">
                           <div className="flex items-center gap-2 text-blue-700">
@@ -669,7 +773,9 @@ export default function BookingDetails() {
                           </div>
                           <div className="flex items-center gap-2 text-blue-700">
                             <Mail className="w-4 h-4" />
-                            <span className="text-sm">support@luxurystay.com</span>
+                            <span className="text-sm">
+                              support@luxurystay.com
+                            </span>
                           </div>
                         </div>
                       </div>
@@ -677,22 +783,23 @@ export default function BookingDetails() {
                   </div>
                 </div>
               )}
-
               {/* Timeline Tab */}
               {activeTab === "timeline" && (
                 <div id="tab-content-timeline" className="p-6">
                   <div className="flex justify-between items-center mb-6">
-                    <h2 className="text-2xl font-bold text-gray-900">Booking Timeline</h2>
+                    <h2 className="text-2xl font-bold text-gray-900">
+                      Booking Timeline
+                    </h2>
                     <Button
                       variant="outline"
-                      onClick={() => handleDownloadCurrent('timeline')}
+                      onClick={() => handleDownloadCurrent("timeline")}
                       className="flex items-center gap-2 no-print"
                     >
                       <Download size={16} />
-                       Download  Now
+                      Download Now
                     </Button>
                   </div>
-                  
+
                   <div className="space-y-6">
                     <div className="flex gap-4">
                       <div className="flex flex-col items-center">
@@ -700,62 +807,247 @@ export default function BookingDetails() {
                         <div className="w-0.5 h-16 bg-gray-300"></div>
                       </div>
                       <div className="flex-1">
-                        <h3 className="font-semibold text-gray-900">Booking Created</h3>
-                        <p className="text-gray-600 text-sm">{formatDateTime(booking.createdAt)}</p>
-                        <p className="text-gray-500 mt-1">Your booking request was submitted</p>
-                      </div>
-                    </div>
-
-                    <div className="flex gap-4">
-                      <div className="flex flex-col items-center">
-                        <div className={`w-3 h-3 rounded-full ${
-                          booking.bookingStatus === 'confirmed' ? 'bg-green-500' : 'bg-gray-300'
-                        }`}></div>
-                        <div className="w-0.5 h-16 bg-gray-300"></div>
-                      </div>
-                      <div className="flex-1">
-                        <h3 className="font-semibold text-gray-900">Confirmation</h3>
+                        <h3 className="font-semibold text-gray-900">
+                          Booking Created
+                        </h3>
                         <p className="text-gray-600 text-sm">
-                          {booking.bookingStatus === 'confirmed' ? formatDateTime(booking.updatedAt) : 'Pending'}
+                          {formatDateTime(booking.createdAt)}
                         </p>
                         <p className="text-gray-500 mt-1">
-                          {booking.bookingStatus === 'confirmed' 
-                            ? 'Your booking has been confirmed' 
-                            : 'Waiting for confirmation from hotel'}
+                          Your booking request was submitted
                         </p>
                       </div>
                     </div>
 
                     <div className="flex gap-4">
                       <div className="flex flex-col items-center">
-                        <div className={`w-3 h-3 rounded-full ${
-                          booking.bookingStatus === 'checked-in' ? 'bg-blue-500' : 'bg-gray-300'
-                        }`}></div>
+                        <div
+                          className={`w-3 h-3 rounded-full ${
+                            booking.bookingStatus === "confirmed"
+                              ? "bg-green-500"
+                              : "bg-gray-300"
+                          }`}
+                        ></div>
                         <div className="w-0.5 h-16 bg-gray-300"></div>
                       </div>
                       <div className="flex-1">
-                        <h3 className="font-semibold text-gray-900">Check-in</h3>
+                        <h3 className="font-semibold text-gray-900">
+                          Confirmation
+                        </h3>
+                        <p className="text-gray-600 text-sm">
+                          {booking.bookingStatus === "confirmed"
+                            ? formatDateTime(booking.updatedAt)
+                            : "Pending"}
+                        </p>
+                        <p className="text-gray-500 mt-1">
+                          {booking.bookingStatus === "confirmed"
+                            ? "Your booking has been confirmed"
+                            : "Waiting for confirmation from hotel"}
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className="flex gap-4">
+                      <div className="flex flex-col items-center">
+                        <div
+                          className={`w-3 h-3 rounded-full ${
+                            booking.bookingStatus === "checked-in"
+                              ? "bg-blue-500"
+                              : "bg-gray-300"
+                          }`}
+                        ></div>
+                        <div className="w-0.5 h-16 bg-gray-300"></div>
+                      </div>
+                      <div className="flex-1">
+                        <h3 className="font-semibold text-gray-900">
+                          Check-in
+                        </h3>
                         <p className="text-gray-600 text-sm">
                           {formatDate(booking.checkInDate)}
                         </p>
-                        <p className="text-gray-500 mt-1">Scheduled check-in date</p>
+                        <p className="text-gray-500 mt-1">
+                          Scheduled check-in date
+                        </p>
                       </div>
                     </div>
 
                     <div className="flex gap-4">
                       <div className="flex flex-col items-center">
-                        <div className={`w-3 h-3 rounded-full ${
-                          booking.bookingStatus === 'checked-out' ? 'bg-purple-500' : 'bg-gray-300'
-                        }`}></div>
+                        <div
+                          className={`w-3 h-3 rounded-full ${
+                            booking.bookingStatus === "checked-out"
+                              ? "bg-purple-500"
+                              : "bg-gray-300"
+                          }`}
+                        ></div>
                       </div>
                       <div className="flex-1">
-                        <h3 className="font-semibold text-gray-900">Check-out</h3>
+                        <h3 className="font-semibold text-gray-900">
+                          Check-out
+                        </h3>
                         <p className="text-gray-600 text-sm">
                           {formatDate(booking.checkOutDate)}
                         </p>
-                        <p className="text-gray-500 mt-1">Scheduled check-out date</p>
+                        <p className="text-gray-500 mt-1">
+                          Scheduled check-out date
+                        </p>
                       </div>
                     </div>
+                  </div>
+                </div>
+              )}
+
+              {activeTab === "tasks" && (
+                <div id="tab-content-tasks" className="p-6">
+                  <div className="flex justify-between items-center mb-6">
+                    <h2 className="text-2xl font-bold text-gray-900">
+                      Requested Tasks
+                    </h2>
+                    <Button
+                      // This button now opens the modal
+                      onClick={() => setIsModalOpen(true)} // Use the state setter
+                      className="flex items-center gap-2 no-print bg-[#1D293D] text-white hover:bg-[#2D3B5D]"
+                    >
+                      <Plus size={16} />
+                      Request New Task
+                    </Button>
+                  </div>
+
+                  {/* Task List Display */}
+                  <div className="space-y-4">
+                    {booking.tasks && booking.tasks.length > 0 ? (
+                      booking.tasks.map((task, index) => (
+                        <div
+                          key={index}
+                          className="flex items-start justify-between p-4 bg-white border border-gray-200 rounded-lg shadow-sm"
+                        >
+                          <div className="flex-1 min-w-0">
+                            <p className="text-lg font-semibold text-gray-900 truncate">
+                              {task.title}
+                            </p>
+                            <p className="text-sm text-gray-500 mt-1">
+                              {task.description || "No description provided."}
+                            </p>
+                            <div className="flex items-center space-x-3 mt-2">
+                              {task.date && (
+                                <span className="text-xs text-gray-600 flex items-center gap-1">
+                                  <Clock size={12} className="text-gray-400" />
+                                  Date: {formatDate(task.date)}
+                                </span>
+                              )}
+                              <span
+                                className={`px-2 py-0.5 rounded-full text-xs font-medium ${
+                                  task.status === "completed"
+                                    ? "bg-green-100 text-green-800"
+                                    : task.status === "in-progress"
+                                    ? "bg-yellow-100 text-yellow-800"
+                                    : "bg-red-100 text-red-800"
+                                }`}
+                              >
+                                {task.status.charAt(0).toUpperCase() +
+                                  task.status.slice(1).replace("-", " ")}
+                              </span>
+                            </div>
+                          </div>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="flex-shrink-0 ml-4"
+                            // Optional: Add onClick={() => handleViewTask(task.id)}
+                          >
+                            <ChevronRight size={18} />
+                          </Button>
+                        </div>
+                      ))
+                    ) : (
+                      <div className="text-center p-12 border-2 border-dashed border-gray-300 rounded-lg bg-gray-50">
+                        <ListChecks className="w-8 h-8 mx-auto text-gray-400 mb-3" />
+                        <p className="text-gray-600 font-medium">
+                          No tasks have been created yet.
+                        </p>
+                        <p className="text-sm text-gray-500">
+                          Use the button above to request a new service or task.
+                        </p>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
+
+              {isModalOpen && (
+                // Modal Backdrop
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/20 backdrop-blur-xl">
+                  {/* Modal Content */}
+                  <div className="bg-white rounded-lg shadow-xl w-full max-w-md mx-4 p-6">
+                    <div className="flex justify-between items-center pb-4 border-b">
+                      <h3 className="text-xl font-bold text-gray-900">
+                        Request New Task
+                      </h3>
+                      <button
+                        onClick={handleCloseModal}
+                        className="text-gray-400 hover:text-gray-600"
+                      >
+                        <X size={20} />
+                      </button>
+                    </div>
+
+                    {/* Form */}
+                    <form
+                      onSubmit={handleSubmitTask}
+                      className="space-y-4 pt-4"
+                    >
+                      <div>
+                        <label
+                          htmlFor="title"
+                          className="block text-sm font-medium text-gray-700 mb-1"
+                        >
+                          Task Title
+                        </label>
+                        <input
+                          id="title"
+                          name="title"
+                          type="text"
+                          required
+                          placeholder="E.g., Extra Towels, Dinner Booking"
+                          // value={newTaskForm.title} onChange={handleChange}
+                          className="w-full p-2 border border-gray-300 rounded-md focus:ring-[#1D293D] focus:border-[#1D293D]"
+                        />
+                      </div>
+
+                      <div>
+                        <label
+                          htmlFor="description"
+                          className="block text-sm font-medium text-gray-700 mb-1"
+                        >
+                          Details / Instructions
+                        </label>
+                        <textarea
+                          id="description"
+                          name="description"
+                          rows="3"
+                          required
+                          placeholder="Please specify details like quantity, time, or location."
+                          // value={newTaskForm.description} onChange={handleChange}
+                          className="w-full p-2 border border-gray-300 rounded-md focus:ring-[#1D293D] focus:border-[#1D293D]"
+                        ></textarea>
+                      </div>
+
+                      <div className="flex justify-end pt-4 space-x-3">
+                        <Button
+                          variant="outline"
+                          onClick={handleCloseModal}
+                          type="button"
+                        >
+                          Cancel
+                        </Button>
+                        <Button
+                          type="submit"
+                          className="bg-[#1D293D] text-white hover:bg-[#2D3B5D]"
+                        >
+                          Submit Request
+                        </Button>
+                      </div>
+                    </form>
                   </div>
                 </div>
               )}
@@ -764,5 +1056,5 @@ export default function BookingDetails() {
         </div>
       </div>
     </div>
-  )
-} 
+  );
+}
