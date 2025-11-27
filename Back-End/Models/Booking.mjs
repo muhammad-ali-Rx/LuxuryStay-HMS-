@@ -310,4 +310,8 @@ bookingSchema.index({ checkInDate: 1, checkOutDate: 1 });
 bookingSchema.index({ bookingStatus: 1 });
 bookingSchema.index({ createdAt: 1 });
 
-export default mongoose.model("Booking", bookingSchema);    
+// 🔴 THE FIX: Check if the model already exists before exporting it.
+// This prevents the OverwriteModelError during hot reloads or multiple imports.
+const Booking = mongoose.models.Booking || mongoose.model("Booking", bookingSchema);
+
+export default Booking;

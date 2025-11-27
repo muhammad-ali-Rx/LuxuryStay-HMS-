@@ -24,27 +24,34 @@ import {
   Mail,
   ArrowUpDown,
   Building,
+  ClipboardList,
+  UserPlus,
 } from "lucide-react";
 
 const API_BASE_URL = "http://localhost:3000";
 
 export default function TasksManagement() {
-  const [bookings, setBookings] = useState([]);
+  const [tasks, setTasks] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [searchTerm, setSearchTerm] = useState("");
   const [filterStatus, setFilterStatus] = useState("");
-  const [selectedBooking, setSelectedBooking] = useState(null);
+  const [selectedTask, setSelectedTask] = useState(null);
   const [showModal, setShowModal] = useState(false);
   const [actionLoading, setActionLoading] = useState(null);
-  const [sortConfig, setSortConfig] = useState({ key: null, direction: 'asc' });
+  const [sortConfig, setSortConfig] = useState({ key: null, direction: "asc" });
 
-  // Fetch all bookings from backend
+  const [staffData, setStaffData] = useState([]); // For future use if needed
+  const [selectedStaffId, setSelectedStaffId] = useState(null); // For future use if needed
+  const [assigningTask, setAssigningTask] = useState(null); // For future use if needed
+
+  // Fetch all tasks from backend
   useEffect(() => {
-    fetchBookings();
+    fetchTasks();
+    fetchStaff();
   }, []);
 
-  const fetchBookings = async () => {
+  const fetchTasks = async () => {
     try {
       setLoading(true);
       setError("");
@@ -54,8 +61,8 @@ export default function TasksManagement() {
         throw new Error("No authentication token found. Please login again.");
       }
 
-      console.log("🔍 Fetching bookings...");
-      const response = await fetch(`${API_BASE_URL}/booking`, {
+      console.log("🔍 Fetching tasks...");
+      const response = await fetch(`${API_BASE_URL}/task`, {
         method: "GET",
         headers: {
           "Content-Type": "application/json",
@@ -70,53 +77,133 @@ export default function TasksManagement() {
       }
 
       if (!response.ok) {
-        throw new Error(`Failed to fetch bookings: ${response.status}`);
+        throw new Error(`Failed to fetch tasks: ${response.status}`);
       }
 
       const result = await response.json();
       console.log("📦 API Response:", result);
 
       if (result.success) {
-        setBookings(result.data || []);
-        console.log("✅ Bookings loaded:", result.data?.length || 0);
+        setTasks(result.data || []);
+        console.log("✅ Tasks loaded:", result.data?.length || 0);
       } else {
-        throw new Error(result.message || "Failed to load bookings");
+        throw new Error(result.message || "Failed to load tasks");
       }
     } catch (error) {
-      console.error("❌ Error fetching bookings:", error);
+      console.error("❌ Error fetching tasks:", error);
       setError(error.message);
     } finally {
       setLoading(false);
     }
   };
 
+  const fetchStaff = async () => {
+    try {
+      setLoading(true);
+      const response = await fetch(`${API_BASE_URL}/users`);
+      if (!response.ok) throw new Error("Failed to fetch users");
+
+      const data = await response.json();
+      console.log("[v0] Fetched all users response:", data);
+
+      let users = [];
+      if (data.data && data.data.users) {
+        users = data.data.users;
+      } else if (data.users) {
+        users = data.users;
+      } else {
+        users = data;
+      }
+
+      const staffRoles = ["manager", "receptionist", "housekeeping"];
+      const filteredStaff = users.filter((user) =>
+        staffRoles.includes(user.role?.toLowerCase())
+      );
+
+      console.log({ users, filteredStaff });
+
+      setStaffData(filteredStaff);
+      setError(null);
+    } catch (err) {
+      setError("Failed to fetch users");
+      console.error("[v0] Error fetching users:", err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleAssign = async (staffId) => {
+    if (!assigningTask || !staffId) {
+      console.error("Task ID or staff ID is missing.");
+      return;
+    }
+
+    try {
+      const userAuthToken = localStorage.getItem("authToken");
+      if (!userAuthToken) {
+        throw new Error("No authentication token found. Please login again.");
+      }
+
+      const response = await fetch(`${API_BASE_URL}/task/${assigningTask._id}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          // IMPORTANT: You MUST include an authorization token (e.g., Bearer token)
+          Authorization: `Bearer ${userAuthToken}`,
+        },
+        body: JSON.stringify({
+          // This is the data being sent to the backend
+          assignedTo: staffId,
+          // Optional: you might also want to set the status to 'in-progress' here
+          status: "in-progress",
+        }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || "Failed to assign task.");
+      }
+
+      // Task assigned successfully
+      const data = await response.json();
+      console.log("Task assignment successful:", data.data);
+
+      // 1. Close the modal
+       setAssigningTask(null);
+
+      // 2. OPTIONAL: Refresh the task list in the parent component
+      fetchTasks();
+    } catch (error) {
+      console.error("API Error during task assignment:", error);
+      // Show error message to the user
+      setError(error.message);
+    }
+  };
+
   const handleSort = (key) => {
-    let direction = 'asc';
-    if (sortConfig.key === key && sortConfig.direction === 'asc') {
-      direction = 'desc';
+    let direction = "asc";
+    if (sortConfig.key === key && sortConfig.direction === "asc") {
+      direction = "desc";
     }
     setSortConfig({ key, direction });
   };
 
-  // ✅ FIXED: Changed 'status' to 'bookingStatus' to match backend
-  const handleUpdateStatus = async (bookingId, newStatus) => {
+  // ✅ FIXED: Changed 'status' to 'taskStatus' to match backend
+  const handleUpdateStatus = async (taskId, newStatus) => {
     try {
-      setActionLoading(bookingId);
-      console.log(`🔄 Updating booking ${bookingId} to ${newStatus}`);
-      
+      setActionLoading(taskId);
+      console.log(`🔄 Updating task ${taskId} to ${newStatus}`);
+
       const token = localStorage.getItem("authToken");
-      const response = await fetch(
-        `${API_BASE_URL}/booking/${bookingId}/status`,
-        {
-          method: "PUT",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-          // ✅ FIX: Changed 'status' to 'bookingStatus'
-          body: JSON.stringify({ bookingStatus: newStatus }),
-        }
-      );
+      const response = await fetch(`${API_BASE_URL}/task/${taskId}/status`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        // ✅ FIX: Changed 'status' to 'taskStatus'
+        body: JSON.stringify({ taskStatus: newStatus }),
+      });
 
       console.log("📡 Status update response:", response.status);
 
@@ -127,7 +214,7 @@ export default function TasksManagement() {
       if (!response.ok) {
         const errorText = await response.text();
         console.error("❌ Status update error:", errorText);
-        throw new Error(`Failed to update booking status: ${response.status}`);
+        throw new Error(`Failed to update task status: ${response.status}`);
       }
 
       const result = await response.json();
@@ -135,48 +222,43 @@ export default function TasksManagement() {
 
       if (result.success) {
         // Update local state immediately
-        setBookings((prev) =>
-          prev.map((booking) =>
-            booking._id === bookingId
-              ? { ...booking, bookingStatus: newStatus }
-              : booking
+        setTasks((prev) =>
+          prev.map((task) =>
+            task._id === taskId ? { ...task, taskStatus: newStatus } : task
           )
         );
-        
-        alert(`✅ Booking status updated to ${newStatus}`);
+
+        alert(`✅ Task status updated to ${newStatus}`);
       } else {
-        throw new Error(result.message || "Failed to update booking status");
+        throw new Error(result.message || "Failed to update task status");
       }
     } catch (error) {
-      console.error("❌ Error updating booking status:", error);
-      alert(`❌ ${error.message || "Failed to update booking status"}`);
-      
+      console.error("❌ Error updating task status:", error);
+      alert(`❌ ${error.message || "Failed to update task status"}`);
+
       // Refresh data to show correct status
-      fetchBookings();
+      fetchTasks();
     } finally {
       setActionLoading(null);
     }
   };
 
-  const handleCheckIn = async (bookingId) => {
+  const handleCheckIn = async (taskId) => {
     try {
-      setActionLoading(`checkin-${bookingId}`);
-      console.log(`🔄 Checking in booking ${bookingId}`);
-      
+      setActionLoading(`checkin-${taskId}`);
+      console.log(`🔄 Checking in task ${taskId}`);
+
       const token = localStorage.getItem("authToken");
-      
+
       // ✅ FIX: Use the status update endpoint with 'checked-in' status
-      const response = await fetch(
-        `${API_BASE_URL}/booking/${bookingId}/status`,
-        {
-          method: "PUT",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-          body: JSON.stringify({ bookingStatus: 'checked-in' }),
-        }
-      );
+      const response = await fetch(`${API_BASE_URL}/task/${taskId}/status`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ taskStatus: "checked-in" }),
+      });
 
       console.log("📡 Check-in response:", response.status);
 
@@ -195,11 +277,9 @@ export default function TasksManagement() {
 
       if (result.success) {
         // Update local state
-        setBookings((prev) =>
-          prev.map((booking) =>
-            booking._id === bookingId
-              ? { ...booking, bookingStatus: 'checked-in' }
-              : booking
+        setTasks((prev) =>
+          prev.map((task) =>
+            task._id === taskId ? { ...task, taskStatus: "checked-in" } : task
           )
         );
         alert("✅ Check-in successful!");
@@ -209,33 +289,30 @@ export default function TasksManagement() {
     } catch (error) {
       console.error("❌ Error during check-in:", error);
       alert(`❌ ${error.message || "Failed to check in"}`);
-      
+
       // Refresh data to show correct status
-      fetchBookings();
+      fetchTasks();
     } finally {
       setActionLoading(null);
     }
   };
 
-  const handleCheckOut = async (bookingId) => {
+  const handleCheckOut = async (taskId) => {
     try {
-      setActionLoading(`checkout-${bookingId}`);
-      console.log(`🔄 Checking out booking ${bookingId}`);
-      
+      setActionLoading(`checkout-${taskId}`);
+      console.log(`🔄 Checking out task ${taskId}`);
+
       const token = localStorage.getItem("authToken");
-      
+
       // ✅ FIX: Use the status update endpoint with 'checked-out' status
-      const response = await fetch(
-        `${API_BASE_URL}/booking/${bookingId}/status`,
-        {
-          method: "PUT",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-          body: JSON.stringify({ bookingStatus: 'checked-out' }),
-        }
-      );
+      const response = await fetch(`${API_BASE_URL}/task/${taskId}/status`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ taskStatus: "checked-out" }),
+      });
 
       console.log("📡 Check-out response:", response.status);
 
@@ -254,11 +331,9 @@ export default function TasksManagement() {
 
       if (result.success) {
         // Update local state
-        setBookings((prev) =>
-          prev.map((booking) =>
-            booking._id === bookingId
-              ? { ...booking, bookingStatus: 'checked-out' }
-              : booking
+        setTasks((prev) =>
+          prev.map((task) =>
+            task._id === taskId ? { ...task, taskStatus: "checked-out" } : task
           )
         );
         alert("✅ Check-out successful!");
@@ -268,37 +343,34 @@ export default function TasksManagement() {
     } catch (error) {
       console.error("❌ Error during check-out:", error);
       alert(`❌ ${error.message || "Failed to check out"}`);
-      
+
       // Refresh data to show correct status
-      fetchBookings();
+      fetchTasks();
     } finally {
       setActionLoading(null);
     }
   };
 
-  const handleCancelBooking = async (bookingId) => {
-    if (!window.confirm("Are you sure you want to cancel this booking?")) {
+  const handleCancelTask = async (taskId) => {
+    if (!window.confirm("Are you sure you want to cancel this task?")) {
       return;
     }
 
     try {
-      setActionLoading(`cancel-${bookingId}`);
-      console.log(`🔄 Cancelling booking ${bookingId}`);
-      
+      setActionLoading(`cancel-${taskId}`);
+      console.log(`🔄 Cancelling task ${taskId}`);
+
       const token = localStorage.getItem("authToken");
-      
+
       // ✅ FIX: Use the status update endpoint with 'cancelled' status
-      const response = await fetch(
-        `${API_BASE_URL}/booking/${bookingId}/status`,
-        {
-          method: "PUT",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-          body: JSON.stringify({ bookingStatus: 'cancelled' }),
-        }
-      );
+      const response = await fetch(`${API_BASE_URL}/task/${taskId}/status`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ taskStatus: "cancelled" }),
+      });
 
       console.log("📡 Cancel response:", response.status);
 
@@ -309,7 +381,7 @@ export default function TasksManagement() {
       if (!response.ok) {
         const errorText = await response.text();
         console.error("❌ Cancel error:", errorText);
-        throw new Error(`Failed to cancel booking: ${response.status}`);
+        throw new Error(`Failed to cancel task: ${response.status}`);
       }
 
       const result = await response.json();
@@ -317,56 +389,54 @@ export default function TasksManagement() {
 
       if (result.success) {
         // Update local state
-        setBookings((prev) =>
-          prev.map((booking) =>
-            booking._id === bookingId
-              ? { ...booking, bookingStatus: 'cancelled' }
-              : booking
+        setTasks((prev) =>
+          prev.map((task) =>
+            task._id === taskId ? { ...task, taskStatus: "cancelled" } : task
           )
         );
-        alert("✅ Booking cancelled successfully!");
+        alert("✅ Task cancelled successfully!");
       } else {
-        throw new Error(result.message || "Failed to cancel booking");
+        throw new Error(result.message || "Failed to cancel task");
       }
     } catch (error) {
-      console.error("❌ Error cancelling booking:", error);
-      alert(`❌ ${error.message || "Failed to cancel booking"}`);
-      
+      console.error("❌ Error cancelling task:", error);
+      alert(`❌ ${error.message || "Failed to cancel task"}`);
+
       // Refresh data to show correct status
-      fetchBookings();
+      fetchTasks();
     } finally {
       setActionLoading(null);
     }
   };
 
-  const handleViewDetails = (booking) => {
-    setSelectedBooking(booking);
+  const handleViewDetails = (task) => {
+    setSelectedTask(task);
     setShowModal(true);
   };
 
-  const handleExportBookings = () => {
-    if (bookings.length === 0) {
-      alert("No bookings data to export");
+  const handleExportTasks = () => {
+    if (tasks.length === 0) {
+      alert("No tasks data to export");
       return;
     }
 
     const csvContent =
       "data:text/csv;charset=utf-8," +
-      "Booking ID,Guest Name,Room,Check-In,Check-Out,Guests,Status,Total Amount,Booking Date,Payment Status\n" +
-      bookings
+      "Task ID,Guest Name,Room,Check-In,Check-Out,Guests,Status,Total Amount,Task Date,Payment Status\n" +
+      tasks
         .map(
-          (booking) =>
-            `"${booking._id}","${booking.guestDetails?.name || "N/A"}","${
-              booking.roomNumber || "N/A"
-            }","${booking.checkInDate || "N/A"}","${
-              booking.checkOutDate || "N/A"
-            }","${booking.numberOfGuests || 0}","${
-              booking.bookingStatus || "pending"
-            }","${booking.totalAmount || 0}","${
-              booking.createdAt
-                ? new Date(booking.createdAt).toLocaleDateString()
+          (task) =>
+            `"${task._id}","${task.guestDetails?.name || "N/A"}","${
+              task.roomNumber || "N/A"
+            }","${task.checkInDate || "N/A"}","${
+              task.checkOutDate || "N/A"
+            }","${task.numberOfGuests || 0}","${
+              task.taskStatus || "pending"
+            }","${task.totalAmount || 0}","${
+              task.createdAt
+                ? new Date(task.createdAt).toLocaleDateString()
                 : "Unknown"
-            }","${booking.paymentStatus || "pending"}"`
+            }","${task.paymentStatus || "pending"}"`
         )
         .join("\n");
 
@@ -375,7 +445,7 @@ export default function TasksManagement() {
     link.setAttribute("href", encodedUri);
     link.setAttribute(
       "download",
-      `bookings_export_${new Date().toISOString().split("T")[0]}.csv`
+      `tasks_export_${new Date().toISOString().split("T")[0]}.csv`
     );
     document.body.appendChild(link);
     link.click();
@@ -447,56 +517,55 @@ export default function TasksManagement() {
     }
   };
 
-  // Filter and search bookings
-  const filteredBookings = bookings.filter((booking) => {
+  // Filter and search tasks
+  const filteredTasks = tasks.filter((task) => {
     const matchesSearch =
-      (booking.guestDetails?.name &&
-        booking.guestDetails.name
+      (task.guestDetails?.name &&
+        task.guestDetails.name
           .toLowerCase()
           .includes(searchTerm.toLowerCase())) ||
-      (booking.roomNumber && booking.roomNumber.includes(searchTerm)) ||
-      (booking._id &&
-        booking._id.toLowerCase().includes(searchTerm.toLowerCase()));
+      (task.roomNumber && task.roomNumber.includes(searchTerm)) ||
+      (task._id && task._id.toLowerCase().includes(searchTerm.toLowerCase()));
 
     const matchesStatus =
       !filterStatus ||
-      (booking.bookingStatus &&
-        booking.bookingStatus.toLowerCase() === filterStatus.toLowerCase());
+      (task.taskStatus &&
+        task.taskStatus.toLowerCase() === filterStatus.toLowerCase());
 
     return matchesSearch && matchesStatus;
   });
 
-  // Sort bookings
-  const sortedBookings = [...filteredBookings].sort((a, b) => {
+  // Sort tasks
+  const sortedTasks = [...filteredTasks].sort((a, b) => {
     if (!sortConfig.key) return 0;
 
     let aValue = a[sortConfig.key];
     let bValue = b[sortConfig.key];
 
     // Handle nested properties
-    if (sortConfig.key === 'guestDetails.name') {
+    if (sortConfig.key === "guestDetails.name") {
       aValue = a.guestDetails?.name;
       bValue = b.guestDetails?.name;
     }
 
     if (aValue < bValue) {
-      return sortConfig.direction === 'asc' ? -1 : 1;
+      return sortConfig.direction === "asc" ? -1 : 1;
     }
     if (aValue > bValue) {
-      return sortConfig.direction === 'asc' ? 1 : -1;
+      return sortConfig.direction === "asc" ? 1 : -1;
     }
     return 0;
   });
 
   // Get available actions based on current status
-  const getAvailableActions = (booking) => {
+  const getAvailableActions = (task) => {
     const actions = [];
 
-    switch (booking.bookingStatus) {
+    switch (task.taskStatus) {
       case "pending":
         actions.push({
           label: "Confirm",
-          action: () => handleUpdateStatus(booking._id, "confirmed"),
+          action: () => handleUpdateStatus(task._id, "confirmed"),
           icon: CheckCircle,
           color: "bg-emerald-500 hover:bg-emerald-600 text-white",
         });
@@ -504,7 +573,7 @@ export default function TasksManagement() {
       case "confirmed":
         actions.push({
           label: "Check In",
-          action: () => handleCheckIn(booking._id),
+          action: () => handleCheckIn(task._id),
           icon: User,
           color: "bg-blue-500 hover:bg-blue-600 text-white",
         });
@@ -512,21 +581,18 @@ export default function TasksManagement() {
       case "checked-in":
         actions.push({
           label: "Check Out",
-          action: () => handleCheckOut(booking._id),
+          action: () => handleCheckOut(task._id),
           icon: Bed,
           color: "bg-purple-500 hover:bg-purple-600 text-white",
         });
         break;
     }
 
-    // Always allow cancellation for pending and confirmed bookings
-    if (
-      booking.bookingStatus === "pending" ||
-      booking.bookingStatus === "confirmed"
-    ) {
+    // Always allow cancellation for pending and confirmed tasks
+    if (task.taskStatus === "pending" || task.taskStatus === "confirmed") {
       actions.push({
         label: "Cancel",
-        action: () => handleCancelBooking(booking._id),
+        action: () => handleCancelTask(task._id),
         icon: XCircle,
         color: "bg-rose-500 hover:bg-rose-600 text-white",
       });
@@ -536,11 +602,11 @@ export default function TasksManagement() {
   };
 
   const stats = {
-    total: bookings.length,
-    pending: bookings.filter(b => b.bookingStatus === "pending").length,
-    confirmed: bookings.filter(b => b.bookingStatus === "confirmed").length,
-    checkedIn: bookings.filter(b => b.bookingStatus === "checked-in").length,
-    revenue: bookings.reduce((sum, booking) => sum + (booking.totalAmount || 0), 0)
+    total: tasks.length,
+    pending: tasks.filter((b) => b.taskStatus === "pending").length,
+    confirmed: tasks.filter((b) => b.taskStatus === "confirmed").length,
+    checkedIn: tasks.filter((b) => b.taskStatus === "checked-in").length,
+    revenue: tasks.reduce((sum, task) => sum + (task.totalAmount || 0), 0),
   };
 
   if (loading) {
@@ -553,8 +619,10 @@ export default function TasksManagement() {
               transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
               className="w-16 h-16 border-4 border-[#0A1F44] border-t-transparent rounded-full mx-auto mb-6"
             />
-            <h3 className="text-2xl font-bold text-gray-900 mb-2">Loading Bookings</h3>
-            <p className="text-gray-600">Fetching your booking data...</p>
+            <h3 className="text-2xl font-bold text-gray-900 mb-2">
+              Loading Tasks
+            </h3>
+            <p className="text-gray-600">Fetching your task data...</p>
           </div>
         </div>
       </div>
@@ -565,7 +633,6 @@ export default function TasksManagement() {
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 p-6">
       {/* Full width container - NO EMPTY SIDES */}
       <div className="w-full space-y-6">
-        
         {/* Header */}
         <motion.div
           initial={{ opacity: 0, y: -20 }}
@@ -574,18 +641,18 @@ export default function TasksManagement() {
         >
           <div>
             <h1 className="text-3xl font-bold text-gray-900">
-              Bookings Management
+              Tasks Management
             </h1>
             <p className="text-gray-600 mt-2">
-              Manage all hotel bookings and reservations
+              Manage all hotel tasks and reservations
             </p>
           </div>
           <div className="flex gap-3">
             <motion.button
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
-              onClick={handleExportBookings}
-              disabled={bookings.length === 0}
+              onClick={handleExportTasks}
+              disabled={tasks.length === 0}
               className="flex items-center gap-2 bg-white text-[#0A1F44] px-4 py-2.5 rounded-lg font-semibold hover:bg-gray-50 transition-all duration-300 border border-gray-300 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               <Download size={18} />
@@ -594,45 +661,13 @@ export default function TasksManagement() {
             <motion.button
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
-              onClick={fetchBookings}
+              onClick={fetchTasks}
               className="flex items-center gap-2 bg-[#0A1F44] text-white px-4 py-2.5 rounded-lg font-semibold hover:bg-[#00326f] transition-all duration-300"
             >
               <RefreshCw size={18} />
               Refresh
             </motion.button>
           </div>
-        </motion.div>
-
-        {/* Stats Overview */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.1 }}
-          className="grid grid-cols-2 lg:grid-cols-5 gap-4"
-        >
-          {[
-            { label: "Total", value: stats.total, color: "gray", icon: <Calendar size={18} /> },
-            { label: "Pending", value: stats.pending, color: "amber", icon: <Clock size={18} /> },
-            { label: "Confirmed", value: stats.confirmed, color: "emerald", icon: <CheckCircle size={18} /> },
-            { label: "Checked In", value: stats.checkedIn, color: "blue", icon: <User size={18} /> },
-            { label: "Revenue", value: `$${stats.revenue}`, color: "purple", icon: <DollarSign size={18} /> },
-          ].map((stat, index) => (
-            <motion.div
-              key={stat.label}
-              initial={{ opacity: 0, scale: 0.9 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ delay: index * 0.1 }}
-              className="bg-white rounded-xl p-4 shadow-sm border border-gray-200 hover:shadow-md transition-all duration-300"
-            >
-              <div className="flex items-center justify-between mb-2">
-                <div className={`p-2 rounded-lg bg-${stat.color}-500/10`}>
-                  {stat.icon}
-                </div>
-                <div className="text-xl font-bold text-gray-900">{stat.value}</div>
-              </div>
-              <div className="text-sm font-medium text-gray-600">{stat.label}</div>
-            </motion.div>
-          ))}
         </motion.div>
 
         {/* Search and Filters */}
@@ -645,10 +680,13 @@ export default function TasksManagement() {
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
             {/* Search */}
             <div className="relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={18} />
+              <Search
+                className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"
+                size={18}
+              />
               <input
                 type="text"
-                placeholder="Search bookings..."
+                placeholder="Search tasks..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 className="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0A1F44] focus:border-transparent transition-all duration-200 bg-white"
@@ -657,7 +695,10 @@ export default function TasksManagement() {
 
             {/* Status Filter */}
             <div className="relative">
-              <Filter className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={18} />
+              <Filter
+                className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"
+                size={18}
+              />
               <select
                 value={filterStatus}
                 onChange={(e) => setFilterStatus(e.target.value)}
@@ -670,19 +711,25 @@ export default function TasksManagement() {
                 <option value="checked-out">Checked Out</option>
                 <option value="cancelled">Cancelled</option>
               </select>
-              <ChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 pointer-events-none" size={14} />
+              <ChevronDown
+                className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 pointer-events-none"
+                size={14}
+              />
             </div>
 
             {/* Results Count */}
             <div className="flex items-center justify-between bg-gradient-to-r from-[#0A1F44] to-[#00326f] rounded-lg p-3 text-white">
               <div>
                 <p className="text-xs opacity-90">Showing</p>
-                <p className="text-lg font-bold">{filteredBookings.length}</p>
+                <p className="text-lg font-bold">{filteredTasks.length}</p>
               </div>
               <div className="text-right">
                 <p className="text-xs opacity-90">Filtered</p>
                 <p className="text-sm font-semibold">
-                  {filterStatus ? filterStatus.charAt(0).toUpperCase() + filterStatus.slice(1) : 'All'}
+                  {filterStatus
+                    ? filterStatus.charAt(0).toUpperCase() +
+                      filterStatus.slice(1)
+                    : "All"}
                 </p>
               </div>
             </div>
@@ -699,12 +746,14 @@ export default function TasksManagement() {
             <div className="flex items-center gap-3">
               <AlertCircle size={20} className="text-rose-600 flex-shrink-0" />
               <div>
-                <p className="font-semibold text-rose-800">Error Loading Bookings</p>
+                <p className="font-semibold text-rose-800">
+                  Error Loading Tasks
+                </p>
                 <p className="text-rose-700 text-sm mt-1">{error}</p>
               </div>
             </div>
             <button
-              onClick={fetchBookings}
+              onClick={fetchTasks}
               className="mt-3 bg-rose-100 text-rose-700 px-3 py-1.5 rounded text-sm font-semibold hover:bg-rose-200 transition-colors"
             >
               Try Again
@@ -712,172 +761,126 @@ export default function TasksManagement() {
           </motion.div>
         )}
 
-        {/* Bookings Table - FULL WIDTH */}
+        {/* Tasks Table - FULL WIDTH */}
         {!error && (
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             className="bg-white rounded-xl shadow-lg border border-gray-200 overflow-hidden w-full"
           >
-            {sortedBookings.length > 0 ? (
+            {sortedTasks.length > 0 ? (
               <div className="w-full">
                 <table className="w-full">
                   <thead>
                     <tr className="bg-gradient-to-r from-[#0A1F44] to-[#00326f] text-white">
-                      <th 
+                      {/* Title Column */}
+                      <th
                         className="px-6 py-4 text-left font-semibold cursor-pointer hover:bg-[#00326f] transition-colors"
-                        onClick={() => handleSort('guestDetails.name')}
+                        onClick={() => handleSort("title")}
                       >
+                        <div className="flex items-center gap-2">
+                          <ClipboardList size={16} />
+                          Title
+                          <ArrowUpDown size={14} />
+                        </div>
+                      </th>
+
+                      {/* Status Column */}
+                      <th
+                        className="px-6 py-4 text-left font-semibold cursor-pointer hover:bg-[#00326f] transition-colors"
+                        onClick={() => handleSort("status")}
+                      >
+                        <div className="flex items-center gap-2">
+                          <Shield size={16} />{" "}
+                          {/* Reusing Shield or another relevant icon */}
+                          Status
+                          <ArrowUpDown size={14} />
+                        </div>
+                      </th>
+
+                      {/* Assigned To Column */}
+                      <th className="px-6 py-4 text-left font-semibold">
                         <div className="flex items-center gap-2">
                           <User size={16} />
-                          Guest
-                          <ArrowUpDown size={14} />
+                          Assigned To
                         </div>
                       </th>
-                      <th className="px-6 py-4 text-left font-semibold">
-                        <div className="flex items-center gap-2">
-                          <Building size={16} />
-                          Room
-                        </div>
-                      </th>
-                      <th 
+
+                      {/* Date Column */}
+                      <th
                         className="px-6 py-4 text-left font-semibold cursor-pointer hover:bg-[#00326f] transition-colors"
-                        onClick={() => handleSort('checkInDate')}
+                        onClick={() => handleSort("date")}
                       >
                         <div className="flex items-center gap-2">
                           <Calendar size={16} />
-                          Check-In
+                          Due Date
                           <ArrowUpDown size={14} />
                         </div>
                       </th>
+
+                      {/* Actions Column */}
                       <th className="px-6 py-4 text-left font-semibold">
-                        <div className="flex items-center gap-2">
-                          <Calendar size={16} />
-                          Check-Out
-                        </div>
+                        Actions
                       </th>
-                      <th className="px-6 py-4 text-left font-semibold">
-                        <div className="flex items-center gap-2">
-                          <Users size={16} />
-                          Guests
-                        </div>
-                      </th>
-                      <th className="px-6 py-4 text-left font-semibold">
-                        <div className="flex items-center gap-2">
-                          <Shield size={16} />
-                          Status
-                        </div>
-                      </th>
-                      <th 
-                        className="px-6 py-4 text-left font-semibold cursor-pointer hover:bg-[#00326f] transition-colors"
-                        onClick={() => handleSort('totalAmount')}
-                      >
-                        <div className="flex items-center gap-2">
-                          <DollarSign size={16} />
-                          Amount
-                          <ArrowUpDown size={14} />
-                        </div>
-                      </th>
-                      <th className="px-6 py-4 text-left font-semibold">Actions</th>
                     </tr>
                   </thead>
                   <tbody>
-                    {sortedBookings.map((booking, idx) => {
-                      const nights = calculateNights(booking.checkInDate, booking.checkOutDate);
-                      const availableActions = getAvailableActions(booking);
+                    {sortedTasks.map((task, idx) => {
+                      // Assuming getStatusColor and getStatusIcon are defined
+                      // Assuming task.assignedTo is an object with a 'name' property
+                      const assignedUserName =
+                        task.assignedTo?.name || "Unassigned";
 
                       return (
                         <motion.tr
-                          key={booking._id}
+                          key={task._id || idx} // Use a unique key like _id
                           initial={{ opacity: 0 }}
                           animate={{ opacity: 1 }}
                           transition={{ delay: idx * 0.05 }}
                           className="border-b border-gray-200 hover:bg-gray-50 transition-colors duration-200"
                         >
-                          {/* Guest Column */}
-                          <td className="px-6 py-4">
-                            <div className="flex items-center gap-3">
-                              <div className="w-10 h-10 bg-gradient-to-br from-[#0A1F44] to-[#00326f] rounded-lg flex items-center justify-center text-white font-semibold text-sm">
-                                {booking.guestDetails?.name?.charAt(0) || "G"}
-                              </div>
-                              <div className="min-w-0 flex-1">
-                                <p className="font-medium text-gray-900 truncate">
-                                  {booking.guestDetails?.name || "Unknown Guest"}
-                                </p>
-                                <p className="text-sm text-gray-500 truncate">
-                                  {booking.guestDetails?.email || "No email"}
-                                </p>
-                              </div>
-                            </div>
-                          </td>
-
-                          {/* Room Column */}
-                          <td className="px-6 py-4">
-                            <div className="space-y-1">
-                              <p className="font-medium text-gray-900">
-                                Room {booking.roomNumber || "N/A"}
-                              </p>
-                              {booking.roomType && (
-                                <span className="inline-block px-2 py-1 rounded text-xs font-medium bg-blue-100 text-blue-700 border border-blue-200">
-                                  {booking.roomType}
-                                </span>
-                              )}
-                            </div>
-                          </td>
-
-                          {/* Check-in Column */}
-                          <td className="px-6 py-4">
-                            <div className="space-y-1">
-                              <p className="font-medium text-gray-900">
-                                {formatDate(booking.checkInDate)}
-                              </p>
-                              <p className="text-xs text-gray-500">
-                                {booking.checkInDate ? new Date(booking.checkInDate).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : ''}
-                              </p>
-                            </div>
-                          </td>
-
-                          {/* Check-out Column */}
-                          <td className="px-6 py-4">
-                            <div className="space-y-1">
-                              <p className="font-medium text-gray-900">
-                                {formatDate(booking.checkOutDate)}
-                              </p>
-                              <p className="text-xs text-gray-500">
-                                {booking.checkOutDate ? new Date(booking.checkOutDate).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : ''}
-                              </p>
-                            </div>
-                          </td>
-
-                          {/* Guests Column */}
-                          <td className="px-6 py-4">
-                            <div className="flex items-center gap-2">
-                              <Users size={16} className="text-gray-400" />
-                              <span className="font-medium text-gray-900">
-                                {booking.numberOfGuests || 0}
-                              </span>
-                            </div>
+                          {/* Title Column */}
+                          <td className="px-6 py-4 font-medium text-gray-900 truncate">
+                            {task.title}
                           </td>
 
                           {/* Status Column */}
                           <td className="px-6 py-4">
                             <div className="flex items-center gap-2">
-                              {getStatusIcon(booking.bookingStatus)}
-                              <span className={`px-3 py-1 rounded-full text-sm font-medium ${getStatusColor(booking.bookingStatus)}`}>
-                                {booking.bookingStatus || "pending"}
+                              {getStatusIcon(task.status)}
+                              <span
+                                className={`px-3 py-1 rounded-full text-sm font-medium ${getStatusColor(
+                                  task.status
+                                )}`}
+                              >
+                                {task.status || "pending"}
                               </span>
                             </div>
                           </td>
 
-                          {/* Amount Column */}
+                          {/* Assigned To Column */}
+                          <td className="px-6 py-4">
+                            <div className="flex items-center gap-2">
+                              <User size={16} className="text-gray-400" />
+                              <span className="font-medium text-gray-900">
+                                {assignedUserName}
+                              </span>
+                            </div>
+                          </td>
+
+                          {/* Date Column */}
                           <td className="px-6 py-4">
                             <div className="space-y-1">
-                              <p className="font-bold text-[#0A1F44] flex items-center gap-1">
-                                <DollarSign size={16} />
-                                {booking.totalAmount || 0}
+                              <p className="font-medium text-gray-900">
+                                {task.date ? formatDate(task.date) : "N/A"}
                               </p>
                               <p className="text-xs text-gray-500">
-                                {nights} night{nights !== 1 ? 's' : ''}
+                                {task.date
+                                  ? new Date(task.date).toLocaleTimeString([], {
+                                      hour: "2-digit",
+                                      minute: "2-digit",
+                                    })
+                                  : ""}
                               </p>
                             </div>
                           </td>
@@ -889,38 +892,26 @@ export default function TasksManagement() {
                               <motion.button
                                 whileHover={{ scale: 1.05 }}
                                 whileTap={{ scale: 0.95 }}
-                                onClick={() => handleViewDetails(booking)}
+                                onClick={() => handleViewDetails(task)}
                                 className="p-2 hover:bg-blue-100 rounded transition-colors text-blue-600 hover:text-blue-700"
                                 title="View Details"
                               >
                                 <Eye size={18} />
                               </motion.button>
 
-                              {/* Action Buttons */}
-                              <div className="flex gap-1">
-                                {availableActions.map((action, index) => (
-                                  <motion.button
-                                    key={index}
-                                    whileHover={{ scale: 1.05 }}
-                                    whileTap={{ scale: 0.95 }}
-                                    onClick={action.action}
-                                    disabled={actionLoading === `${action.label.toLowerCase()}-${booking._id}`}
-                                    className={`px-3 py-2 rounded text-sm font-semibold transition-all duration-200 flex items-center gap-1 ${action.color} ${
-                                      actionLoading === `${action.label.toLowerCase()}-${booking._id}`
-                                        ? "opacity-50 cursor-not-allowed"
-                                        : "hover:shadow-md"
-                                    }`}
-                                    title={action.label}
-                                  >
-                                    {actionLoading === `${action.label.toLowerCase()}-${booking._id}` ? (
-                                      <Loader size={14} className="animate-spin" />
-                                    ) : (
-                                      <action.icon size={14} />
-                                    )}
-                                    <span>{action.label}</span>
-                                  </motion.button>
-                                ))}
-                              </div>
+                              {/* Assign/Edit Button */}
+                              <motion.button
+                                whileHover={{ scale: 1.05 }}
+                                whileTap={{ scale: 0.95 }}
+                                onClick={() => setAssigningTask(task)}
+                                disabled={task.assignedTo}
+                                className="px-3 py-2 rounded text-sm font-semibold transition-all duration-200 flex items-center gap-1 bg-green-500 text-white hover:bg-green-600 disabled:opacity-50 disabled:cursor-not-allowed"
+                                title="Assign/Edit"
+                              >
+                                <UserPlus size={14} />{" "}
+                                {/* Assuming UserPlus or Edit icon is available */}
+                                <span>Assign</span>
+                              </motion.button>
                             </div>
                           </td>
                         </motion.tr>
@@ -935,11 +926,11 @@ export default function TasksManagement() {
                   <Calendar size={32} className="text-gray-400" />
                 </div>
                 <h3 className="text-xl font-semibold text-gray-900 mb-3">
-                  {bookings.length === 0 ? "No Bookings Yet" : "No Matching Bookings"}
+                  {tasks.length === 0 ? "No Tasks Yet" : "No Matching Tasks"}
                 </h3>
                 <p className="text-gray-600 text-sm max-w-md mx-auto mb-6">
-                  {bookings.length === 0
-                    ? "Get started by accepting your first booking."
+                  {tasks.length === 0
+                    ? "Get started by accepting your first task."
                     : "Try adjusting your search terms or filters."}
                 </p>
                 <button
@@ -956,9 +947,9 @@ export default function TasksManagement() {
           </motion.div>
         )}
 
-        {/* Booking Details Modal */}
+        {/* Task Details Modal */}
         <AnimatePresence>
-          {showModal && selectedBooking && (
+          {showModal && selectedTask && (
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
@@ -976,10 +967,11 @@ export default function TasksManagement() {
                   <div className="flex justify-between items-start">
                     <div>
                       <h3 className="text-3xl font-bold text-gray-900 mb-2">
-                        Booking Details
+                        Task Details
                       </h3>
                       <p className="text-gray-600">
-                        Complete information for booking #{selectedBooking._id?.slice(-8)}
+                        Complete information for task #
+                        {selectedTask._id?.slice(-8)}
                       </p>
                     </div>
                     <motion.button
@@ -987,7 +979,7 @@ export default function TasksManagement() {
                       whileTap={{ scale: 0.9 }}
                       onClick={() => {
                         setShowModal(false);
-                        setSelectedBooking(null);
+                        setSelectedTask(null);
                       }}
                       className="text-gray-400 hover:text-gray-600 transition-colors p-3 hover:bg-gray-100 rounded-2xl"
                     >
@@ -1006,69 +998,80 @@ export default function TasksManagement() {
                       <div className="space-y-4">
                         <div className="flex items-center gap-4 p-4 bg-gray-50 rounded-2xl">
                           <div className="w-16 h-16 bg-gradient-to-br from-[#0A1F44] to-[#00326f] rounded-2xl flex items-center justify-center text-white font-semibold text-2xl">
-                            {selectedBooking.guestDetails?.name?.charAt(0) || "G"}
+                            {selectedTask.guestDetails?.name?.charAt(0) || "G"}
                           </div>
                           <div>
                             <p className="font-bold text-gray-900 text-lg">
-                              {selectedBooking.guestDetails?.name || "Unknown Guest"}
+                              {selectedTask.guestDetails?.name ||
+                                "Unknown Guest"}
                             </p>
-                            <p className="text-gray-600">{selectedBooking.guestDetails?.email || "No email"}</p>
+                            <p className="text-gray-600">
+                              {selectedTask.guestDetails?.email || "No email"}
+                            </p>
                           </div>
                         </div>
-                        
+
                         <div className="grid grid-cols-2 gap-4">
                           <div className="space-y-2">
-                            <p className="text-sm text-gray-600">Phone Number</p>
+                            <p className="text-sm text-gray-600">
+                              Phone Number
+                            </p>
                             <p className="font-medium text-gray-900 flex items-center gap-2">
                               <Phone size={16} />
-                              {selectedBooking.guestDetails?.phone || "N/A"}
+                              {selectedTask.guestDetails?.phone || "N/A"}
                             </p>
                           </div>
                           <div className="space-y-2">
-                            <p className="text-sm text-gray-600">Booking ID</p>
+                            <p className="text-sm text-gray-600">Task ID</p>
                             <p className="font-medium text-gray-900 font-mono text-sm">
-                              {selectedBooking._id}
+                              {selectedTask._id}
                             </p>
                           </div>
                         </div>
                       </div>
                     </div>
 
-                    {/* Booking Summary */}
+                    {/* Task Summary */}
                     <div className="space-y-6">
                       <h4 className="text-xl font-bold text-gray-900 border-b pb-3">
-                        Booking Summary
+                        Task Summary
                       </h4>
                       <div className="space-y-4">
                         <div className="grid grid-cols-2 gap-4">
                           <div className="space-y-2">
                             <p className="text-sm text-gray-600">Room</p>
                             <p className="font-medium text-gray-900">
-                              Room {selectedBooking.roomNumber}
+                              Room {selectedTask.roomNumber}
                             </p>
-                            <p className="text-sm text-gray-500">{selectedBooking.roomType}</p>
+                            <p className="text-sm text-gray-500">
+                              {selectedTask.roomType}
+                            </p>
                           </div>
                           <div className="space-y-2">
                             <p className="text-sm text-gray-600">Duration</p>
                             <p className="font-medium text-gray-900">
-                              {calculateNights(selectedBooking.checkInDate, selectedBooking.checkOutDate)} nights
+                              {calculateNights(
+                                selectedTask.checkInDate,
+                                selectedTask.checkOutDate
+                              )}{" "}
+                              nights
                             </p>
                           </div>
                         </div>
-                        
+
                         <div className="grid grid-cols-2 gap-4">
                           <div className="space-y-2">
                             <p className="text-sm text-gray-600">Check-in</p>
                             <p className="font-medium text-gray-900 flex items-center gap-2">
                               <Calendar size={16} />
-                              {formatDate(selectedBooking.checkInDate)}
+                              {formatDate(selectedTask.checkInDate)}
                             </p>
                           </div>
                           <div className="space-y-2">
                             <p className="text-sm text-gray-600">Check-out</p>
                             <p className="font-medium text-gray-900 flex items-center gap-2">
                               <Calendar size={16} />
-                              {formatDate(selectedBooking.checkOutDate)}
+                              {formatDate(selectedTask.checkOutDate)}
                             </p>
                           </div>
                         </div>
@@ -1084,63 +1087,71 @@ export default function TasksManagement() {
                         <div className="flex justify-between items-center p-4 bg-gradient-to-r from-[#0A1F44] to-[#00326f] rounded-2xl text-white">
                           <div>
                             <p className="text-sm opacity-90">Total Amount</p>
-                            <p className="text-2xl font-bold">${selectedBooking.totalAmount || 0}</p>
+                            <p className="text-2xl font-bold">
+                              ${selectedTask.totalAmount || 0}
+                            </p>
                           </div>
                           <DollarSign size={32} className="opacity-80" />
                         </div>
-                        
+
                         <div className="grid grid-cols-2 gap-4">
                           <div className="space-y-2">
-                            <p className="text-sm text-gray-600">Payment Status</p>
+                            <p className="text-sm text-gray-600">
+                              Payment Status
+                            </p>
                             <span className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-emerald-500/15 text-emerald-700 border border-emerald-200">
                               <CheckCircle size={14} />
-                              {selectedBooking.paymentStatus || "pending"}
+                              {selectedTask.paymentStatus || "pending"}
                             </span>
                           </div>
                           <div className="space-y-2">
                             <p className="text-sm text-gray-600">Guests</p>
                             <p className="font-medium text-gray-900 flex items-center gap-2">
                               <Users size={16} />
-                              {selectedBooking.numberOfGuests || 0} guests
+                              {selectedTask.numberOfGuests || 0} guests
                             </p>
                           </div>
                         </div>
                       </div>
                     </div>
 
-                    {/* Booking Status */}
+                    {/* Task Status */}
                     <div className="space-y-6">
                       <h4 className="text-xl font-bold text-gray-900 border-b pb-3">
-                        Booking Status
+                        Task Status
                       </h4>
                       <div className="space-y-4">
                         <div className="flex items-center gap-3 p-4 bg-gray-50 rounded-2xl">
-                          {getStatusIcon(selectedBooking.bookingStatus)}
+                          {getStatusIcon(selectedTask.taskStatus)}
                           <div>
                             <p className="font-semibold text-gray-900 capitalize">
-                              {selectedBooking.bookingStatus || "pending"}
+                              {selectedTask.taskStatus || "pending"}
                             </p>
-                            <p className="text-sm text-gray-600">Current booking status</p>
+                            <p className="text-sm text-gray-600">
+                              Current task status
+                            </p>
                           </div>
                         </div>
-                        
+
                         <div className="space-y-2">
-                          <p className="text-sm text-gray-600">Booking Date</p>
-                            <p className="font-medium text-gray-900">
-                              {formatDate(selectedBooking.createdAt)}
-                            </p>
-                          </div>
+                          <p className="text-sm text-gray-600">Task Date</p>
+                          <p className="font-medium text-gray-900">
+                            {formatDate(selectedTask.createdAt)}
+                          </p>
                         </div>
                       </div>
                     </div>
+                  </div>
 
                   {/* Special Requests */}
-                  {selectedBooking.specialRequests && (
+                  {selectedTask.specialRequests && (
                     <div className="space-y-4">
-                      <h4 className="text-xl font-bold text-gray-900">Special Requests</h4>
+                      <h4 className="text-xl font-bold text-gray-900">
+                        Special Requests
+                      </h4>
                       <div className="bg-gray-50 p-6 rounded-2xl border border-gray-200">
                         <p className="text-gray-700 leading-relaxed">
-                          {selectedBooking.specialRequests}
+                          {selectedTask.specialRequests}
                         </p>
                       </div>
                     </div>
@@ -1151,13 +1162,13 @@ export default function TasksManagement() {
                     <button
                       onClick={() => {
                         setShowModal(false);
-                        setSelectedBooking(null);
+                        setSelectedTask(null);
                       }}
                       className="flex-1 px-6 py-4 border-2 border-gray-300 text-gray-700 rounded-2xl hover:bg-gray-50 transition-all duration-300 font-semibold"
                     >
                       Close Details
                     </button>
-                    {getAvailableActions(selectedBooking).map((action, index) => (
+                    {getAvailableActions(selectedTask).map((action, index) => (
                       <button
                         key={index}
                         onClick={action.action}
@@ -1166,6 +1177,77 @@ export default function TasksManagement() {
                         {action.label}
                       </button>
                     ))}
+                  </div>
+                </div>
+              </motion.div>
+            </motion.div>
+          )}
+
+          {assigningTask && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              // 1. CLOSE VIA BACKDROP CLICK
+              onClick={() =>  setAssigningTask(null)}
+              className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4"
+            >
+              <motion.div
+                initial={{ opacity: 0, scale: 0.9, y: 20 }}
+                animate={{ opacity: 1, scale: 1, y: 0 }}
+                exit={{ opacity: 0, scale: 0.9, y: 20 }}
+                // PREVENTS BACKDROP CLICK FROM FIRING WHEN CLICKING INSIDE MODAL
+                onClick={(e) => e.stopPropagation()}
+                className="bg-white rounded-3xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto relative" // Added 'relative' for the absolute positioning of the close button
+              >
+                {/* 2. THE EXPLICIT CLOSE BUTTON (X) */}
+                <button
+                  onClick={() =>  setAssigningTask(null)} // Function to close the modal
+                  className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 transition p-1 rounded-full hover:bg-gray-100 z-10"
+                >
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    className="h-6 w-6"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                    strokeWidth={2}
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      d="M6 18L18 6M6 6l12 12"
+                    />
+                  </svg>
+                </button>
+
+                {/* The main content (Staff Listing and Assignment Button) */}
+                <div className="p-8">
+                  <h3 className="text-xl font-bold mb-4">Assign Task To:</h3>
+                  <ul className="space-y-2">
+                    {staffData.map((staff) => (
+                      <li
+                        key={staff._id}
+                        onClick={() => setSelectedStaffId(staff._id)} // Function to set the selected ID
+                        className={`cursor-pointer p-3 rounded-xl transition duration-150 ${
+                          selectedStaffId === staff._id
+                            ? "bg-blue-600 text-white shadow-lg"
+                            : "bg-gray-100 hover:bg-gray-200"
+                        }`}
+                      >
+                        <div className="font-semibold">{staff.name}</div>
+                        <div className="text-sm opacity-80">{staff.role}</div>
+                      </li>
+                    ))}
+                  </ul>
+                  <div className="mt-6 flex justify-end">
+                    <button
+                      onClick={() => handleAssign(selectedStaffId)} // Function to call the assignment API
+                      disabled={!selectedStaffId}
+                      className="bg-green-500 text-white px-6 py-2 rounded-xl font-semibold hover:bg-green-600 disabled:opacity-50 transition"
+                    >
+                      Assign Task
+                    </button>
                   </div>
                 </div>
               </motion.div>

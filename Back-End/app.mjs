@@ -12,6 +12,7 @@ import restaurants from "./Routers/restaurants.mjs" // Make sure this path is co
 import reservations from "./Routers/reservations.mjs"
 import contect from "./Routers/contactRoutes.mjs"
 import Booking from "./Routers/bookingRoutes.mjs";
+import Task from "./Routers/taskRoutes.mjs";
 import payment from './Routers/paymentRoutes.mjs';
 import reportRoutes from './Routers/reportRoutes.mjs';
 import path from 'path';
@@ -78,6 +79,7 @@ app.use("/room", roomRating)
 app.use("/restaurants", restaurants) // This should point to your fixed routes file
 app.use("/reservations", reservations)
 app.use("/booking", Booking)
+app.use("/task", Task)
 app.use("/payment", payment)
 app.use('/reports', reportRoutes);
 app.use('/form', contect)

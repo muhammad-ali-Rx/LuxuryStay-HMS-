@@ -30,7 +30,7 @@ import FrontendNavbar from "../components/Navbar";
 import { useAuth } from "../context/AuthContext";
 import { Button } from "../components/UI/button";
 
-const API_BASE_URL = "http://localhost:3000/booking";
+const API_BASE_URL = "http://localhost:3000";
 
 export default function BookingDetails() {
   const { id } = useParams();
@@ -39,12 +39,16 @@ export default function BookingDetails() {
   const { userAuth, isAuthenticated, getToken } = useAuth();
 
   const [booking, setBooking] = useState(null);
+  const [bookingTasks, setBookingTasks] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [activeTab, setActiveTab] = useState("overview");
 
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [newTaskForm, setNewTaskForm] = useState({ title: '', description: '' });
+  const [newTaskForm, setNewTaskForm] = useState({
+    title: "",
+    description: "",
+  });
   const [isLoading, setIsLoading] = useState(false); // For button loading state
 
   const handleCloseModal = () => setIsModalOpen(false);
@@ -57,8 +61,8 @@ export default function BookingDetails() {
     e.preventDefault();
     setIsLoading(true);
 
-    // API Endpoint (Adjust BASE_URL as necessary)
-    const URL = `${API_BASE_URL}/${booking._id}/tasks`;
+    // 🔴 UPDATED: Point to the new standalone Task creation endpoint
+    const URL = `${API_BASE_URL}/task`;
 
     try {
       const token = getToken();
@@ -66,31 +70,36 @@ export default function BookingDetails() {
         throw new Error("Authentication token not found");
       }
 
+      // 🔴 UPDATED: Add the booking ID to the payload
+      const payload = {
+        ...newTaskForm,
+        booking: booking._id, // Link the task to the current booking
+      };
+
       const response = await fetch(URL, {
-        method: 'POST',
+        method: "POST",
         headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
         },
-        body: JSON.stringify(newTaskForm), // Pass the data in the request body
-        credentials: 'include', // Ensure cookies are sent (equivalent to `withCredentials: true` in axios)
+        body: JSON.stringify(payload),
+        credentials: "include",
       });
 
       const data = await response.json();
 
-      // Handle Success
-      const addedTask = await data.task;
+      if (!response.ok) {
+        throw new Error(data.message || "Failed to create task");
+      }
 
-      console.log({addedTask, booking});
+      const addedTask = data.task;
 
-      // Update local booking state with the new task
-      setBooking(prevBooking => ({
-        ...prevBooking,
-        tasks: [...prevBooking.tasks, addedTask],
-      }));
+      console.log({ addedTask, booking });
 
-      // Success Toast (You'll need a toast library for this)
-      // toast.success("Task created and staff notified!");
+      // 🔴 UPDATED: Update the local tasks state, NOT the booking state
+      // This assumes a state setter `setBookingTasks` is available
+      setBookingTasks((prevTasks) => [...prevTasks, addedTask]);
+
       toast.success(`Task created and staff notified!`, {
         duration: 3000,
         icon: <CheckCircle className="text-emerald-500" />,
@@ -100,7 +109,7 @@ export default function BookingDetails() {
     } catch (error) {
       console.error("Task submission failed:", error);
       // Error Toast
-      // toast.error(error.response?.data?.message || "Failed to create task.");
+      toast.error(error.message || "Failed to create task.");
     } finally {
       setIsLoading(false);
     }
@@ -139,6 +148,7 @@ export default function BookingDetails() {
     } else {
       fetchBookingDetails();
     }
+    fetchBookingTasks();
   }, [id, location.state]);
 
   const fetchBookingDetails = async () => {
@@ -151,7 +161,7 @@ export default function BookingDetails() {
         throw new Error("Authentication token not found");
       }
 
-      const response = await fetch(`${API_BASE_URL}/${id}`, {
+      const response = await fetch(`${API_BASE_URL}/booking/${id}`, {
         method: "GET",
         headers: {
           Authorization: `Bearer ${token}`,
@@ -178,6 +188,48 @@ export default function BookingDetails() {
     } catch (error) {
       console.error("❌ Error fetching booking details:", error);
       setError(error.message || "Failed to load booking details");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const fetchBookingTasks = async () => {
+    try {
+      setLoading(true);
+      setError("");
+
+      const token = getToken();
+      if (!token) {
+        throw new Error("Authentication token not found");
+      }
+
+      const response = await fetch(`${API_BASE_URL}/task/booking/${id}`, {
+        method: "GET",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+      });
+
+      if (response.status === 401) {
+        throw new Error("Session expired. Please login again.");
+      }
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || "Failed to fetch booking tasks");
+      }
+
+      const result = await response.json();
+
+      if (result.success) {
+        setBookingTasks(result.data);
+      } else {
+        throw new Error(result.message || "Failed to load booking tasks");
+      }
+    } catch (error) {
+      console.error("❌ Error fetching booking tasks:", error);
+      setError(error.message || "Failed to load booking tasks");
     } finally {
       setLoading(false);
     }
@@ -497,46 +549,51 @@ export default function BookingDetails() {
               <nav className="space-y-2">
                 <button
                   onClick={() => setActiveTab("overview")}
-                  className={`w-full text-left px-4 py-3 rounded-lg transition-all ${activeTab === "overview"
-                    ? "bg-[#1D293D] text-white"
-                    : "text-gray-600 hover:bg-gray-100"
-                    }`}
+                  className={`w-full text-left px-4 py-3 rounded-lg transition-all ${
+                    activeTab === "overview"
+                      ? "bg-[#1D293D] text-white"
+                      : "text-gray-600 hover:bg-gray-100"
+                  }`}
                 >
                   Overview
                 </button>
                 <button
                   onClick={() => setActiveTab("guest")}
-                  className={`w-full text-left px-4 py-3 rounded-lg transition-all ${activeTab === "guest"
-                    ? "bg-[#1D293D] text-white"
-                    : "text-gray-600 hover:bg-gray-100"
-                    }`}
+                  className={`w-full text-left px-4 py-3 rounded-lg transition-all ${
+                    activeTab === "guest"
+                      ? "bg-[#1D293D] text-white"
+                      : "text-gray-600 hover:bg-gray-100"
+                  }`}
                 >
                   Guest Details
                 </button>
                 <button
                   onClick={() => setActiveTab("payment")}
-                  className={`w-full text-left px-4 py-3 rounded-lg transition-all ${activeTab === "payment"
-                    ? "bg-[#1D293D] text-white"
-                    : "text-gray-600 hover:bg-gray-100"
-                    }`}
+                  className={`w-full text-left px-4 py-3 rounded-lg transition-all ${
+                    activeTab === "payment"
+                      ? "bg-[#1D293D] text-white"
+                      : "text-gray-600 hover:bg-gray-100"
+                  }`}
                 >
                   Payment Info
                 </button>
                 <button
                   onClick={() => setActiveTab("timeline")}
-                  className={`w-full text-left px-4 py-3 rounded-lg transition-all ${activeTab === "timeline"
-                    ? "bg-[#1D293D] text-white"
-                    : "text-gray-600 hover:bg-gray-100"
-                    }`}
+                  className={`w-full text-left px-4 py-3 rounded-lg transition-all ${
+                    activeTab === "timeline"
+                      ? "bg-[#1D293D] text-white"
+                      : "text-gray-600 hover:bg-gray-100"
+                  }`}
                 >
                   Timeline
                 </button>
                 <button
                   onClick={() => setActiveTab("tasks")}
-                  className={`w-full text-left px-4 py-3 rounded-lg transition-all ${activeTab === "tasks"
-                    ? "bg-[#1D293D] text-white"
-                    : "text-gray-600 hover:bg-gray-100"
-                    }`}
+                  className={`w-full text-left px-4 py-3 rounded-lg transition-all ${
+                    activeTab === "tasks"
+                      ? "bg-[#1D293D] text-white"
+                      : "text-gray-600 hover:bg-gray-100"
+                  }`}
                 >
                   Tasks
                 </button>
@@ -666,10 +723,11 @@ export default function BookingDetails() {
                           Payment Status
                         </h4>
                         <span
-                          className={`px-3 py-1 rounded-full text-sm font-semibold capitalize ${booking.paymentStatus === "paid"
-                            ? "bg-green-100 text-green-800"
-                            : "bg-yellow-100 text-yellow-800"
-                            }`}
+                          className={`px-3 py-1 rounded-full text-sm font-semibold capitalize ${
+                            booking.paymentStatus === "paid"
+                              ? "bg-green-100 text-green-800"
+                              : "bg-yellow-100 text-yellow-800"
+                          }`}
                         >
                           {booking.paymentStatus || "pending"}
                         </span>
@@ -791,10 +849,11 @@ export default function BookingDetails() {
                               Payment Status
                             </span>
                             <span
-                              className={`px-2 py-1 rounded text-sm font-semibold ${booking.paymentStatus === "paid"
-                                ? "bg-green-100 text-green-800"
-                                : "bg-yellow-100 text-yellow-800"
-                                }`}
+                              className={`px-2 py-1 rounded text-sm font-semibold ${
+                                booking.paymentStatus === "paid"
+                                  ? "bg-green-100 text-green-800"
+                                  : "bg-yellow-100 text-yellow-800"
+                              }`}
                             >
                               {booking.paymentStatus || "pending"}
                             </span>
@@ -876,10 +935,11 @@ export default function BookingDetails() {
                     <div className="flex gap-4">
                       <div className="flex flex-col items-center">
                         <div
-                          className={`w-3 h-3 rounded-full ${booking.bookingStatus === "confirmed"
-                            ? "bg-green-500"
-                            : "bg-gray-300"
-                            }`}
+                          className={`w-3 h-3 rounded-full ${
+                            booking.bookingStatus === "confirmed"
+                              ? "bg-green-500"
+                              : "bg-gray-300"
+                          }`}
                         ></div>
                         <div className="w-0.5 h-16 bg-gray-300"></div>
                       </div>
@@ -903,10 +963,11 @@ export default function BookingDetails() {
                     <div className="flex gap-4">
                       <div className="flex flex-col items-center">
                         <div
-                          className={`w-3 h-3 rounded-full ${booking.bookingStatus === "checked-in"
-                            ? "bg-blue-500"
-                            : "bg-gray-300"
-                            }`}
+                          className={`w-3 h-3 rounded-full ${
+                            booking.bookingStatus === "checked-in"
+                              ? "bg-blue-500"
+                              : "bg-gray-300"
+                          }`}
                         ></div>
                         <div className="w-0.5 h-16 bg-gray-300"></div>
                       </div>
@@ -926,10 +987,11 @@ export default function BookingDetails() {
                     <div className="flex gap-4">
                       <div className="flex flex-col items-center">
                         <div
-                          className={`w-3 h-3 rounded-full ${booking.bookingStatus === "checked-out"
-                            ? "bg-purple-500"
-                            : "bg-gray-300"
-                            }`}
+                          className={`w-3 h-3 rounded-full ${
+                            booking.bookingStatus === "checked-out"
+                              ? "bg-purple-500"
+                              : "bg-gray-300"
+                          }`}
                         ></div>
                       </div>
                       <div className="flex-1">
@@ -955,8 +1017,8 @@ export default function BookingDetails() {
                       Requested Tasks
                     </h2>
                     <Button
-                      // This button now opens the modal
-                      onClick={() => setIsModalOpen(true)} // Use the state setter
+                      // This button still opens the modal for creating a task for THIS booking
+                      onClick={() => setIsModalOpen(true)}
                       className="flex items-center gap-2 no-print bg-[#1D293D] text-white hover:bg-[#2D3B5D]"
                     >
                       <Plus size={16} />
@@ -966,10 +1028,11 @@ export default function BookingDetails() {
 
                   {/* Task List Display */}
                   <div className="space-y-4">
-                    {booking.tasks && booking.tasks.length > 0 ? (
-                      booking.tasks.map((task, index) => (
+                    {/* 🔴 UPDATED: Map over a separate state array (bookingTasks) */}
+                    {bookingTasks && bookingTasks.length > 0 ? (
+                      bookingTasks.map((task, index) => (
                         <div
-                          key={index}
+                          key={task._id || index} // Use the standalone Task ID
                           className="flex items-start justify-between p-4 bg-white border border-gray-200 rounded-lg shadow-sm"
                         >
                           <div className="flex-1 min-w-0">
@@ -987,12 +1050,13 @@ export default function BookingDetails() {
                                 </span>
                               )}
                               <span
-                                className={`px-2 py-0.5 rounded-full text-xs font-medium ${task.status === "completed"
-                                  ? "bg-green-100 text-green-800"
-                                  : task.status === "in-progress"
+                                className={`px-2 py-0.5 rounded-full text-xs font-medium ${
+                                  task.status === "completed"
+                                    ? "bg-green-100 text-green-800"
+                                    : task.status === "in-progress"
                                     ? "bg-yellow-100 text-yellow-800"
                                     : "bg-red-100 text-red-800"
-                                  }`}
+                                }`}
                               >
                                 {task.status.charAt(0).toUpperCase() +
                                   task.status.slice(1).replace("-", " ")}
@@ -1003,17 +1067,18 @@ export default function BookingDetails() {
                             variant="ghost"
                             size="icon"
                             className="flex-shrink-0 ml-4"
-                          // Optional: Add onClick={() => handleViewTask(task.id)}
+                            // Optional: Add onClick={() => handleViewTask(task.id)}
                           >
                             <ChevronRight size={18} />
                           </Button>
                         </div>
                       ))
                     ) : (
+                      // ... No tasks found fallback
                       <div className="text-center p-12 border-2 border-dashed border-gray-300 rounded-lg bg-gray-50">
                         <ListChecks className="w-8 h-8 mx-auto text-gray-400 mb-3" />
                         <p className="text-gray-600 font-medium">
-                          No tasks have been created yet.
+                          No tasks have been created yet for this booking.
                         </p>
                         <p className="text-sm text-gray-500">
                           Use the button above to request a new service or task.
@@ -1102,7 +1167,7 @@ export default function BookingDetails() {
                           className="bg-[#1D293D] text-white hover:bg-[#2D3B5D]"
                           disabled={isLoading} // Disable while loading
                         >
-                          {isLoading ? 'Submitting...' : 'Submit Request'}
+                          {isLoading ? "Submitting..." : "Submit Request"}
                         </Button>
                       </div>
                     </form>

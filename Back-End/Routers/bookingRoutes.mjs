@@ -32,6 +32,7 @@ router.put("/:id/status", auth, authorize(["admin", "manager", "receptionist"]),
 router.put("/:id/check-in", auth, authorize(["admin", "manager", "receptionist"]), checkInBooking);
 router.put("/:id/check-out", auth, authorize(["admin", "manager", "receptionist"]), checkOutBooking);
 
-router.post("/:id/tasks", auth, addTaskToBooking);
+// router.post("/:id/tasks", auth, addTaskToBooking);
+// router.get("/booking/:bookingId", auth, getBookingTasks);
 
 export default router;
