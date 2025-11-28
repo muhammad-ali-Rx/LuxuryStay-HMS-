@@ -26,9 +26,30 @@ import {
   Building,
   ClipboardList,
   UserPlus,
+  Plus,
+  X,
 } from "lucide-react";
 
 const API_BASE_URL = "http://localhost:3000";
+
+const Button = ({ children, onClick, variant, type, disabled, className }) => {
+  let baseClasses = "px-4 py-2 font-semibold text-sm rounded-lg transition duration-200 shadow-md";
+  if (variant === "outline") {
+    baseClasses += " bg-white border border-gray-300 text-gray-700 hover:bg-gray-50";
+  } else {
+    baseClasses += ` text-white ${className}`;
+  }
+  return (
+    <button
+      onClick={onClick}
+      type={type}
+      disabled={disabled}
+      className={`${baseClasses} ${disabled ? 'opacity-50 cursor-not-allowed' : ''}`}
+    >
+      {children}
+    </button>
+  );
+};
 
 export default function TasksManagement() {
   const [tasks, setTasks] = useState([]);
@@ -44,6 +65,23 @@ export default function TasksManagement() {
   const [staffData, setStaffData] = useState([]); // For future use if needed
   const [selectedStaffId, setSelectedStaffId] = useState(null); // For future use if needed
   const [assigningTask, setAssigningTask] = useState(null); // For future use if needed
+
+  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+  const [newTaskForm, setNewTaskForm] = useState({
+    title: '',
+    description: '',
+  });
+  const [isLoading, setIsLoading] = useState(false);
+
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setNewTaskForm(prev => ({
+      ...prev,
+      [name]: value,
+    }));
+  };
+  const handleCloseModal = () => setIsCreateModalOpen(false);
+  const handleSubmitTask = () => {}
 
   // Fetch all tasks from backend
   useEffect(() => {
@@ -169,7 +207,7 @@ export default function TasksManagement() {
       console.log("Task assignment successful:", data.data);
 
       // 1. Close the modal
-       setAssigningTask(null);
+      setAssigningTask(null);
 
       // 2. OPTIONAL: Refresh the task list in the parent component
       fetchTasks();
@@ -426,16 +464,12 @@ export default function TasksManagement() {
       tasks
         .map(
           (task) =>
-            `"${task._id}","${task.guestDetails?.name || "N/A"}","${
-              task.roomNumber || "N/A"
-            }","${task.checkInDate || "N/A"}","${
-              task.checkOutDate || "N/A"
-            }","${task.numberOfGuests || 0}","${
-              task.taskStatus || "pending"
-            }","${task.totalAmount || 0}","${
-              task.createdAt
-                ? new Date(task.createdAt).toLocaleDateString()
-                : "Unknown"
+            `"${task._id}","${task.guestDetails?.name || "N/A"}","${task.roomNumber || "N/A"
+            }","${task.checkInDate || "N/A"}","${task.checkOutDate || "N/A"
+            }","${task.numberOfGuests || 0}","${task.taskStatus || "pending"
+            }","${task.totalAmount || 0}","${task.createdAt
+              ? new Date(task.createdAt).toLocaleDateString()
+              : "Unknown"
             }","${task.paymentStatus || "pending"}"`
         )
         .join("\n");
@@ -728,7 +762,7 @@ export default function TasksManagement() {
                 <p className="text-sm font-semibold">
                   {filterStatus
                     ? filterStatus.charAt(0).toUpperCase() +
-                      filterStatus.slice(1)
+                    filterStatus.slice(1)
                     : "All"}
                 </p>
               </div>
@@ -813,7 +847,7 @@ export default function TasksManagement() {
                       >
                         <div className="flex items-center gap-2">
                           <Calendar size={16} />
-                          Due Date
+                          Date
                           <ArrowUpDown size={14} />
                         </div>
                       </th>
@@ -877,9 +911,9 @@ export default function TasksManagement() {
                               <p className="text-xs text-gray-500">
                                 {task.date
                                   ? new Date(task.date).toLocaleTimeString([], {
-                                      hour: "2-digit",
-                                      minute: "2-digit",
-                                    })
+                                    hour: "2-digit",
+                                    minute: "2-digit",
+                                  })
                                   : ""}
                               </p>
                             </div>
@@ -1189,7 +1223,7 @@ export default function TasksManagement() {
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               // 1. CLOSE VIA BACKDROP CLICK
-              onClick={() =>  setAssigningTask(null)}
+              onClick={() => setAssigningTask(null)}
               className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4"
             >
               <motion.div
@@ -1202,7 +1236,7 @@ export default function TasksManagement() {
               >
                 {/* 2. THE EXPLICIT CLOSE BUTTON (X) */}
                 <button
-                  onClick={() =>  setAssigningTask(null)} // Function to close the modal
+                  onClick={() => setAssigningTask(null)} // Function to close the modal
                   className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 transition p-1 rounded-full hover:bg-gray-100 z-10"
                 >
                   <svg
@@ -1229,11 +1263,10 @@ export default function TasksManagement() {
                       <li
                         key={staff._id}
                         onClick={() => setSelectedStaffId(staff._id)} // Function to set the selected ID
-                        className={`cursor-pointer p-3 rounded-xl transition duration-150 ${
-                          selectedStaffId === staff._id
-                            ? "bg-blue-600 text-white shadow-lg"
-                            : "bg-gray-100 hover:bg-gray-200"
-                        }`}
+                        className={`cursor-pointer p-3 rounded-xl transition duration-150 ${selectedStaffId === staff._id
+                          ? "bg-blue-600 text-white shadow-lg"
+                          : "bg-gray-100 hover:bg-gray-200"
+                          }`}
                       >
                         <div className="font-semibold">{staff.name}</div>
                         <div className="text-sm opacity-80">{staff.role}</div>
@@ -1255,6 +1288,115 @@ export default function TasksManagement() {
           )}
         </AnimatePresence>
       </div>
+
+      <div
+        className="add-btn fixed right-0 bottom-0 bg-[#0A1F44] hover:bg-[#00326f] text-white p-2.5 rounded-full m-5 hover:scale-105 transition-all cursor-pointer"
+        whileHover={{ scale: 1.05 }}
+        whileTap={{ scale: 0.95 }}
+        onClick={() => setIsCreateModalOpen(true)}
+      >
+        <Plus size={28} />
+      </div>
+
+      {isCreateModalOpen && (
+        // <motion.div
+        //   initial={{ opacity: 0 }}
+        //   animate={{ opacity: 1 }}
+        //   exit={{ opacity: 0 }}
+        //   className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4"
+        // >
+        //   <motion.div
+        //     initial={{ opacity: 0, scale: 0.9, y: 20 }}
+        //     animate={{ opacity: 1, scale: 1, y: 0 }}
+        //     exit={{ opacity: 0, scale: 0.9, y: 20 }}
+        //     className="bg-white rounded-3xl shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-y-auto"
+        //   >
+        //     {/* form */}
+        //   </motion.div>
+        // </motion.div>
+
+        <motion.div // initial, animate, exit properties assumed from framer-motion
+          className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4"
+        >
+          <motion.div // initial, animate, exit properties assumed from framer-motion
+            className="bg-white rounded-3xl shadow-2xl max-w-lg w-full max-h-[90vh] overflow-y-auto p-8"
+          >
+            <div className="flex justify-between items-start border-b pb-4 mb-6">
+              <h3 className="text-2xl font-extrabold text-[#1D293D]">
+                Request New Task
+              </h3>
+              <button
+                onClick={handleCloseModal}
+                className="text-gray-400 p-1 rounded-full hover:text-gray-600 transition"
+                aria-label="Close modal"
+              >
+                <X size={24} />
+              </button>
+            </div>
+
+            <form onSubmit={handleSubmitTask} className="space-y-6">
+              <div>
+                <label
+                  htmlFor="title"
+                  className="block text-sm font-medium text-gray-700 mb-2"
+                >
+                  Task Title
+                </label>
+                <input
+                  id="title"
+                  name="title"
+                  type="text"
+                  required
+                  placeholder="E.g., Extra Towels, Dinner Booking"
+                  value={newTaskForm.title}
+                  onChange={handleChange}
+                  className="w-full p-3 border border-gray-300 rounded-xl focus:ring-indigo-500 focus:border-indigo-500 transition duration-150 shadow-sm"
+                  disabled={isLoading}
+                />
+              </div>
+
+              <div>
+                <label
+                  htmlFor="description"
+                  className="block text-sm font-medium text-gray-700 mb-2"
+                >
+                  Details / Instructions
+                </label>
+                <textarea
+                  id="description"
+                  name="description"
+                  rows="4"
+                  required
+                  placeholder="Please specify details like quantity, time, or location."
+                  value={newTaskForm.description}
+                  onChange={handleChange}
+                  className="w-full p-3 border border-gray-300 rounded-xl focus:ring-indigo-500 focus:border-indigo-500 transition duration-150 shadow-sm resize-none"
+                  disabled={isLoading}
+                ></textarea>
+              </div>
+
+              <div className="flex justify-end pt-4 space-x-3">
+                <Button
+                  variant="outline"
+                  onClick={handleCloseModal}
+                  type="button"
+                  disabled={isLoading}
+                >
+                  Cancel
+                </Button>
+                <Button
+                  type="submit"
+                  className="bg-[#1D293D] text-white hover:bg-[#2D3B5D] flex items-center justify-center space-x-2"
+                  disabled={isLoading}
+                >
+                  {isLoading && <Loader2 className="animate-spin h-5 w-5 mr-2" />}
+                  {isLoading ? "Submitting..." : "Submit Request"}
+                </Button>
+              </div>
+            </form>
+          </motion.div>
+        </motion.div>
+      )}
     </div>
   );
 }
