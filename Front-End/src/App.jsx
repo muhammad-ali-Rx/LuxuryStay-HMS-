@@ -32,7 +32,7 @@ import BookingDetails from "./pages/BookingDetails";
 import AdminPanel from "./pages/admin/AdminPanel";
 
 import socket from "./utils/socket.mjs"; // 👈 NEW: Import the socket instance
-import { Toaster } from "react-hot-toast";
+import toast, { Toaster } from "react-hot-toast";
 
 // Protected Route Component for User Booking
 function ProtectedBookingRoute() {

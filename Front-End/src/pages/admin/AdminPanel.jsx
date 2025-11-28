@@ -13,8 +13,19 @@ import SettingsPage from "../../components/admin/SettingsPage"
 import RestaurantsManagement from "../../components/admin/RestaurantsManagement"
 import BillingPayments from "../../components/admin/BillingPayments"
 import TasksManagement from "../../components/admin/TasksManagement"
+import { useEffect } from "react"
+import socket from "../../utils/socket.mjs"
+import toast from "react-hot-toast"
 
 export default function AdminPanel() {
+  useEffect(() => {
+    socket.on("new_task", (data) => {
+      console.log("New Task Notification:", data.message, data.task);
+      // You can also trigger UI updates or notifications here
+      toast.success(`New Task: ${data.task.title}`);
+    });
+  }, [])
+
   const [activeTab, setActiveTab] = useState("dashboard")
   const [sidebarOpen, setSidebarOpen] = useState(true)
   const navigate = useNavigate()

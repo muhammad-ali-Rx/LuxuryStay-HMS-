@@ -29,13 +29,17 @@ import {
   Plus,
   X,
 } from "lucide-react";
+import { useAuth } from "../../context/AuthContext";
+import toast from "react-hot-toast";
 
 const API_BASE_URL = "http://localhost:3000";
 
 const Button = ({ children, onClick, variant, type, disabled, className }) => {
-  let baseClasses = "px-4 py-2 font-semibold text-sm rounded-lg transition duration-200 shadow-md";
+  let baseClasses =
+    "px-4 py-2 font-semibold text-sm rounded-lg transition duration-200 shadow-md";
   if (variant === "outline") {
-    baseClasses += " bg-white border border-gray-300 text-gray-700 hover:bg-gray-50";
+    baseClasses +=
+      " bg-white border border-gray-300 text-gray-700 hover:bg-gray-50";
   } else {
     baseClasses += ` text-white ${className}`;
   }
@@ -44,7 +48,9 @@ const Button = ({ children, onClick, variant, type, disabled, className }) => {
       onClick={onClick}
       type={type}
       disabled={disabled}
-      className={`${baseClasses} ${disabled ? 'opacity-50 cursor-not-allowed' : ''}`}
+      className={`${baseClasses} ${
+        disabled ? "opacity-50 cursor-not-allowed" : ""
+      }`}
     >
       {children}
     </button>
@@ -52,6 +58,8 @@ const Button = ({ children, onClick, variant, type, disabled, className }) => {
 };
 
 export default function TasksManagement() {
+  const { getToken } = useAuth();
+
   const [tasks, setTasks] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -66,27 +74,83 @@ export default function TasksManagement() {
   const [selectedStaffId, setSelectedStaffId] = useState(null); // For future use if needed
   const [assigningTask, setAssigningTask] = useState(null); // For future use if needed
 
+  const [roomData, setRoomData] = useState([]); // For future use if needed
+
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [newTaskForm, setNewTaskForm] = useState({
-    title: '',
-    description: '',
+    title: "",
+    description: "",
+    roomNumberId: "",
   });
   const [isLoading, setIsLoading] = useState(false);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setNewTaskForm(prev => ({
+    setNewTaskForm((prev) => ({
       ...prev,
       [name]: value,
     }));
   };
   const handleCloseModal = () => setIsCreateModalOpen(false);
-  const handleSubmitTask = () => {}
+  const handleSubmitTask = async (e) => {
+    e.preventDefault();
+
+    // 🔴 UPDATED: Point to the new standalone Task creation endpoint
+    const URL = `${API_BASE_URL}/task`;
+
+    try {
+      const token = getToken();
+      if (!token) {
+        throw new Error("Authentication token not found");
+      }
+
+      // 🔴 UPDATED: Add the booking ID to the payload
+      const payload = {
+        ...newTaskForm,
+      };
+
+      const response = await fetch(URL, {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(payload),
+        credentials: "include",
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.message || "Failed to create task");
+      }
+
+      console.log(data);
+
+      // 🔴 UPDATED: Update the local tasks state, NOT the booking state
+      // This assumes a state setter `setBookingTasks` is available
+      fetchTasks();
+
+      toast.success(`Task created and staff notified!`, {
+        duration: 3000,
+        icon: <CheckCircle className="text-emerald-500" />,
+      });
+
+      handleCloseModal(); // Close and reset form
+    } catch (error) {
+      console.error("Task submission failed:", error);
+      // Error Toast
+      toast.error(error.message || "Failed to create task.");
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   // Fetch all tasks from backend
   useEffect(() => {
     fetchTasks();
     fetchStaff();
+    fetchRooms();
   }, []);
 
   const fetchTasks = async () => {
@@ -170,6 +234,21 @@ export default function TasksManagement() {
     }
   };
 
+  const fetchRooms = async () => {
+    try {
+      setLoading(true);
+      const response = await fetch("http://localhost:3000/room/show");
+      const data = await response.json();
+      const roomsArray = Array.isArray(data) ? data : data.rooms || [];
+      setRoomData(roomsArray);
+    } catch (error) {
+      console.error("[v0] Error fetching rooms:", error);
+      toast.error("Failed to load rooms");
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const handleAssign = async (staffId) => {
     if (!assigningTask || !staffId) {
       console.error("Task ID or staff ID is missing.");
@@ -182,20 +261,23 @@ export default function TasksManagement() {
         throw new Error("No authentication token found. Please login again.");
       }
 
-      const response = await fetch(`${API_BASE_URL}/task/${assigningTask._id}`, {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-          // IMPORTANT: You MUST include an authorization token (e.g., Bearer token)
-          Authorization: `Bearer ${userAuthToken}`,
-        },
-        body: JSON.stringify({
-          // This is the data being sent to the backend
-          assignedTo: staffId,
-          // Optional: you might also want to set the status to 'in-progress' here
-          status: "in-progress",
-        }),
-      });
+      const response = await fetch(
+        `${API_BASE_URL}/task/${assigningTask._id}`,
+        {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+            // IMPORTANT: You MUST include an authorization token (e.g., Bearer token)
+            Authorization: `Bearer ${userAuthToken}`,
+          },
+          body: JSON.stringify({
+            // This is the data being sent to the backend
+            assignedTo: staffId,
+            // Optional: you might also want to set the status to 'in-progress' here
+            status: "in-progress",
+          }),
+        }
+      );
 
       if (!response.ok) {
         const errorData = await response.json();
@@ -464,12 +546,16 @@ export default function TasksManagement() {
       tasks
         .map(
           (task) =>
-            `"${task._id}","${task.guestDetails?.name || "N/A"}","${task.roomNumber || "N/A"
-            }","${task.checkInDate || "N/A"}","${task.checkOutDate || "N/A"
-            }","${task.numberOfGuests || 0}","${task.taskStatus || "pending"
-            }","${task.totalAmount || 0}","${task.createdAt
-              ? new Date(task.createdAt).toLocaleDateString()
-              : "Unknown"
+            `"${task._id}","${task.guestDetails?.name || "N/A"}","${
+              task.roomNumber || "N/A"
+            }","${task.checkInDate || "N/A"}","${
+              task.checkOutDate || "N/A"
+            }","${task.numberOfGuests || 0}","${
+              task.taskStatus || "pending"
+            }","${task.totalAmount || 0}","${
+              task.createdAt
+                ? new Date(task.createdAt).toLocaleDateString()
+                : "Unknown"
             }","${task.paymentStatus || "pending"}"`
         )
         .join("\n");
@@ -762,7 +848,7 @@ export default function TasksManagement() {
                 <p className="text-sm font-semibold">
                   {filterStatus
                     ? filterStatus.charAt(0).toUpperCase() +
-                    filterStatus.slice(1)
+                      filterStatus.slice(1)
                     : "All"}
                 </p>
               </div>
@@ -911,9 +997,9 @@ export default function TasksManagement() {
                               <p className="text-xs text-gray-500">
                                 {task.date
                                   ? new Date(task.date).toLocaleTimeString([], {
-                                    hour: "2-digit",
-                                    minute: "2-digit",
-                                  })
+                                      hour: "2-digit",
+                                      minute: "2-digit",
+                                    })
                                   : ""}
                               </p>
                             </div>
@@ -1263,10 +1349,11 @@ export default function TasksManagement() {
                       <li
                         key={staff._id}
                         onClick={() => setSelectedStaffId(staff._id)} // Function to set the selected ID
-                        className={`cursor-pointer p-3 rounded-xl transition duration-150 ${selectedStaffId === staff._id
-                          ? "bg-blue-600 text-white shadow-lg"
-                          : "bg-gray-100 hover:bg-gray-200"
-                          }`}
+                        className={`cursor-pointer p-3 rounded-xl transition duration-150 ${
+                          selectedStaffId === staff._id
+                            ? "bg-blue-600 text-white shadow-lg"
+                            : "bg-gray-100 hover:bg-gray-200"
+                        }`}
                       >
                         <div className="font-semibold">{staff.name}</div>
                         <div className="text-sm opacity-80">{staff.role}</div>
@@ -1321,6 +1408,7 @@ export default function TasksManagement() {
           <motion.div // initial, animate, exit properties assumed from framer-motion
             className="bg-white rounded-3xl shadow-2xl max-w-lg w-full max-h-[90vh] overflow-y-auto p-8"
           >
+            {console.log(roomData)}
             <div className="flex justify-between items-start border-b pb-4 mb-6">
               <h3 className="text-2xl font-extrabold text-[#1D293D]">
                 Request New Task
@@ -1335,6 +1423,34 @@ export default function TasksManagement() {
             </div>
 
             <form onSubmit={handleSubmitTask} className="space-y-6">
+              <div>
+                <label
+                  htmlFor="roomNumber"
+                  className="block text-sm font-medium text-gray-700 mb-2"
+                >
+                  Select Room
+                </label>
+                <select
+                  id="roomNumber"
+                  name="roomNumberId"
+                  required
+                  value={newTaskForm.roomNumberId} // Assuming newTaskForm includes a roomNumber field
+                  onChange={handleChange} // Assuming handleChange updates newTaskForm correctly
+                  className="w-full p-3 border border-gray-300 rounded-xl focus:ring-indigo-500 focus:border-indigo-500 transition duration-150 shadow-sm"
+                  disabled={isLoading}
+                >
+                  <option value="" disabled>
+                    Choose a Room Number
+                  </option>
+                  {roomData &&
+                    roomData.map((room) => (
+                      <option key={room._id} value={room._id}>
+                        {room.roomNumber}
+                      </option>
+                    ))}
+                </select>
+              </div>
+
               <div>
                 <label
                   htmlFor="title"
@@ -1389,7 +1505,9 @@ export default function TasksManagement() {
                   className="bg-[#1D293D] text-white hover:bg-[#2D3B5D] flex items-center justify-center space-x-2"
                   disabled={isLoading}
                 >
-                  {isLoading && <Loader2 className="animate-spin h-5 w-5 mr-2" />}
+                  {isLoading && (
+                    <Loader2 className="animate-spin h-5 w-5 mr-2" />
+                  )}
                   {isLoading ? "Submitting..." : "Submit Request"}
                 </Button>
               </div>

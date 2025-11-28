@@ -1,5 +1,6 @@
 import Task from "../models/Task.mjs"; // Assuming Task model is correctly imported
 import Booking from "../models/Booking.mjs"; // Assuming Booking model is correctly imported
+import { io } from "../app.mjs";
 
 // Utility function for population settings
 const taskPopulationOptions = [
@@ -70,50 +71,123 @@ export const getBookingTasks = async (req, res) => {
 };
 
 // 💡 Placeholder for createTask from previous response - include it here
-export const createTask = async (req, res) => {
-  const { title, description, date, assignedTo, booking } = req.body; 
+// export const createTask = async (req, res) => {
+//   const { title, description, date, assignedTo, booking, roomNumberId } = req.body;
 
-  console.log(req.body);
-  
+//   if (!title) {
+//     return res.status(400).json({ success: false, message: "Task title is required." });
+//   }
+
+//   let guestDetails = {};
+//   let roomNumber = null;
+
+//   try {
+//     // 1. Handle Booking Association (if a booking ID is provided)
+//     if (booking) {
+//       const parentBooking = await Booking.findById(booking).select('roomNumber guestDetails');
+//       if (!parentBooking) {
+//         return res.status(404).json({ success: false, message: "Linked booking not found." });
+//       }
+//       // Embed guest/room details into the task for easy retrieval
+//       guestDetails = parentBooking.guestDetails;
+//       roomNumber = parentBooking.roomNumber;
+//     }
+
+//     // 2. Create the Task
+//     const newTask = new Task({
+//       title,
+//       description,
+//       date: date || new Date(),
+//       assignedTo,
+//       booking,
+//       createdBy: req.user._id, // The ID of the logged-in user (Guest or Admin)
+//       guestDetails,
+//       roomNumber,
+//     });
+
+//     await newTask.save();
+    
+//     // 3. Populate fields for the immediate response
+//     await newTask.populate(taskPopulationOptions);
+
+//     // 4. Notification Logic (Placeholder)
+//     console.log(`TASK CREATED: ${newTask._id}. Booking ID: ${booking || 'Standalone'}.`);
+
+//     res.status(201).json({
+//       success: true,
+//       message: "Task successfully created.",
+//       task: newTask,
+//     });
+
+//   } catch (error) {
+//     console.error("Error creating task:", error);
+//     res.status(500).json({ success: false, message: "Server error while creating task.", error: error.message });
+//   }
+// };
+
+export const createTask = async (req, res) => {
+  // roomNumberId is the _id of the Room document
+  const { title, description, date, assignedTo, booking, roomNumberId } = req.body;
 
   if (!title) {
     return res.status(400).json({ success: false, message: "Task title is required." });
   }
 
+  // New Validation: A task must be linked to a Booking OR a Room ID
+  if (!booking && !roomNumberId) {
+    return res.status(400).json({ success: false, message: "A task must be linked to a Booking or a Room ID." });
+  }
+
   let guestDetails = {};
-  let roomNumber = null;
+  let roomId = roomNumberId; // Default to roomNumberId from body
 
   try {
-    // 1. Handle Booking Association (if a booking ID is provided)
+    // 1. Handle Booking Association (for Guest Requests)
     if (booking) {
-      const parentBooking = await Booking.findById(booking).select('roomNumber guestDetails');
+      // Find the booking and select necessary fields
+      const parentBooking = await Booking.findById(booking).select('room guestDetails');
+      
       if (!parentBooking) {
         return res.status(404).json({ success: false, message: "Linked booking not found." });
       }
-      // Embed guest/room details into the task for easy retrieval
+      
+      // Use the room ID from the booking and embed guest details
+      roomId = parentBooking.room; // Assuming Booking model now references the Room _id as 'room'
       guestDetails = parentBooking.guestDetails;
-      roomNumber = parentBooking.roomNumber;
+
+      // Secondary check: Ensure the booking has a room associated
+      if (!roomId) {
+        return res.status(400).json({ success: false, message: "Linked booking does not have an associated room." });
+      }
+    } 
+    
+    // 2. If no booking but a roomNumberId is provided (Admin Task)
+    // The roomId is already set to roomNumberId (if it exists)
+    if (!roomId) {
+        return res.status(400).json({ success: false, message: "A valid Room ID is required." });
     }
 
-    // 2. Create the Task
+    // 3. Create the Task
     const newTask = new Task({
       title,
       description,
       date: date || new Date(),
       assignedTo,
       booking,
-      createdBy: req.user._id, // The ID of the logged-in user (Guest or Admin)
-      guestDetails,
-      roomNumber,
+      room: roomId, // Link the task to the Room document
+      createdBy: req.user._id, 
+      guestDetails, // This will be empty for admin tasks without a booking
     });
 
     await newTask.save();
     
-    // 3. Populate fields for the immediate response
-    await newTask.populate(taskPopulationOptions);
+    // 4. Populate fields for the immediate response
+    // Ensure taskPopulationOptions includes 'room' and 'booking'
+    await newTask.populate(taskPopulationOptions); 
 
-    // 4. Notification Logic (Placeholder)
-    console.log(`TASK CREATED: ${newTask._id}. Booking ID: ${booking || 'Standalone'}.`);
+    // 5. Notification Logic (Placeholder)
+    console.log(`TASK CREATED: ${newTask._id}. Room ID: ${roomId}.`);
+    io.emit('new_task', { message: 'A new task has been created.', task: newTask });
 
     res.status(201).json({
       success: true,
@@ -126,6 +200,7 @@ export const createTask = async (req, res) => {
     res.status(500).json({ success: false, message: "Server error while creating task.", error: error.message });
   }
 };
+
 // Add updateTask and deleteTask placeholders here if needed for completeness
 export const updateTask = async (req, res) => {
   const taskId = req.params.id;
