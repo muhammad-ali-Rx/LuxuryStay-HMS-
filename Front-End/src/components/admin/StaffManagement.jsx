@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { Mail, Edit, Trash2, Plus, X, ChevronRight, Users, UserCheck, Shield, Home } from "lucide-react";
+import toast from "react-hot-toast"; // Only toast import, NO Toaster
 
 const API_BASE_URL = "http://localhost:3000";
 
@@ -11,7 +12,6 @@ export default function StaffManagement() {
   const [staffData, setStaffData] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [successMessage, setSuccessMessage] = useState("");
 
   const [selectedStaff, setSelectedStaff] = useState(null);
   const [showDetailView, setShowDetailView] = useState(false);
@@ -65,6 +65,7 @@ export default function StaffManagement() {
     } catch (err) {
       setError("Failed to fetch users");
       console.error("[v0] Error fetching users:", err);
+      toast.error("Failed to fetch users");
     } finally {
       setLoading(false);
     }
@@ -135,12 +136,13 @@ export default function StaffManagement() {
       if (selectedStaff) {
         setSelectedStaff({ ...selectedStaff, ...updatedFields });
       }
-      setSuccessMessage("User updated successfully!");
-      setTimeout(() => setSuccessMessage(""), 3000);
+      toast.success("User updated successfully!");
       setError(null);
     } catch (err) {
       console.error("[v0] Edit error:", err.message);
-      setError(err.message || "Failed to update user");
+      const errorMessage = err.message || "Failed to update user";
+      setError(errorMessage);
+      toast.error(errorMessage);
     }
   };
 
@@ -158,17 +160,23 @@ export default function StaffManagement() {
         
         setShowDetailView(false);
         setSelectedStaff(null);
-        setSuccessMessage("User deleted successfully!");
-        setTimeout(() => setSuccessMessage(""), 3000);
+        toast.success("User deleted successfully!");
       } catch (err) {
         setError("Failed to delete user");
         console.error("[v0] Delete error:", err);
+        toast.error("Failed to delete user");
       }
     }
   };
 
   const handleAddStaff = async () => {
     try {
+      // Validate required fields
+      if (!editFormData.name || !editFormData.email || !editFormData.role || !editFormData.password) {
+        toast.error("Please fill in all required fields");
+        return;
+      }
+
       const response = await fetch(`${API_BASE_URL}/users/create-staff`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -203,12 +211,13 @@ export default function StaffManagement() {
         salary: "",
         password: "",
       });
-      setSuccessMessage("Staff account created successfully!");
-      setTimeout(() => setSuccessMessage(""), 3000);
+      toast.success("Staff account created successfully!");
       setError(null);
     } catch (err) {
       console.error("[v0] Add error:", err.message);
-      setError(err.message || "Failed to add staff member");
+      const errorMessage = err.message || "Failed to add staff member";
+      setError(errorMessage);
+      toast.error(errorMessage);
     }
   };
 
@@ -277,18 +286,8 @@ export default function StaffManagement() {
 
   return (
     <div className="p-6 space-y-6 bg-gray-50 min-h-screen">
-      {successMessage && (
-        <motion.div
-          initial={{ opacity: 0, y: -20 }}
-          animate={{ opacity: 1, y: 0 }}
-          exit={{ opacity: 0, y: -20 }}
-          className="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded-lg flex items-center gap-2 mb-6"
-        >
-          <span>✓</span>
-          {successMessage}
-        </motion.div>
-      )}
-
+      {/* NO TOASTER COMPONENT HERE - Using global Toaster from App.jsx */}
+      
       {error && (
         <motion.div
           initial={{ opacity: 0, y: -20 }}

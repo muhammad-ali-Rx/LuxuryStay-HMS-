@@ -31,6 +31,7 @@ import BookingDetails from "./pages/BookingDetails";
 // Admin Pages
 import AdminPanel from "./pages/admin/AdminPanel";
 
+
 import socket from "./utils/socket.mjs"; // 👈 NEW: Import the socket instance
 import toast, { Toaster } from "react-hot-toast";
 

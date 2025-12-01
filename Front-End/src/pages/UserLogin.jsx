@@ -1,9 +1,10 @@
 import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { motion } from "framer-motion";
-import { Mail, Lock, Eye, EyeOff, LogIn } from "lucide-react"; // Fixed import
+import { Mail, Lock, Eye, EyeOff, LogIn } from "lucide-react";
 import FrontendNavbar from "../components/Navbar";
 import { useAuth } from "../context/AuthContext";
+import toast from "react-hot-toast";
 
 const API_BASE_URL = "http://localhost:3000";
 
@@ -23,10 +24,15 @@ export default function UserLogin() {
 
     try {
       if (!email || !password) {
-        setError("Please fill in all fields");
+        toast.error("Please fill in all fields", {
+          duration: 3000,
+        });
         setLoading(false);
         return;
       }
+
+      // Show loading toast
+      const loadingToast = toast.loading("Signing in...");
 
       const response = await fetch(`${API_BASE_URL}/users/login`, {
         method: "POST",
@@ -39,7 +45,13 @@ export default function UserLogin() {
       if (!response.ok) {
         const text = await response.text();
         console.log("[v0] Error response text:", text);
-        throw new Error(`HTTP Error: ${response.status}`);
+        toast.dismiss(loadingToast);
+        toast.error("Invalid email or password. Please try again.", {
+          duration: 4000,
+          icon: '❌',
+        });
+        setLoading(false);
+        return;
       }
 
       const data = await response.json();
@@ -48,26 +60,69 @@ export default function UserLogin() {
       const user = setUserFromAPI(data);
 
       if (!user || !user.role) {
-        setError("Invalid user data received");
+        toast.dismiss(loadingToast);
+        toast.error("Invalid user data received. Please try again.", {
+          duration: 4000,
+        });
         setLoading(false);
         return;
       }
 
+      // Dismiss loading toast and show success toast
+      toast.dismiss(loadingToast);
+      
       // Check the user role and navigate accordingly
       if (user.role === "guest") {
-        navigate("/reservations", { state: { from: "login" } });
+        toast.success(`Welcome back, ${user.name || 'Guest'}!`, {
+          duration: 3000,
+          icon: '👋',
+        });
+        setTimeout(() => {
+          navigate("/reservations", { state: { from: "login" } });
+        }, 1500);
       } else if (
         ["admin", "manager", "receptionist", "housekeeping", "staff"].includes(user.role)
       ) {
-        navigate("/admin", { state: { from: "login" } });
+        toast.success(`Welcome, ${user.name || 'Admin'}! Redirecting to admin panel...`, {
+          duration: 3000,
+          icon: '🔑',
+        });
+        setTimeout(() => {
+          navigate("/admin", { state: { from: "login" } });
+        }, 1500);
       } else {
-        navigate("/booking", { state: { from: "login" } });
+        toast.success(`Welcome, ${user.name || 'User'}!`, {
+          duration: 3000,
+          icon: '🎉',
+        });
+        setTimeout(() => {
+          navigate("/booking", { state: { from: "login" } });
+        }, 1500);
       }
     } catch (err) {
-      setError(err.message || "Invalid credentials. Please try again.");
-    } finally {
+      console.error("Login error:", err);
+      toast.error(err.message || "An error occurred. Please try again.", {
+        duration: 4000,
+        icon: '⚠️',
+      });
       setLoading(false);
     }
+  };
+
+  const handleForgotPassword = () => {
+    toast.info("Please contact support to reset your password.", {
+      duration: 4000,
+      icon: 'ℹ️',
+    });
+  };
+
+  const handleQuickTestLogin = (testEmail, testPassword, userType) => {
+    setEmail(testEmail);
+    setPassword(testPassword);
+    toast.info(`Filled ${userType} credentials. Click Sign In to continue.`, {
+      duration: 3000,
+      icon: '📝',
+    });
   };
 
   // ✅ Quick admin login only

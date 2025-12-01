@@ -4,6 +4,7 @@ import { useState, useEffect } from "react"
 import { motion } from "framer-motion"
 import { Mail, Phone, MapPin, Edit, Trash2, Search, Plus, Filter, Download, Eye, User, AlertCircle, XCircle } from "lucide-react"
 import { Button } from "../ui/button"
+import toast from "react-hot-toast";
 
 const API_BASE_URL = "http://localhost:3000"
 
@@ -22,7 +23,7 @@ export default function GuestsManagement() {
   }, [])
 
   const fetchGuests = async () => {
-    try {
+    try { 
       setLoading(true)
       setError("")
       
@@ -81,6 +82,9 @@ export default function GuestsManagement() {
     } catch (error) {
       console.error("❌ Error fetching guests:", error)
       setError(error.message)
+      toast.error(`Failed to load guests: ${error.message}`, {
+        duration: 4000,
+      })
     } finally {
       setLoading(false)
     }
@@ -93,6 +97,8 @@ export default function GuestsManagement() {
 
     try {
       console.log("🗑️ Deleting guest:", guestId)
+      const loadingToast = toast.loading("Deleting guest...")
+      
       const response = await fetch(`${API_BASE_URL}/users/delete/${guestId}`, {
         method: 'DELETE',
         headers: {
@@ -108,14 +114,20 @@ export default function GuestsManagement() {
       const result = await response.json()
       
       if (result.success) {
+        toast.dismiss(loadingToast)
         setGuests(prev => prev.filter(guest => guest._id !== guestId))
-        alert("✅ Guest deleted successfully!")
+        toast.success("Guest deleted successfully!", {
+          duration: 3000,
+          icon: '🗑️',
+        })
       } else {
         throw new Error(result.message || 'Failed to delete guest')
       }
     } catch (error) {
       console.error("❌ Error deleting guest:", error)
-      alert(`❌ ${error.message || "Failed to delete guest"}`)
+      toast.error(error.message || "Failed to delete guest", {
+        duration: 4000,
+      })
     }
   }
 
@@ -131,7 +143,9 @@ export default function GuestsManagement() {
 
   const handleUpdateGuest = async (updatedData) => {
     try {
+      const loadingToast = toast.loading("Updating guest...")
       console.log("📝 Updating guest:", selectedGuest._id, updatedData)
+      
       const response = await fetch(`${API_BASE_URL}/users/update/${selectedGuest._id}`, {
         method: 'PUT',
         headers: {
@@ -148,24 +162,32 @@ export default function GuestsManagement() {
       const result = await response.json()
       
       if (result.success) {
+        toast.dismiss(loadingToast)
         setGuests(prev => prev.map(guest => 
           guest._id === selectedGuest._id ? { ...guest, ...updatedData } : guest
         ))
         setShowModal(false)
         setSelectedGuest(null)
-        alert("✅ Guest updated successfully!")
+        toast.success("Guest updated successfully!", {
+          duration: 3000,
+          icon: '✅',
+        })
       } else {
         throw new Error(result.message || 'Failed to update guest')
       }
     } catch (error) {
       console.error("❌ Error updating guest:", error)
-      alert(`❌ ${error.message || "Failed to update guest"}`)
+      toast.error(error.message || "Failed to update guest", {
+        duration: 4000,
+      })
     }
   }
 
   const handleExportGuests = () => {
     if (guests.length === 0) {
-      alert("No guests data to export")
+      toast.error("No guests data to export", {
+        duration: 3000,
+      })
       return
     }
 
@@ -182,11 +204,28 @@ export default function GuestsManagement() {
     document.body.appendChild(link)
     link.click()
     document.body.removeChild(link)
+    
+    toast.success(`Exported ${guests.length} guests to CSV`, {
+      duration: 3000,
+      icon: '📥',
+    })
   }
 
   const handleAddGuest = () => {
     // For now, show a message about adding guests
-    alert("To add a new guest, please use the user registration system. Guests can register themselves through the website.")
+    toast.info("To add a new guest, please use the user registration system. Guests can register themselves through the website.", {
+      duration: 4000,
+      icon: 'ℹ️',
+    })
+  }
+
+  const handleClearFilters = () => {
+    setSearchTerm("")
+    setFilterCountry("")
+    toast.success("Filters cleared", {
+      duration: 2000,
+      icon: '🔄',
+    })
   }
 
   // Filter and search guests
@@ -398,10 +437,7 @@ export default function GuestsManagement() {
                 }
               </p>
               <Button 
-                onClick={() => {
-                  setSearchTerm("")
-                  setFilterCountry("")
-                }}
+                onClick={handleClearFilters}
                 className="bg-[#0A1F44] text-white rounded-lg hover:bg-[#00326f] transition-colors"
               >
                 Clear Filters
@@ -519,4 +555,4 @@ export default function GuestsManagement() {
       )}
     </div>
   )
-}
+} 

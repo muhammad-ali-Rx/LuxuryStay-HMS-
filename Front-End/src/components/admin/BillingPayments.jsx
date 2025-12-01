@@ -21,6 +21,7 @@ import {
 } from "lucide-react";
 import { motion } from "framer-motion";
 import axios from "axios";
+import toast from "react-hot-toast";
 
 const BillingPayments = () => {
   const [invoices, setInvoices] = useState([]);
@@ -137,6 +138,7 @@ const BillingPayments = () => {
         setInvoices(formattedInvoices);
         setFilteredInvoices(formattedInvoices);
         calculateStats(formattedInvoices);
+        toast.success("✅ Billing data loaded successfully!");
       } else {
         throw new Error(response.data.message);
       }
@@ -145,25 +147,31 @@ const BillingPayments = () => {
     } catch (error) {
       console.error("Error fetching billing data:", error);
       setError(error.response?.data?.message || "Failed to load billing data");
+      toast.error("❌ Failed to load billing data");
       setLoading(false);
     }
   };
 
-  // ✅ FIXED: Enhanced payment status update with amount validation
+  // ✅ FIXED BACKEND ISSUE: Enhanced payment status update to handle notes array properly
   const updatePaymentStatus = async (invoiceId, newStatus) => {
     try {
       setUpdatingStatus(invoiceId);
+      const loadingToast = toast.loading("Updating payment status...");
 
       const token = getToken();
       if (!token) {
-        alert("Please log in to update payment status");
+        toast.dismiss(loadingToast);
+        toast.error("Please log in to update payment status");
         setUpdatingStatus(null);
         return;
       }
 
       const invoice = invoices.find((inv) => inv.id === invoiceId);
       if (!invoice) {
-        throw new Error("Invoice not found");
+        toast.dismiss(loadingToast);
+        toast.error("Invoice not found");
+        setUpdatingStatus(null);
+        return;
       }
 
       console.log("🔄 Updating payment status:", invoiceId, newStatus);
@@ -186,13 +194,19 @@ const BillingPayments = () => {
         }
       }
 
+      // ✅ FIX: Create proper notes object to avoid push() error
+      const notes = Array.isArray(invoice.originalData?.notes) 
+        ? [...invoice.originalData.notes, `Status changed to ${newStatus} via billing system`]
+        : [`Status changed to ${newStatus} via billing system`];
+
       const response = await axios.put(
         `http://localhost:3000/payment/${invoiceId}/payment-status`,
         {
           paymentStatus: mapToBackendStatus(newStatus),
           paidAmount: updatedPaid,
           pendingAmount: updatedPending,
-          notes: `Status changed to ${newStatus} via billing system`,
+          notes: notes, // ✅ Send as array, not string
+          timestamp: new Date().toISOString(),
         },
         {
           headers: { Authorization: `Bearer ${token}` },
@@ -200,16 +214,15 @@ const BillingPayments = () => {
       );
 
       if (response.data.success) {
+        toast.dismiss(loadingToast);
+        toast.success(`✅ Payment status updated to ${newStatus}!`);
         await fetchBillingData();
-        alert(
-          "✅ Payment status updated successfully! Amounts adjusted accordingly."
-        );
       } else {
         throw new Error(response.data.message);
       }
     } catch (error) {
       console.error("❌ Error updating payment status:", error);
-      alert(error.response?.data?.message || "Error updating payment status");
+      toast.error(error.response?.data?.message || "Error updating payment status");
       fetchBillingData();
     } finally {
       setUpdatingStatus(null);
@@ -217,52 +230,56 @@ const BillingPayments = () => {
   };
 
   const sendInvoice = async (invoice) => {
-  try {
-    setSendingInvoice(invoice.id);
-    const token = getToken();
-    if (!token) {
-      alert('Please log in to send invoice');
-      setSendingInvoice(null);
-      return;
-    }
-
-    console.log("📧 Sending invoice to:", invoice.guestEmail);
-
-    const response = await axios.post(
-      `http://localhost:3000/payment/${invoice.id}/send-invoice`,
-      {},
-      { 
-        headers: { Authorization: `Bearer ${token}` },
-        timeout: 15000 // Increased timeout for email sending
+    try {
+      setSendingInvoice(invoice.id);
+      const loadingToast = toast.loading("Sending invoice...");
+      
+      const token = getToken();
+      if (!token) {
+        toast.dismiss(loadingToast);
+        toast.error('Please log in to send invoice');
+        setSendingInvoice(null);
+        return;
       }
-    );
 
-    if (response.data.success) {
-      alert(`✅ Invoice sent successfully to ${invoice.guestEmail}\nPlease check their email inbox (including spam folder).`);
-    } else {
-      throw new Error(response.data.message);
+      console.log("📧 Sending invoice to:", invoice.guestEmail);
+
+      const response = await axios.post(
+        `http://localhost:3000/payment/${invoice.id}/send-invoice`,
+        {},
+        { 
+          headers: { Authorization: `Bearer ${token}` },
+          timeout: 15000
+        }
+      );
+
+      if (response.data.success) {
+        toast.dismiss(loadingToast);
+        toast.success(`✅ Invoice sent to ${invoice.guestEmail}!`);
+      } else {
+        throw new Error(response.data.message);
+      }
+      
+    } catch (error) {
+      console.error("❌ Error sending invoice:", error);
+      
+      let errorMessage = 'Error sending invoice. ';
+      
+      if (error.response?.status === 404) {
+        errorMessage = 'Invoice not found. Please refresh the page and try again.';
+      } else if (error.code === 'ECONNABORTED') {
+        errorMessage = 'Request timeout. Email might be taking longer to send.';
+      } else if (error.message.includes('Email credentials')) {
+        errorMessage = 'Email service not configured. Please contact administrator.';
+      } else {
+        errorMessage += error.response?.data?.message || error.message;
+      }
+      
+      toast.error(errorMessage);
+    } finally {
+      setSendingInvoice(null);
     }
-    
-  } catch (error) {
-    console.error("❌ Error sending invoice:", error);
-    
-    let errorMessage = 'Error sending invoice. ';
-    
-    if (error.response?.status === 404) {
-      errorMessage = 'Invoice not found. Please refresh the page and try again.';
-    } else if (error.code === 'ECONNABORTED') {
-      errorMessage = 'Request timeout. Email might be taking longer to send.';
-    } else if (error.message.includes('Email credentials')) {
-      errorMessage = 'Email service not configured. Please contact administrator.';
-    } else {
-      errorMessage += error.response?.data?.message || error.message;
-    }
-    
-    alert(errorMessage);
-  } finally {
-    setSendingInvoice(null);
   }
-}
 
   // ✅ FIXED: Map frontend status to backend status
   const mapToBackendStatus = (status) => {
@@ -319,8 +336,8 @@ const BillingPayments = () => {
       Nights: ${invoice.nights}
       
       Subtotal: Rs. ${invoice.subtotal.toLocaleString()}
-      Paid: Rs. ${invoice.paid.toLocaleString()}
-      Pending: Rs. ${invoice.pending.toLocaleString()}
+      Paid: Rs. {invoice.paid.toLocaleString()}
+      Pending: Rs. {invoice.pending.toLocaleString()}
       
       Payment Status: ${invoice.paymentStatus}
       Invoice Date: ${invoice.invoiceDate}
@@ -333,6 +350,7 @@ const BillingPayments = () => {
     link.download = `invoice-${invoice.id}.txt`;
     link.click();
     window.URL.revokeObjectURL(url);
+    toast.success("✅ PDF generated successfully!");
   };
 
   const getStatusColor = (status) => {
@@ -345,19 +363,6 @@ const BillingPayments = () => {
         return "bg-blue-100 text-blue-800 border border-blue-200";
       default:
         return "bg-gray-100 text-gray-800 border border-gray-200";
-    }
-  };
-
-  const getStatusIcon = (status) => {
-    switch (status) {
-      case "paid":
-        return "✓";
-      case "pending":
-        return "⏰";
-      case "partial":
-        return "↗";
-      default:
-        return "⏰";
     }
   };
 
@@ -411,6 +416,11 @@ const BillingPayments = () => {
 
   // Download CSV function
   const downloadCSV = () => {
+    if (filteredInvoices.length === 0) {
+      toast.error("No data to export");
+      return;
+    }
+
     const headers = [
       "Invoice ID",
       "Type",
@@ -467,14 +477,15 @@ const BillingPayments = () => {
     link.click();
     document.body.removeChild(link);
     window.URL.revokeObjectURL(url);
+    toast.success("✅ CSV exported successfully!");
   };
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="flex flex-col items-center gap-4">
+      <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 flex items-center justify-center">
+        <div className="flex flex-col items-center gap-6">
           <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-[#D4AF37]"></div>
-          <p className="text-gray-600 font-medium">Loading billing data...</p>
+          <p className="text-gray-600 font-medium text-lg">Loading billing data...</p>
         </div>
       </div>
     );
@@ -487,7 +498,7 @@ const BillingPayments = () => {
         <motion.div
           initial={{ opacity: 0, scale: 0.9 }}
           animate={{ opacity: 1, scale: 1 }}
-          className="bg-white rounded-2xl shadow-2xl w-full w-full max-h-[90vh] "
+          className="bg-white rounded-2xl shadow-2xl w-full max-w-6xl max-h-[90vh] overflow-y-auto"
         >
           <div className="p-8">
             {/* Header */}
@@ -572,7 +583,7 @@ const BillingPayments = () => {
                       {invoice.nights}
                     </td>
                     <td className="px-6 py-4 text-right text-gray-900 font-medium">
-                      Rs. {invoice.roomRate.toLocaleString()}
+                      Rs. {invoice.roomRate?.toLocaleString()}
                     </td>
                     <td className="px-6 py-4 text-right text-gray-900 font-bold text-lg">
                       Rs. {invoice.subtotal.toLocaleString()}
@@ -635,14 +646,20 @@ const BillingPayments = () => {
               {/* Action Buttons */}
               <div className="flex gap-4 justify-end">
                 <button
-                  onClick={() => generatePDF(invoice)}
+                  onClick={() => {
+                    generatePDF(invoice);
+                    onClose();
+                  }}
                   className="flex items-center gap-3 px-6 py-3 bg-gray-100 text-gray-700 rounded-xl hover:bg-gray-200 transition-all duration-200 font-medium shadow-sm"
                 >
                   <Download size={18} />
                   Download PDF
                 </button>
                 <button
-                  onClick={() => sendInvoice(invoice)}
+                  onClick={() => {
+                    sendInvoice(invoice);
+                    onClose();
+                  }}
                   className="flex items-center gap-3 px-6 py-3 bg-[#D4AF37] text-[#0A1F44] rounded-xl hover:bg-[#c19b2a] transition-all duration-200 font-medium shadow-sm"
                 >
                   <Mail size={18} />
@@ -711,7 +728,7 @@ const BillingPayments = () => {
       )}
 
       {/* Stats Cards */}
-      <div className="container  px-6 py-8">
+      <div className="container px-6 py-8">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
           {[
             {
@@ -932,10 +949,9 @@ const BillingPayments = () => {
                               : "hover:shadow-md"
                           } w-full`}
                         >
-                          {/* ✅ FIXED: Removed SVG from option tags to prevent hydration error */}
-                          <option value="pending">⏰ Pending</option>
-                          <option value="partial">↗ Partial</option>
-                          <option value="paid">✓ Paid</option>
+                          <option value="pending">Pending</option>
+                          <option value="partial">Partial</option>
+                          <option value="paid">Paid</option>
                         </select>
                         {updatingStatus === invoice.id && (
                           <div className="absolute right-2 top-1/2 transform -translate-y-1/2">

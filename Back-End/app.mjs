@@ -14,6 +14,7 @@ import contect from "./Routers/contactRoutes.mjs"
 import Booking from "./Routers/bookingRoutes.mjs";
 import Task from "./Routers/taskRoutes.mjs";
 import payment from './Routers/paymentRoutes.mjs';
+import dashboardRoutes from "./Routers/dashboardRoutes.mjs";
 import reportRoutes from './Routers/reportRoutes.mjs';
 import path from 'path';
 import { fileURLToPath } from 'url';
@@ -82,6 +83,7 @@ app.use("/booking", Booking)
 app.use("/task", Task)
 app.use("/payment", payment)
 app.use('/reports', reportRoutes);
+app.use("/dashboard", dashboardRoutes);
 app.use('/form', contect)
 
 // Global error handler

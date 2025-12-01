@@ -25,6 +25,7 @@ import {
   ArrowUpDown,
   Building,
 } from "lucide-react";
+import toast from "react-hot-toast";
 
 const API_BASE_URL = "http://localhost:3000";
 
@@ -85,6 +86,7 @@ export default function BookingsManagement() {
     } catch (error) {
       console.error("❌ Error fetching bookings:", error);
       setError(error.message);
+      toast.error("Failed to fetch bookings");
     } finally {
       setLoading(false);
     }
@@ -98,7 +100,6 @@ export default function BookingsManagement() {
     setSortConfig({ key, direction });
   };
 
-  // ✅ FIXED: Changed 'status' to 'bookingStatus' to match backend
   const handleUpdateStatus = async (bookingId, newStatus) => {
     try {
       setActionLoading(bookingId);
@@ -113,7 +114,6 @@ export default function BookingsManagement() {
             "Content-Type": "application/json",
             Authorization: `Bearer ${token}`,
           },
-          // ✅ FIX: Changed 'status' to 'bookingStatus'
           body: JSON.stringify({ bookingStatus: newStatus }),
         }
       );
@@ -143,13 +143,13 @@ export default function BookingsManagement() {
           )
         );
         
-        alert(`✅ Booking status updated to ${newStatus}`);
+        toast.success(`✅ Booking status updated to ${newStatus}`);
       } else {
         throw new Error(result.message || "Failed to update booking status");
       }
     } catch (error) {
       console.error("❌ Error updating booking status:", error);
-      alert(`❌ ${error.message || "Failed to update booking status"}`);
+      toast.error(`❌ ${error.message || "Failed to update booking status"}`);
       
       // Refresh data to show correct status
       fetchBookings();
@@ -165,7 +165,6 @@ export default function BookingsManagement() {
       
       const token = localStorage.getItem("authToken");
       
-      // ✅ FIX: Use the status update endpoint with 'checked-in' status
       const response = await fetch(
         `${API_BASE_URL}/booking/${bookingId}/status`,
         {
@@ -202,13 +201,13 @@ export default function BookingsManagement() {
               : booking
           )
         );
-        alert("✅ Check-in successful!");
+        toast.success("✅ Check-in successful!");
       } else {
         throw new Error(result.message || "Failed to check in");
       }
     } catch (error) {
       console.error("❌ Error during check-in:", error);
-      alert(`❌ ${error.message || "Failed to check in"}`);
+      toast.error(`❌ ${error.message || "Failed to check in"}`);
       
       // Refresh data to show correct status
       fetchBookings();
@@ -224,7 +223,6 @@ export default function BookingsManagement() {
       
       const token = localStorage.getItem("authToken");
       
-      // ✅ FIX: Use the status update endpoint with 'checked-out' status
       const response = await fetch(
         `${API_BASE_URL}/booking/${bookingId}/status`,
         {
@@ -261,13 +259,13 @@ export default function BookingsManagement() {
               : booking
           )
         );
-        alert("✅ Check-out successful!");
+        toast.success("✅ Check-out successful!");
       } else {
         throw new Error(result.message || "Failed to check out");
       }
     } catch (error) {
       console.error("❌ Error during check-out:", error);
-      alert(`❌ ${error.message || "Failed to check out"}`);
+      toast.error(`❌ ${error.message || "Failed to check out"}`);
       
       // Refresh data to show correct status
       fetchBookings();
@@ -287,7 +285,6 @@ export default function BookingsManagement() {
       
       const token = localStorage.getItem("authToken");
       
-      // ✅ FIX: Use the status update endpoint with 'cancelled' status
       const response = await fetch(
         `${API_BASE_URL}/booking/${bookingId}/status`,
         {
@@ -324,13 +321,13 @@ export default function BookingsManagement() {
               : booking
           )
         );
-        alert("✅ Booking cancelled successfully!");
+        toast.success("✅ Booking cancelled successfully!");
       } else {
         throw new Error(result.message || "Failed to cancel booking");
       }
     } catch (error) {
       console.error("❌ Error cancelling booking:", error);
-      alert(`❌ ${error.message || "Failed to cancel booking"}`);
+      toast.error(`❌ ${error.message || "Failed to cancel booking"}`);
       
       // Refresh data to show correct status
       fetchBookings();
@@ -346,7 +343,7 @@ export default function BookingsManagement() {
 
   const handleExportBookings = () => {
     if (bookings.length === 0) {
-      alert("No bookings data to export");
+      toast.error("No bookings data to export");
       return;
     }
 
@@ -380,6 +377,7 @@ export default function BookingsManagement() {
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
+    toast.success("Bookings exported successfully!");
   };
 
   const calculateNights = (checkIn, checkOut) => {
