@@ -48,7 +48,7 @@ export default function UserLogin() {
         toast.dismiss(loadingToast);
         toast.error("Invalid email or password. Please try again.", {
           duration: 4000,
-          icon: '❌',
+          icon: "❌",
         });
         setLoading(false);
         return;
@@ -70,30 +70,35 @@ export default function UserLogin() {
 
       // Dismiss loading toast and show success toast
       toast.dismiss(loadingToast);
-      
+
       // Check the user role and navigate accordingly
       if (user.role === "guest") {
-        toast.success(`Welcome back, ${user.name || 'Guest'}!`, {
+        toast.success(`Welcome back, ${user.name || "Guest"}!`, {
           duration: 3000,
-          icon: '👋',
+          icon: "👋",
         });
         setTimeout(() => {
           navigate("/reservations", { state: { from: "login" } });
         }, 1500);
       } else if (
-        ["admin", "manager", "receptionist", "housekeeping", "staff"].includes(user.role)
+        ["admin", "manager", "receptionist", "housekeeping", "staff"].includes(
+          user.role
+        )
       ) {
-        toast.success(`Welcome, ${user.name || 'Admin'}! Redirecting to admin panel...`, {
-          duration: 3000,
-          icon: '🔑',
-        });
+        toast.success(
+          `Welcome, ${user.name || "Admin"}! Redirecting to admin panel...`,
+          {
+            duration: 3000,
+            icon: "🔑",
+          }
+        );
         setTimeout(() => {
           navigate("/admin", { state: { from: "login" } });
         }, 1500);
       } else {
-        toast.success(`Welcome, ${user.name || 'User'}!`, {
+        toast.success(`Welcome, ${user.name || "User"}!`, {
           duration: 3000,
-          icon: '🎉',
+          icon: "🎉",
         });
         setTimeout(() => {
           navigate("/booking", { state: { from: "login" } });
@@ -103,7 +108,7 @@ export default function UserLogin() {
       console.error("Login error:", err);
       toast.error(err.message || "An error occurred. Please try again.", {
         duration: 4000,
-        icon: '⚠️',
+        icon: "⚠️",
       });
       setLoading(false);
     }
@@ -112,7 +117,7 @@ export default function UserLogin() {
   const handleForgotPassword = () => {
     toast.info("Please contact support to reset your password.", {
       duration: 4000,
-      icon: 'ℹ️',
+      icon: "ℹ️",
     });
   };
 
@@ -121,12 +126,12 @@ export default function UserLogin() {
     setPassword(testPassword);
     toast.info(`Filled ${userType} credentials. Click Sign In to continue.`, {
       duration: 3000,
-      icon: '📝',
+      icon: "📝",
     });
   };
 
   // ✅ Quick admin login only
- 
+
   return (
     <div className="min-h-screen bg-[#1D293D]">
       <div className="flex items-center justify-center min-h-[calc(100vh-80px)] px-4 pt-20">
@@ -260,11 +265,8 @@ export default function UserLogin() {
 
                 <div className="bg-gray-50 border-t border-gray-200 p-4">
                   <div className="text-center">
-                    <p className="text-gray-600 text-xs font-medium mb-1">
-                      Endpoint: /users/login
-                    </p>
                     <p className="text-gray-500 text-xs">
-                      Connected to backend API
+                      Welcome to LuxuryStay
                     </p>
                   </div>
                 </div>
