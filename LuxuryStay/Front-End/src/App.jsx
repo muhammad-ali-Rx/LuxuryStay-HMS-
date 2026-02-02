@@ -34,6 +34,7 @@ import AdminPanel from "./pages/admin/AdminPanel";
 
 import socket from "./utils/socket.mjs"; // 👈 NEW: Import the socket instance
 import toast, { Toaster } from "react-hot-toast";
+import ChatbotWidget from "./components/ChatbotWidget"; // 🤖 Import the chatbot widget
 
 // Protected Route Component for User Booking
 function ProtectedBookingRoute() {
@@ -175,6 +176,8 @@ function AppRoutes() {
           },
         }}
       />
+      {/* 🤖 Hotel AI Chatbot Widget */}
+      <ChatbotWidget />
       <Routes>
         <Route path="/" element={<Navigate to="/splash" replace />} />
 
