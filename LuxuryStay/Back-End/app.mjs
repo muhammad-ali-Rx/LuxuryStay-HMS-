@@ -16,6 +16,7 @@ import Task from "./Routers/taskRoutes.mjs";
 import payment from './Routers/paymentRoutes.mjs';
 import dashboardRoutes from "./Routers/dashboardRoutes.mjs";
 import reportRoutes from './Routers/reportRoutes.mjs';
+import chatbotRoutes from './Routers/chatbotRoutes.mjs';
 import path from 'path';
 import { fileURLToPath } from 'url';
 
@@ -85,6 +86,8 @@ app.use("/payment", payment)
 app.use('/reports', reportRoutes);
 app.use("/dashboard", dashboardRoutes);
 app.use('/form', contect)
+// 🤖 Chatbot API route
+app.use('/api/chatbot', chatbotRoutes)
 
 // Global error handler
 app.use((err, req, res, next) => {
